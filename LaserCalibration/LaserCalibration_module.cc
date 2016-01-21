@@ -28,6 +28,8 @@
 // LArSoft includes
 #include "Simulation/SimChannel.h"
 #include "Simulation/LArG4Parameters.h"
+#include "RawData/RawDigit.h"
+#include "RawData/raw.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/Wire.h"
@@ -49,11 +51,20 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "fhiclcpp/ParameterSet.h"
 
+// uBooNE includes
+#include "Utilities/AssociationUtil.h"
+// #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
+#include "CalibrationDBI/Interface/IDetPedestalService.h"
+#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "CalibrationDBI/Interface/IChannelStatusService.h"
+#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
+
 // ROOT includes. Note: To look up the properties of the ROOT classes,
 // use the ROOT web site; e.g.,
 // <http://root.cern.ch/root/html532/ClassIndex.html>
 #include "TH1.h"
 #include "TH2.h"
+#include "TCanvas.h"
 #include "TTree.h"
 #include "TLorentzVector.h"
 #include "TVector3.h"
@@ -63,6 +74,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <typeinfo>
 
 
 namespace {
@@ -368,22 +380,70 @@ namespace LaserCalibration {
     
     std::cout << "FUUUUUUUUUUUUUUUUUUUUUUUUCK " << std::endl;
     
-    art::ValidHandle< std::vector<recob::Wire>> wireVecHandle = event.getValidHandle<std::vector<recob::Wire>>(fCalDataModuleLabel);
+//     art::ValidHandle< std::vector<raw::RawDigit> > RawVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>(fCalDataModuleLabel);
     
-    std::cout << "FUUUUUUUUUUUUUUUUUUUUUUUUCK " << std::endl;
+    art::Handle< std::vector<raw::RawDigit> > digitVecHandle;
+    event.getByLabel(fCalDataModuleLabel, digitVecHandle);
     
-    std::vector<recob::Wire> Wires = *wireVecHandle;
+//     auto RawDigits = *digitVecHandle;
     
-    std::cout << "FUUUUUUUUUUUUUUUUUUUUUUUUCK " << std::endl;
+//     std::cout << "FUUUUUUUUUUUUUUUUUUUUUUUUCK " << typeid(*/*RawDigits*/).name() << std::endl;
     
-    auto const& theWire = Wires[5];
+//     std::vector<recob::Wire> Wires = *wireVecHandle;
     
-    raw::ChannelID_t theChannel = theWire.Channel();
-    std::vector<geo::WireID> wids = fGeometry->ChannelToWire(theChannel);
+//     std::cout << "FUUUUUUUUUUUUUUUUUUUUUUUUCK " << RawDigits.size() << std::endl;
+    
+    unsigned RawIndex = 1477;
+    
+    const lariov::IDetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+    TH1S* SingleWire = new TH1S("You","Fuck",digitVecHandle->at(RawIndex).Samples(),0,digitVecHandle->at(RawIndex).Samples()-1);
+    
+    for(auto const & RawDigit : *digitVecHandle)
+    {
+      raw::ChannelID_t channel = RawDigit.Channel();
+    
+      std::cout << "Channel: " << channel << std::endl;
+    
+      std::vector<geo::WireID> wids = fGeometry->ChannelToWire(channel);
+      unsigned int thePlane = wids.front().Plane;
+      unsigned int theWire = wids.front().Wire;
+    
+      std::cout << "Plane: " << thePlane << std::endl;
+      std::cout << "Wire: " << theWire << std::endl;
+      std::cout << "Compresson: " << RawDigit.Compression() << std::endl; 
+      
+      float Pedestal = pedestalRetrievalAlg.PedMean(channel);
+    
+      std::cout << "Pedestal: " << Pedestal << std::endl;
+      
+//       for(unsigned ADC_ticks = 0; ADC_ticks < RawDigit.Samples(); ADC_ticks++)
+//       {
+// 	RawDigit.ADC(ADC_ticks) -= Pedestal;
+//       }
+      
+//       for(auto & RawDigitADC : RawDigit.ADC())
+//       {
+// 	RawDigitADC -= Pedestal;
+//       }
+    }
+    
+    for(unsigned samples = 0; samples < digitVecHandle->at(RawIndex).Samples(); samples++)
+      SingleWire->SetBinContent(samples,digitVecHandle->at(RawIndex).ADC(samples));
+    
+    TCanvas* C1 = new TCanvas("Fuck","You",1400,1000);
+    SingleWire->Draw();
+    C1 -> Print("Fuck.png","png");
+    delete SingleWire;
+    delete C1;
+    
+//     auto const& theWire = Wires[5];
+    
+//     raw::ChannelID_t theChannel = theWire.Channel();
+//     std::vector<geo::WireID> wids = fGeometry->ChannelToWire(theChannel);
 //     unsigned short thePlane = wids[0].Plane;
-    unsigned short theWireNum = wids[0].Wire;
+//     unsigned short theWireNum = wids[0].Wire;
     
-    std::cout << "FUUUUUUUUUUUUUUUUUUUUUUUUCK " << theWireNum << std::endl;
+//     std::cout << "FUUUUUUUUUUUUUUUUUUUUUUUUCK " << theWireNum << std::endl;
 
 
   } // LaserCalibration::analyze()

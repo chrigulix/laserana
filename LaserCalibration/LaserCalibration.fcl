@@ -24,7 +24,7 @@ services.DatabaseUtil.ShouldConnect: false
 source:
 {
   module_type: RootInput
-  maxEvents:  10        # Number of events to create
+  maxEvents:  1        # Number of events to create
 }
 
 # Define and configure some modules to do work on each event.
@@ -50,7 +50,7 @@ physics:
       module_type:         "LaserCalibration"
       SimulationLabel: 	   "largeant"
       HitLabel:            "gaushit"
-      CalDataModuleLabel:  "caldata"
+      CalDataModuleLabel:  "daq"
       ClusterLabel:        "fuzzycluster"
       PDGcode:             13
       BinSize:             0.3
@@ -59,14 +59,14 @@ physics:
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- reco: [ digitfilter, caldata ]
+ #reco: [ digitfilter, caldata ]
 
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
 
  #trigger_paths is a keyword and contains the paths that modify the art::event, 
  #ie filters and producers
- trigger_paths: [reco]
+ #trigger_paths: [reco]
 
  analysis : [LaserCalibration] 
 
