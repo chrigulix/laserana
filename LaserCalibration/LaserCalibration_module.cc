@@ -42,7 +42,8 @@
 
 // Framework includes
 #include "art/Utilities/Exception.h"
-#include "art/Framework/Core/EDAnalyzer.h"
+// #include "art/Framework/Core/EDAnalyzer.h"
+#include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
@@ -51,6 +52,7 @@
 #include "art/Framework/Core/FindManyP.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "art/Persistency/Common/Ptr.h"
 
 // uBooNE includes
 #include "Utilities/AssociationUtil.h"
@@ -148,7 +150,7 @@ namespace LaserCalibration {
    * - *BinSize* (real, mandatory): dx [cm] used for the dE/dx calculation
    * 
    */
-  class LaserCalibration : public art::EDAnalyzer
+  class LaserCalibration : public art::EDProducer
   {
   public:
  
@@ -178,21 +180,23 @@ namespace LaserCalibration {
     // This method is called once, at the start of the job. In this
     //  example, it will define the histograms and n-tuples we'll write.
     // Define the histograms and n-tuples
-    virtual void beginJob() override;
+    virtual void beginJob() /*override*/;
+    
+    virtual void endJob() /*override*/;
 
     // This method is called once, at the start of each run. It's a
     // good place to read databases or files that may have
     // run-dependent information.
-    virtual void beginRun(const art::Run& run) override;
+//     virtual void beginRun(const art::Run& run) override;
 
     // This method reads in any parameters from the .fcl files. This
     // method is called 'reconfigure' because it might be called in the
     // middle of a job; e.g., if the user changes parameter values in an
     // interactive event display.
-    virtual void reconfigure(fhicl::ParameterSet const& parameterSet) override;
+    virtual void reconfigure(fhicl::ParameterSet const& parameterSet) /*override*/;
 
     // The analysis routine, called once per event. 
-    virtual void analyze (const art::Event& event) override;
+    virtual void produce (art::Event& event) /*override*/;
 
   private:
 
@@ -260,6 +264,8 @@ namespace LaserCalibration {
     art::InputTag fCalDataModuleLabel;
     
   }; // class LaserCalibration
+  
+  DEFINE_ART_MODULE(LaserCalibration)
 
 
   //-----------------------------------------------------------------------
@@ -268,14 +274,16 @@ namespace LaserCalibration {
 
   //-----------------------------------------------------------------------
   // Constructor
-  LaserCalibration::LaserCalibration(fhicl::ParameterSet const& parameterSet)
-    : EDAnalyzer(parameterSet)
+  LaserCalibration::LaserCalibration(fhicl::ParameterSet const& pset)
+//     : EDProducer()
   {
     // get a pointer to the geometry service provider
     fGeometry = &*(art::ServiceHandle<geo::Geometry>());
     
     // Read in the parameters from the .fcl file.
-    reconfigure(parameterSet);
+    this->reconfigure(pset);
+    
+    produces< std::vector<recob::Wire> >("bibibi");
   }
 
   
@@ -335,10 +343,14 @@ namespace LaserCalibration {
     fReconstructionNtuple->Branch("NdEdx",   &fRecoNdEdxBins,  "NdEdx/I");
     fReconstructionNtuple->Branch("dEdx",    &fRecodEdxBins);
   }
+  
+  void  LaserCalibration::endJob()
+  {  
+  }
    
   //-----------------------------------------------------------------------
-  void LaserCalibration::beginRun(const art::Run& /*run*/)
-  {
+//   void LaserCalibration::beginRun(const art::Run& /*run*/)
+//   {
     // art expects this function to have a art::Run argument;
     // C++ expects us to use all the arguments we are given,
     // or it will warn that we could have forgotten to use it
@@ -358,7 +370,7 @@ namespace LaserCalibration {
     // But sim::LArG4Parameters might in principle ask a database for it.
 //     art::ServiceHandle<sim::LArG4Parameters> larParameters;
 //     fElectronsToGeV = 1./larParameters->GeVToElectrons();
-  }
+//   }
 
   //-----------------------------------------------------------------------
   void LaserCalibration::reconfigure(fhicl::ParameterSet const& parameterSet)
@@ -374,7 +386,7 @@ namespace LaserCalibration {
   }
 
   //-----------------------------------------------------------------------
-  void LaserCalibration::analyze(const art::Event& event) 
+  void LaserCalibration::produce(art::Event& event) 
   {
     // Start by fetching some basic event information for our n-tuple.
     fEvent  = event.id().event(); 
@@ -394,7 +406,7 @@ namespace LaserCalibration {
     
     WireVec->reserve(digitVecHandle->size());
     
-//     recob::WireCreator a();
+    recob::WireCreator a();
     
 //     auto RawDigits = *digitVecHandle;
     
@@ -417,17 +429,19 @@ namespace LaserCalibration {
     {
       raw::ChannelID_t channel = RawDigit.Channel();
     
-      std::cout << "Channel: " << channel << std::endl;
+//       std::cout << "Channel: " << channel << std::endl;
     
       WireIDs = fGeometry->ChannelToWire(channel);
       unsigned int thePlane = WireIDs.front().Plane;
       unsigned int theWire = WireIDs.front().Wire;
       
-      std::vector<short> rawADC(RawDigit.Samples());
+      std::vector<float> rawADC;
+      
+      rawADC.resize(RawDigit.Samples());
       
       recob::Wire::RegionsOfInterest_t ROIVec;
       
-      ROIVec.add_range(0,rawADC);
+      ROIVec.add_range(0,std::move(rawADC));
       
 //       recob::WireCreator
       
@@ -462,6 +476,8 @@ namespace LaserCalibration {
     delete SingleWire;
     delete C1;
     
+    event.put(std::move(WireVec), "blibla");
+    
 //     auto const& theWire = Wires[5];
     
 //     raw::ChannelID_t theChannel = theWire.Channel();
@@ -477,7 +493,6 @@ namespace LaserCalibration {
   
   // This macro has to be defined for this module to be invoked from a
   // .fcl file; see LaserCalibration.fcl for more information.
-  DEFINE_ART_MODULE(LaserCalibration)
 
 } // namespace LaserCalibration
 
