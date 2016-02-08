@@ -283,7 +283,7 @@ namespace LaserCalibration {
     // Read in the parameters from the .fcl file.
     this->reconfigure(pset);
     
-    produces< std::vector<recob::Wire> >("bibibi");
+    produces< std::vector<recob::Wire> >("blibla");
   }
 
   
@@ -406,22 +406,14 @@ namespace LaserCalibration {
     
     WireVec->reserve(digitVecHandle->size());
     
-    recob::WireCreator a();
-    
-//     auto RawDigits = *digitVecHandle;
-    
-//     std::cout << "FUUUUUUUUUUUUUUUUUUUUUUUUCK " << typeid(*/*RawDigits*/).name() << std::endl;
-    
-//     std::vector<recob::Wire> Wires = *wireVecHandle;
-    
-//     std::cout << "FUUUUUUUUUUUUUUUUUUUUUUUUCK " << RawDigits.size() << std::endl;
-    
     unsigned RawIndex = 1477;
     
 //     raw::Uncompress a();
     
-    const lariov::IDetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+    const lariov::IDetPedestalProvider& PedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
     TH1S* SingleWire = new TH1S("You","Fuck",digitVecHandle->at(RawIndex).Samples(),0,digitVecHandle->at(RawIndex).Samples()-1);
+    
+    std::vector<short> RawADC;
     
 //     digitVecHandle
     
@@ -429,23 +421,27 @@ namespace LaserCalibration {
     {
       raw::ChannelID_t channel = RawDigit.Channel();
     
-//       std::cout << "Channel: " << channel << std::endl;
-    
       WireIDs = fGeometry->ChannelToWire(channel);
       unsigned int thePlane = WireIDs.front().Plane;
       unsigned int theWire = WireIDs.front().Wire;
       
-      std::vector<float> rawADC;
+      RawADC.resize(RawDigit.Samples());
       
-      rawADC.resize(RawDigit.Samples());
+      raw::Uncompress(RawDigit.ADCs(), RawADC, RawDigit.Compression());
+      
+      for(auto & RawSample : RawADC)
+      {
+	RawSample -= PedestalRetrievalAlg.PedMean(channel);
+      }
       
       recob::Wire::RegionsOfInterest_t ROIVec;
       
-      ROIVec.add_range(0,std::move(rawADC));
+      ROIVec.add_range(0,std::move(RawADC));
       
 //       recob::WireCreator
       
-      WireVec->push_back(recob::WireCreator(std::move(ROIVec),RawDigit).move());
+      WireVec->emplace_back(recob::WireCreator(std::move(ROIVec),RawDigit).move());
+      
 //       std::cout << "Plane: " << thePlane << std::endl;
 //       std::cout << "Wire: " << theWire << std::endl;
 //       std::cout << "Compresson: " << RawDigit.Compression() << std::endl; 
@@ -466,7 +462,7 @@ namespace LaserCalibration {
     }
     
     
-    float Pedestal = pedestalRetrievalAlg.PedMean(digitVecHandle->at(RawIndex).Channel());
+    float Pedestal = PedestalRetrievalAlg.PedMean(digitVecHandle->at(RawIndex).Channel());
     for(unsigned samples = 0; samples < digitVecHandle->at(RawIndex).Samples(); samples++)
       SingleWire->SetBinContent(samples,digitVecHandle->at(RawIndex).ADC(samples) - Pedestal);
     
