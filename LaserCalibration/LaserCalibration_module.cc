@@ -409,26 +409,26 @@ namespace LaserCalibration {
     
     unsigned RawIndex = 1477;
     
-//     raw::Uncompress a();
-    
     const lariov::IDetPedestalProvider& PedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
     TH1F* SingleWire = new TH1F("You","Fuck",DigitVecHandle->at(RawIndex).Samples(),0,DigitVecHandle->at(RawIndex).Samples()-1);
     
     std::vector<short> RawADC;
     std::vector<float> RawSignal;
     
+    float CollectionThreshold = 10.0;
+    
     
     RawADC.resize(DigitVecHandle->at(0).Samples());
     RawSignal.resize(DigitVecHandle->at(0).Samples());
 
 //     for(size_t rdIter = 0; rdIter < DigitVecHandle->size(); ++rdIter)
-    
+
     // Loop over all physical readout channels
     for(auto const & RawDigit : *DigitVecHandle)
     {
 //       art::Ptr<raw::RawDigit> RawDigit(DigitVecHandle, rdIter);
       raw::ChannelID_t channel = RawDigit.Channel();
-    
+      
       WireIDs = fGeometry->ChannelToWire(channel);
       unsigned int thePlane = WireIDs.front().Plane;
       unsigned int theWire = WireIDs.front().Wire;
@@ -444,9 +444,23 @@ namespace LaserCalibration {
       {
 	RawSample -= PedestalRetrievalAlg.PedMean(channel);
       }
-     
       
+      // Create a Wire object with the raw signal
+      WireVec->emplace_back(recob::WireCreator(std::move(RawSignal),RawDigit).move());
       
+      // If wire plane is Y-plane
+      if(fGeometry->ChannelToWire(channel).front().Plane == 2) // If wire plane is Y-plane
+      {
+	
+      }
+      else if(fGeometry->ChannelToWire(channel).front().Plane == 1) // If wire plane is U-plane
+      {
+	
+      }
+      else // If wire plane is U-plane 
+      {
+	
+      }
       
 //       recob::Wire::RegionsOfInterest_t ROIVec;
 //       ROIVec.add_range(0,std::move(RawADC));
