@@ -80,6 +80,7 @@
 #include <typeinfo>
 #include <utility>
 #include <memory>
+#include <iterator>
 
 
 namespace {
@@ -411,38 +412,50 @@ namespace LaserCalibration {
 //     raw::Uncompress a();
     
     const lariov::IDetPedestalProvider& PedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
-    TH1S* SingleWire = new TH1S("You","Fuck",DigitVecHandle->at(RawIndex).Samples(),0,DigitVecHandle->at(RawIndex).Samples()-1);
+    TH1F* SingleWire = new TH1F("You","Fuck",DigitVecHandle->at(RawIndex).Samples(),0,DigitVecHandle->at(RawIndex).Samples()-1);
     
     std::vector<short> RawADC;
+    std::vector<float> RawSignal;
     
-//     digitVecHandle
     
-//     for(auto & RawDigit : *DigitVecHandle)
-    for(size_t rdIter = 0; rdIter < DigitVecHandle->size(); ++rdIter)
+    RawADC.resize(DigitVecHandle->at(0).Samples());
+    RawSignal.resize(DigitVecHandle->at(0).Samples());
+
+//     for(size_t rdIter = 0; rdIter < DigitVecHandle->size(); ++rdIter)
+    
+    // Loop over all physical readout channels
+    for(auto const & RawDigit : *DigitVecHandle)
     {
-      art::Ptr<raw::RawDigit> RawDigit(DigitVecHandle, rdIter);
-      raw::ChannelID_t channel = RawDigit->Channel();
+//       art::Ptr<raw::RawDigit> RawDigit(DigitVecHandle, rdIter);
+      raw::ChannelID_t channel = RawDigit.Channel();
     
       WireIDs = fGeometry->ChannelToWire(channel);
       unsigned int thePlane = WireIDs.front().Plane;
       unsigned int theWire = WireIDs.front().Wire;
       
-      RawADC.resize(RawDigit->Samples());
+      // Extract data into RawADC vector and uncompress it
+      raw::Uncompress(RawDigit.ADCs(), RawADC, RawDigit.Compression());
       
-      raw::Uncompress(RawDigit->ADCs(), RawADC, RawDigit->Compression());
+      // Move the Raw ADC digit (short) into the signal vector (float)
+      std::copy(RawADC.begin(), RawADC.end(), RawSignal.begin());
       
-      for(auto & RawSample : RawADC)
+      // subtract pedestial
+      for(auto & RawSample : RawSignal)
       {
 	RawSample -= PedestalRetrievalAlg.PedMean(channel);
       }
+     
       
-      recob::Wire::RegionsOfInterest_t ROIVec;
       
-      ROIVec.add_range(0,std::move(RawADC));
+      
+//       recob::Wire::RegionsOfInterest_t ROIVec;
+//       ROIVec.add_range(0,std::move(RawADC));
       
 //       recob::WireCreator
       
-      WireVec->emplace_back(recob::WireCreator(std::move(ROIVec),*RawDigit).move());
+      WireVec->emplace_back(recob::WireCreator(std::move(RawSignal),RawDigit).move());
+      
+//       std::cout << "FUUUUUUUUUUUUUUUUUUUUUUUUUUUCK" << std::endl;
       
 //       std::cout << "Plane: " << thePlane << std::endl;
 //       std::cout << "Wire: " << theWire << std::endl;
@@ -463,17 +476,18 @@ namespace LaserCalibration {
 //       }
     }
     
-    
-    float Pedestal = PedestalRetrievalAlg.PedMean(DigitVecHandle->at(RawIndex).Channel());
-    for(unsigned samples = 0; samples < DigitVecHandle->at(RawIndex).Samples(); samples++)
-      SingleWire->SetBinContent(samples,DigitVecHandle->at(RawIndex).ADC(samples) - Pedestal);
-    
+    float Pedestal = PedestalRetrievalAlg.PedRms(DigitVecHandle->at(RawIndex).Channel());
+//     for(unsigned samples = 0; samples < DigitVecHandle->at(RawIndex).Samples(); samples++)
+//       SingleWire->SetBinContent(samples,DigitVecHandle->at(RawIndex).ADC(samples) - Pedestal);
+    for(unsigned samples = 0; samples < WireVec->at(RawIndex).NSignal(); samples++)
+      SingleWire->SetBinContent(samples,WireVec->at(RawIndex).Signal().at(samples));
+    std::cout << "Pedestal " << PedestalRetrievalAlg.PedMean(DigitVecHandle->at(RawIndex).Channel()) << " " << PedestalRetrievalAlg.PedRms(DigitVecHandle->at(RawIndex).Channel()) << std::endl;
+    std::cout << "Errors " << PedestalRetrievalAlg.PedMeanErr(DigitVecHandle->at(RawIndex).Channel()) << " " << PedestalRetrievalAlg.PedRmsErr(DigitVecHandle->at(RawIndex).Channel()) << std::endl;
     TCanvas* C1 = new TCanvas("Fuck","You",1400,1000);
     SingleWire->Draw();
     C1 -> Print("Fuck.png","png");
     delete SingleWire;
     delete C1;
-    
     event.put(std::move(WireVec), "blibla");
     
 //     auto const& theWire = Wires[5];

@@ -3,6 +3,7 @@ simple_plugin(LaserCalibration "module"
 			Geometry_service
                         Geometry
 			RecoBaseArt
+			RecoBase
 			RawData
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
