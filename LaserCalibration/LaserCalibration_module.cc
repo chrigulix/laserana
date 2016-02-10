@@ -31,6 +31,7 @@
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "RecoBaseArt/WireCreator.h"
+#include "RecoBaseArt/HitCreator.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/Wire.h"
@@ -198,6 +199,8 @@ namespace LaserCalibration {
 
     // The analysis routine, called once per event. 
     virtual void produce (art::Event& event) /*override*/;
+    
+    std::vector<recob::Hit> LaserHitFinder(recob::Wire const& SingleWire, float const& Threshold, raw::ChannelID_t const& Channel); 
 
   private:
 
@@ -413,13 +416,21 @@ namespace LaserCalibration {
     TH1F* SingleWire = new TH1F("You","Fuck",DigitVecHandle->at(RawIndex).Samples(),0,DigitVecHandle->at(RawIndex).Samples()-1);
     
     std::vector<short> RawADC;
-    std::vector<float> RawSignal;
+//     std::vector<float> RawSignal;
+    
+    unsigned int StartROI = 4000;
+    unsigned int EndROI = 6000;
     
     float CollectionThreshold = 10.0;
     
     
+    unsigned int Index = 0;
+    
     RawADC.resize(DigitVecHandle->at(0).Samples());
-    RawSignal.resize(DigitVecHandle->at(0).Samples());
+//     RawSignal.reserve(DigitVecHandle->at(0).Samples());
+    
+    recob::Wire::RegionsOfInterest_t RegionOfInterest;
+    
 
 //     for(size_t rdIter = 0; rdIter < DigitVecHandle->size(); ++rdIter)
 
@@ -435,20 +446,42 @@ namespace LaserCalibration {
       
       // Extract data into RawADC vector and uncompress it
       raw::Uncompress(RawDigit.ADCs(), RawADC, RawDigit.Compression());
+//       std::cout << "Fuuuuuck" << std::endl;
       
       // Move the Raw ADC digit (short) into the signal vector (float)
-      std::copy(RawADC.begin(), RawADC.end(), RawSignal.begin());
+//       std::copy(RawADC.begin(), RawADC.end(), RawSignal.begin());
+//       std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI,RawSignal.begin());
+      std::vector<float> RawSignal(RawADC.begin()+StartROI, RawADC.begin()+EndROI);
       
       // subtract pedestial
       for(auto & RawSample : RawSignal)
       {
 	RawSample -= PedestalRetrievalAlg.PedMean(channel);
+// 	std::cout << RawSample << std::endl;
       }
+//       for(unsigned int sample = StartROI; sample < EndROI; sample++ )
+//       {
+// 	RegionOfInterest.add_range(StartROI)
+//       }
+//       std::cout << "Fuuuuuck" << std::endl;
+      RegionOfInterest.add_range(StartROI,RawSignal.begin(),RawSignal.end());
+//       std::cout << "Fuuuuuck" << std::endl;
       
       // Create a Wire object with the raw signal
-      WireVec->emplace_back(recob::WireCreator(std::move(RawSignal),RawDigit).move());
+      WireVec->emplace_back(recob::WireCreator(std::move(RegionOfInterest),RawDigit).move());
       
-      // If wire plane is Y-plane
+//       std::cout << "Fuuuuuck" << std::endl;
+      
+      if(Index==RawIndex)
+      {
+	std::vector<recob::Hit> HitVector = LaserHitFinder(WireVec->back(), CollectionThreshold, channel);
+	
+	for(auto const& hit : HitVector)
+	{
+	  std::cout << hit.SummedADC() << std::endl;
+	}
+      }
+//       std::cout << "Fuuuuuck" << std::endl;
       if(fGeometry->ChannelToWire(channel).front().Plane == 2) // If wire plane is Y-plane
       {
 	
@@ -457,7 +490,7 @@ namespace LaserCalibration {
       {
 	
       }
-      else // If wire plane is U-plane 
+      else if(fGeometry->ChannelToWire(channel).front().Plane == 0) // If wire plane is V-plane 
       {
 	
       }
@@ -467,7 +500,8 @@ namespace LaserCalibration {
       
 //       recob::WireCreator
       
-      WireVec->emplace_back(recob::WireCreator(std::move(RawSignal),RawDigit).move());
+      
+      Index++;
       
 //       std::cout << "FUUUUUUUUUUUUUUUUUUUUUUUUUUUCK" << std::endl;
       
@@ -491,10 +525,10 @@ namespace LaserCalibration {
     }
     
     float Pedestal = PedestalRetrievalAlg.PedRms(DigitVecHandle->at(RawIndex).Channel());
-//     for(unsigned samples = 0; samples < DigitVecHandle->at(RawIndex).Samples(); samples++)
-//       SingleWire->SetBinContent(samples,DigitVecHandle->at(RawIndex).ADC(samples) - Pedestal);
-    for(unsigned samples = 0; samples < WireVec->at(RawIndex).NSignal(); samples++)
-      SingleWire->SetBinContent(samples,WireVec->at(RawIndex).Signal().at(samples));
+    for(unsigned samples = 0; samples < DigitVecHandle->at(RawIndex).Samples(); samples++)
+      SingleWire->SetBinContent(samples,DigitVecHandle->at(RawIndex).ADC(samples) - Pedestal);
+//     for(unsigned samples = 0; samples < WireVec->at(RawIndex).NSignal(); samples++)
+//       SingleWire->SetBinContent(samples,WireVec->at(RawIndex).Signal().at(samples));
     std::cout << "Pedestal " << PedestalRetrievalAlg.PedMean(DigitVecHandle->at(RawIndex).Channel()) << " " << PedestalRetrievalAlg.PedRms(DigitVecHandle->at(RawIndex).Channel()) << std::endl;
     std::cout << "Errors " << PedestalRetrievalAlg.PedMeanErr(DigitVecHandle->at(RawIndex).Channel()) << " " << PedestalRetrievalAlg.PedRmsErr(DigitVecHandle->at(RawIndex).Channel()) << std::endl;
     TCanvas* C1 = new TCanvas("Fuck","You",1400,1000);
@@ -515,6 +549,39 @@ namespace LaserCalibration {
 
 
   } // LaserCalibration::analyze()
+  
+  //------------------------------------------------------------------------
+  std::vector<recob::Hit> LaserCalibration::LaserHitFinder(recob::Wire const& SingleWire, float const& Threshold, raw::ChannelID_t const& Channel)
+  {
+    std::vector<recob::Hit> LaserHits;
+    std::vector<std::pair<int,int>> HitEdge;
+    HitEdge.push_back(std::make_pair(1,1));
+//     bool HitFlag = false; 
+    for(unsigned int Sample = 0; Sample < SingleWire.Signal().size(); Sample++ )
+    {
+      if( SingleWire.Signal().at(Sample) >= Threshold && HitEdge.back().second )
+      {
+	HitEdge.push_back(std::make_pair(Sample,0));
+      }
+      else if( !HitEdge.back().second && SingleWire.Signal().at(Sample) < Threshold )
+      {
+	HitEdge.back().second = Sample;
+      }
+    }
+    
+    short int LocalIndex = 0;
+    for(auto const& Pairs : HitEdge)
+    {
+      std::cout << Pairs.first << " " << Pairs.second << std::endl;
+      LaserHits.push_back(recob::HitCreator(SingleWire, fGeometry->ChannelToWire(Channel).front(), Pairs.first, Pairs.second, 
+			  (float) (Pairs.first - Pairs.second), (float) (Pairs.first - Pairs.second)/2, (float)0., (float)0., (float)0., 
+			  (float)0., (float)0., (short int)1, LocalIndex, (float)1., 0).move());
+// 	recob::HitCreator::HitCreator(const recob::Wire&, geo::WireID::WireID_t&, const int&, const int&, float, float, float, float, float, float, float, short int, short int&, float, int)
+      LocalIndex++;
+    }
+    return LaserHits;
+  }
+  
   
   
   // This macro has to be defined for this module to be invoked from a
