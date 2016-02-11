@@ -421,38 +421,44 @@ namespace LaserCalibration {
     TH1F* SingleWire = new TH1F("You","Fuck",DigitVecHandle->at(RawIndex).Samples(),0,DigitVecHandle->at(RawIndex).Samples()-1);
     
     std::vector<short> RawADC;
-    std::vector<float> RawSignal;
+    std::vector<float> RawROI;
     
     unsigned int StartROI = 4500;
     unsigned int EndROI = 5500;
     
     float CollectionThreshold = 10.0;
-    
-    
-    unsigned int Index = 0;
+
     
     RawADC.resize(DigitVecHandle->at(0).Samples());
-    RawSignal.resize(EndROI - StartROI);
+    RawROI.resize(EndROI - StartROI);
     
     recob::Wire::RegionsOfInterest_t RegionOfInterest;
     
+    // Loop over downstream laser system
     if(fLCSNumber == 2)
     {
+      // Loop over 10 wires at the edge of the TPC based on the wire map
       for(unsigned int WireIndex = YMap.size()-1; WireIndex >= YMap.size() - 10; WireIndex--)
       {
-	raw::Uncompress(DigitVecHandle->at(YMap.at(WireIndex)).ADCs(), RawADC, DigitVecHandle->at(YMap.at(WireIndex)).Compression());
+        // Get the wire data for this particular wire
+        auto RawDigit = DigitVecHandle->at(YMap.at(WireIndex));
+	raw::Uncompress(RawDigit.ADCs(), RawADC, RawDigit.Compression());
+        
+        // copy only the region of interest into the the RawSignal vector
+	std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI, RawROI.begin());
 
-	std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI,RawSignal.begin());
-
-	for(auto & RawSample : RawSignal)
+        // Subtract pedestal from samples in ROI
+	for(auto & RawSample : RawROI)
 	{
-	  RawSample -= PedestalRetrievalAlg.PedMean(DigitVecHandle->at(YMap.at(WireIndex)).Channel());
+	  RawSample -= PedestalRetrievalAlg.PedMean(RawDigit.Channel());
 	}
-	RegionOfInterest.add_range(StartROI,RawSignal.begin(),RawSignal.end());
 	
-	WireVec->emplace_back(recob::WireCreator( std::move(RegionOfInterest),DigitVecHandle->at(YMap.at(WireIndex)) ).move());
+        // Create a wire from the selected ROI (1. copy raw into ROI container, 2. copy the ROI vector into a wire container)
+        RegionOfInterest.add_range(StartROI,RawROI.begin(),RawROI.end());
+	WireVec->emplace_back(recob::WireCreator( std::move(RegionOfInterest), RawDigit ).move());
 	
-	std::vector<recob::Hit> HitVector = LaserHitFinder(WireVec->back(), CollectionThreshold,DigitVecHandle->at(YMap.at(WireIndex)).Channel());
+        // Now look for hits in the ROI
+	std::vector<recob::Hit> HitVector = LaserHitFinder(WireVec->back(), CollectionThreshold, RawDigit.Channel());
 	
 	for(auto const& hit : HitVector)
 	{
@@ -463,6 +469,7 @@ namespace LaserCalibration {
     
 //     for(size_t rdIter = 0; rdIter < DigitVecHandle->size(); ++rdIter)
 
+    unsigned int Index = 0;
     // Loop over all physical readout channels
     for(auto const & RawDigit : *DigitVecHandle)
     {
@@ -481,11 +488,11 @@ namespace LaserCalibration {
       
       // Move the Raw ADC digit (short) into the signal vector (float)
 //       std::copy(RawADC.begin(), RawADC.end(), RawSignal.begin());
-      std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI,RawSignal.begin());
+      std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI,RawROI.begin());
 //       std::vector<float> RawSignal(RawADC.begin()+StartROI, RawADC.begin()+EndROI);
       
       // subtract pedestial
-      for(auto & RawSample : RawSignal)
+      for(auto & RawSample : RawROI)
       {
 	RawSample -= PedestalRetrievalAlg.PedMean(channel);
 // 	std::cout << RawSample << std::endl;
@@ -495,7 +502,7 @@ namespace LaserCalibration {
 // 	RegionOfInterest.add_range(StartROI)
 //       }
 //       std::cout << "Fuuuuuck" << std::endl;
-      RegionOfInterest.add_range(StartROI,RawSignal.begin(),RawSignal.end());
+      RegionOfInterest.add_range(StartROI,RawROI.begin(),RawROI.end());
 //       std::cout << "Fuuuuuck" << std::endl;
       
       // Create a Wire object with the raw signal
