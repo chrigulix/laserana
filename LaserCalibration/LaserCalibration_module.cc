@@ -72,6 +72,7 @@
 #include "TTree.h"
 #include "TLorentzVector.h"
 #include "TVector3.h"
+#include "TFile.h"
 
 // C++ Includes
 #include <map>
@@ -208,6 +209,7 @@ namespace LaserCalibration {
     // go from this custom example to your own task.
 
     // The parameters we'll read from the .fcl file.
+    bool fWireMapGenerator;               ///< Decide if you want to produce a wire map (recomended if you don't have it)
     std::string fSimulationProducerLabel; ///< The name of the producer that tracked simulated particles through the detector
     std::string fHitProducerLabel;        ///< The name of the producer that created hits
     std::string fClusterProducerLabel;    ///< The name of the producer that created clusters
@@ -267,6 +269,14 @@ namespace LaserCalibration {
     
     art::InputTag fCalDataModuleLabel;
     
+    std::string fFileName = "WireIndexMap.root";
+    
+    std::map<unsigned int, unsigned int> UMap;
+    std::map<unsigned int, unsigned int> VMap;
+    std::map<unsigned int, unsigned int> YMap;
+    
+    unsigned short fLCSNumber;
+    
   }; // class LaserCalibration
   
   DEFINE_ART_MODULE(LaserCalibration)
@@ -297,59 +307,53 @@ namespace LaserCalibration {
     // Get the detector length, to determine the maximum bin edge of one
     // of the histograms.
     const double detectorLength = DetectorDiagonal(*fGeometry);
+    
+    if(!fWireMapGenerator)
+    {
+      TFile* InputFile = new TFile(fFileName.c_str(), "READ");
+      
+      std::map<unsigned int, unsigned int>* pUMap;
+      std::map<unsigned int, unsigned int>* pVMap;
+      std::map<unsigned int, unsigned int>* pYMap;
+      
+      InputFile->GetObject("UMap",pUMap);
+      InputFile->GetObject("VMap",pVMap);
+      InputFile->GetObject("YMap",pYMap);
+      
+      UMap = *pUMap;
+      VMap = *pVMap;
+      YMap = *pYMap;
+      
+      delete pUMap;
+      delete pVMap;
+      delete pYMap;
+    }
+    
+    // TODO: Change later
+    fLCSNumber = 2;
 
     // Access ART's TFileService, which will handle creating and writing
     // histograms and n-tuples for us. 
-    art::ServiceHandle<art::TFileService> tfs;
-  
-    // The arguments to 'make<whatever>' are the same as those passed
-    // to the 'whatever' constructor, provided 'whatever' is a ROOT
-    // class that TFileService recognizes. 
-
-    // Define the histograms. Putting semi-colons around the title
-    // causes it to be displayed as the x-axis label if the histogram
-    // is drawn (the format is "title;label on abscissae;label on ordinates").
-    fPDGCodeHist     = tfs->make<TH1D>("pdgcodes",";PDG Code;",                  5000, -2500, 2500);
-    fMomentumHist    = tfs->make<TH1D>("mom",     ";particle Momentum (GeV);",    100, 0.,    10.);
-    fTrackLengthHist = tfs->make<TH1D>("length",  ";particle track length (cm);", 200, 0, detectorLength);
-
-    // Define our n-tuples, which are limited forms of ROOT
-    // TTrees. Start with the TTree itself.
-    fSimulationNtuple     = tfs->make<TTree>("LaserCalibrationSimulation",    "LaserCalibrationSimulation");
-    fReconstructionNtuple = tfs->make<TTree>("LaserCalibrationReconstruction","LaserCalibrationReconstruction");
-
-    // Define the branches (columns) of our simulation n-tuple. When
-    // we write a variable, we give the address of the variable to
-    // TTree::Branch.
-    fSimulationNtuple->Branch("Event",       &fEvent,          "Event/I");
-    fSimulationNtuple->Branch("SubRun",      &fSubRun,         "SubRun/I");
-    fSimulationNtuple->Branch("Run",         &fRun,            "Run/I");
-    fSimulationNtuple->Branch("TrackID",     &fSimTrackID,     "TrackID/I");
-    fSimulationNtuple->Branch("PDG",         &fSimPDG,         "PDG/I");
-    // When we write arrays, we give the address of the array to
-    // TTree::Branch; in C++ this is simply the array name.
-    fSimulationNtuple->Branch("StartXYZT",   fStartXYZT,       "StartXYZT[4]/D");
-    fSimulationNtuple->Branch("EndXYZT",     fEndXYZT,         "EndXYZT[4]/D");
-    fSimulationNtuple->Branch("StartPE",     fStartPE,         "StartPE[4]/D");
-    fSimulationNtuple->Branch("EndPE",       fEndPE,           "EndPE[4]/D");
-    // For a variable-length array: include the number of bins.
-    fSimulationNtuple->Branch("NdEdx",       &fSimNdEdxBins,   "NdEdx/I");
-    // ROOT can understand fairly well vectors of numbers (and little more)
-    fSimulationNtuple->Branch("dEdx",        &fSimdEdxBins);
-
-    // A similar definition for the reconstruction n-tuple. Note that we
-    // use some of the same variables in both n-tuples.
-    fReconstructionNtuple->Branch("Event",   &fEvent,          "Event/I");
-    fReconstructionNtuple->Branch("SubRun",  &fSubRun,         "SubRun/I");
-    fReconstructionNtuple->Branch("Run",     &fRun,            "Run/I");
-    fReconstructionNtuple->Branch("TrackID", &fRecoTrackID,    "TrackID/I");
-    fReconstructionNtuple->Branch("PDG",     &fRecoPDG,        "PDG/I");
-    fReconstructionNtuple->Branch("NdEdx",   &fRecoNdEdxBins,  "NdEdx/I");
-    fReconstructionNtuple->Branch("dEdx",    &fRecodEdxBins);
+//     art::ServiceHandle<art::TFileService> tfs;
+    
+    // Above is almost only useless shit!
+    // Map of Y-WireIDs
+//     std::map<>
+    
   }
   
+  
+  
   void  LaserCalibration::endJob()
-  {  
+  {
+    if(fWireMapGenerator)
+    {
+      TFile* OutputFile = new TFile(fFileName.c_str(), "RECREATE");
+    
+      OutputFile->WriteObject(&UMap,"UMap");
+      OutputFile->WriteObject(&VMap,"VMap");
+      OutputFile->WriteObject(&YMap,"YMap");
+    }
   }
    
   //-----------------------------------------------------------------------
@@ -381,6 +385,7 @@ namespace LaserCalibration {
   {
     // Read parameters from the .fcl file. The names in the arguments
     // to p.get<TYPE> must match names in the .fcl file.
+    fWireMapGenerator        = parameterSet.get< bool        >("GenerateWireMap");
     fSimulationProducerLabel = parameterSet.get< std::string >("SimulationLabel");
     fHitProducerLabel        = parameterSet.get< std::string >("HitLabel");
     fClusterProducerLabel    = parameterSet.get< std::string >("ClusterLabel");
@@ -416,10 +421,10 @@ namespace LaserCalibration {
     TH1F* SingleWire = new TH1F("You","Fuck",DigitVecHandle->at(RawIndex).Samples(),0,DigitVecHandle->at(RawIndex).Samples()-1);
     
     std::vector<short> RawADC;
-//     std::vector<float> RawSignal;
+    std::vector<float> RawSignal;
     
-    unsigned int StartROI = 4000;
-    unsigned int EndROI = 6000;
+    unsigned int StartROI = 4500;
+    unsigned int EndROI = 5500;
     
     float CollectionThreshold = 10.0;
     
@@ -427,11 +432,35 @@ namespace LaserCalibration {
     unsigned int Index = 0;
     
     RawADC.resize(DigitVecHandle->at(0).Samples());
-//     RawSignal.reserve(DigitVecHandle->at(0).Samples());
+    RawSignal.resize(EndROI - StartROI);
     
     recob::Wire::RegionsOfInterest_t RegionOfInterest;
     
+    if(fLCSNumber == 2)
+    {
+      for(unsigned int WireIndex = YMap.size()-1; WireIndex >= YMap.size() - 10; WireIndex--)
+      {
+	raw::Uncompress(DigitVecHandle->at(YMap.at(WireIndex)).ADCs(), RawADC, DigitVecHandle->at(YMap.at(WireIndex)).Compression());
 
+	std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI,RawSignal.begin());
+
+	for(auto & RawSample : RawSignal)
+	{
+	  RawSample -= PedestalRetrievalAlg.PedMean(DigitVecHandle->at(YMap.at(WireIndex)).Channel());
+	}
+	RegionOfInterest.add_range(StartROI,RawSignal.begin(),RawSignal.end());
+	
+	WireVec->emplace_back(recob::WireCreator( std::move(RegionOfInterest),DigitVecHandle->at(YMap.at(WireIndex)) ).move());
+	
+	std::vector<recob::Hit> HitVector = LaserHitFinder(WireVec->back(), CollectionThreshold,DigitVecHandle->at(YMap.at(WireIndex)).Channel());
+	
+	for(auto const& hit : HitVector)
+	{
+	  std::cout << "ADC count per Hit " << WireIndex << " " << hit.SummedADC() << std::endl;
+	}
+      }
+    }
+    
 //     for(size_t rdIter = 0; rdIter < DigitVecHandle->size(); ++rdIter)
 
     // Loop over all physical readout channels
@@ -439,6 +468,8 @@ namespace LaserCalibration {
     {
 //       art::Ptr<raw::RawDigit> RawDigit(DigitVecHandle, rdIter);
       raw::ChannelID_t channel = RawDigit.Channel();
+      
+//       std::cout  << channel << std::endl;
       
       WireIDs = fGeometry->ChannelToWire(channel);
       unsigned int thePlane = WireIDs.front().Plane;
@@ -450,8 +481,8 @@ namespace LaserCalibration {
       
       // Move the Raw ADC digit (short) into the signal vector (float)
 //       std::copy(RawADC.begin(), RawADC.end(), RawSignal.begin());
-//       std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI,RawSignal.begin());
-      std::vector<float> RawSignal(RawADC.begin()+StartROI, RawADC.begin()+EndROI);
+      std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI,RawSignal.begin());
+//       std::vector<float> RawSignal(RawADC.begin()+StartROI, RawADC.begin()+EndROI);
       
       // subtract pedestial
       for(auto & RawSample : RawSignal)
@@ -472,27 +503,27 @@ namespace LaserCalibration {
       
 //       std::cout << "Fuuuuuck" << std::endl;
       
-      if(Index==RawIndex)
-      {
-	std::vector<recob::Hit> HitVector = LaserHitFinder(WireVec->back(), CollectionThreshold, channel);
-	
-	for(auto const& hit : HitVector)
-	{
-	  std::cout << hit.SummedADC() << std::endl;
-	}
-      }
+//       if(Index==RawIndex)
+//       {
+// 	std::vector<recob::Hit> HitVector = LaserHitFinder(WireVec->back(), CollectionThreshold, channel);
+// 	
+// 	for(auto const& hit : HitVector)
+// 	{
+// // 	  std::cout << hit.SummedADC() << std::endl;
+// 	}
+//       }
 //       std::cout << "Fuuuuuck" << std::endl;
       if(fGeometry->ChannelToWire(channel).front().Plane == 2) // If wire plane is Y-plane
       {
-	
+	if(fWireMapGenerator) YMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
       }
-      else if(fGeometry->ChannelToWire(channel).front().Plane == 1) // If wire plane is U-plane
+      else if(fGeometry->ChannelToWire(channel).front().Plane == 1) // If wire plane is V-plane
       {
-	
+	if(fWireMapGenerator) VMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
       }
-      else if(fGeometry->ChannelToWire(channel).front().Plane == 0) // If wire plane is V-plane 
+      else if(fGeometry->ChannelToWire(channel).front().Plane == 0) // If wire plane is U-plane 
       {
-	
+	if(fWireMapGenerator) UMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
       }
       
 //       recob::Wire::RegionsOfInterest_t ROIVec;
@@ -523,6 +554,8 @@ namespace LaserCalibration {
 // 	RawDigitADC -= Pedestal;
 //       }
     }
+    
+//     std::cout << "WireID 3000 " << YMap.at(3000) << std::endl;
     
     float Pedestal = PedestalRetrievalAlg.PedRms(DigitVecHandle->at(RawIndex).Channel());
     for(unsigned samples = 0; samples < DigitVecHandle->at(RawIndex).Samples(); samples++)

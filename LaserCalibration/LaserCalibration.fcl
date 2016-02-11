@@ -49,6 +49,7 @@ physics:
     LaserCalibration: 
     {
       module_type:         "LaserCalibration"
+      GenerateWireMap:     false
       SimulationLabel: 	   "largeant"
       HitLabel:            "gaushit"
       CalDataModuleLabel:  "daq"
