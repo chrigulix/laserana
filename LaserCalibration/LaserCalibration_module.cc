@@ -594,49 +594,50 @@ namespace LaserCalibration {
   std::vector<recob::Hit> LaserCalibration::LaserHitFinder(recob::Wire const& SingleWire, float const& Threshold, raw::ChannelID_t const& Channel)
   {
     std::vector<recob::Hit> LaserHits;
-    std::vector<std::pair<int,int>> HitEdge; // start and end of signal over threshold
-    HitEdge.push_back(std::make_pair(1,1));
     
-    std::vector<std::pair<int,int>> HitPeak; // peak value and peak time
-    
+    int HitEnd = -9999;
+    int HitStart = - 9999;
+    int Peak = - 9999;
+    int PeakTime = -9999;
+    int HitIdx = 0;
+
+    bool Above = false;
+ 
     auto Signal = SingleWire.Signal();
-    
-//     bool HitFlag = false; 
-    for(unsigned int Sample = 0; Sample < Signal.size(); Sample++ )
+
+    // loop over wire
+    for(unsigned int sample = 0; sample < Signal.size(); sample++ )
     {
-      if( Signal.at(Sample) >= Threshold)
+      if( Signal.at(sample) >= Threshold)
       {
         // If we go over the threshold the first time, save the time tick
-        if (HitEdge.back().second)
+        if (!Above)
         {
-          HitEdge.push_back(std::make_pair(Sample,0));
-          HitPeak.push_back(std::make_pair(Signal.at(Sample), Sample));
+          HitStart = sample;
+          Above = true;
+          Peak = Signal.at(sample);
         }
-        if (Signal.at(Sample) > HitPeak.back().first) 
+        if (Signal.at(sample) > Peak) 
         {
-          HitPeak.back().first = SingleWire.Signal().at(Sample);
-          HitPeak.back().second = Sample;
+          Peak = Signal.at(sample);
+          PeakTime = sample;
         }
       }
-      else if( !HitEdge.back().second && Signal.at(Sample) < Threshold )
+      else if( Above && Signal.at(sample) < Threshold )
       {
-	HitEdge.back().second = Sample;
+	HitEnd = sample;
+        Above = false;
+        
+        std::cout << "Time: Start/Stop " << HitStart << "/" << HitEnd << std::endl;
+        std::cout << "Peak: Value/Tick " << Peak << "/" << PeakTime << std::endl;
+
+        LaserHits.push_back(recob::HitCreator(SingleWire, fGeometry->ChannelToWire(Channel).front(), HitStart, HitEnd, 
+			  (float) (HitStart - HitEnd), (float) (HitStart - HitEnd)/2, (float)0., (float)0., (float)0., 
+			  (float)0., (float)0., (short int)1, HitIdx, (float)1., 0).move());
+        HitIdx++;
       }
     }
-    
-    for(auto const& Pairs : HitPeak) std::cout << "Peaks: Value/Tick " << Pairs.first << " " << Pairs.second << std::endl;
-    
-    
-    short int LocalIndex = 0;
-    for(auto const& Pairs : HitEdge)
-    {
-      std::cout << Pairs.first << " " << Pairs.second << std::endl;
-      LaserHits.push_back(recob::HitCreator(SingleWire, fGeometry->ChannelToWire(Channel).front(), Pairs.first, Pairs.second, 
-			  (float) (Pairs.first - Pairs.second), (float) (Pairs.first - Pairs.second)/2, (float)0., (float)0., (float)0., 
-			  (float)0., (float)0., (short int)1, LocalIndex, (float)1., 0).move());
-// 	recob::HitCreator::HitCreator(const recob::Wire&, geo::WireID::WireID_t&, const int&, const int&, float, float, float, float, float, float, float, short int, short int&, float, int)
-      LocalIndex++;
-    }
+        
     return LaserHits;
   }
   
