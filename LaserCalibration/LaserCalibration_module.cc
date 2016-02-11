@@ -440,11 +440,11 @@ namespace LaserCalibration {
       // Loop over 10 wires at the edge of the TPC based on the wire map
       for(unsigned int WireIndex = YMap.size()-1; WireIndex >= YMap.size() - 10; WireIndex--)
       {
-        // Get the wire data for this particular wire
+        // Get the raw data for this particular wire
         auto RawDigit = DigitVecHandle->at(YMap.at(WireIndex));
 	raw::Uncompress(RawDigit.ADCs(), RawADC, RawDigit.Compression());
         
-        // copy only the region of interest into the the RawSignal vector
+        // copy only the region of interest into the the RawROI vector
 	std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI, RawROI.begin());
 
         // Subtract pedestal from samples in ROI
@@ -594,20 +594,38 @@ namespace LaserCalibration {
   std::vector<recob::Hit> LaserCalibration::LaserHitFinder(recob::Wire const& SingleWire, float const& Threshold, raw::ChannelID_t const& Channel)
   {
     std::vector<recob::Hit> LaserHits;
-    std::vector<std::pair<int,int>> HitEdge;
+    std::vector<std::pair<int,int>> HitEdge; // start and end of signal over threshold
     HitEdge.push_back(std::make_pair(1,1));
+    
+    std::vector<std::pair<int,int>> HitPeak; // peak value and peak time
+    
+    auto Signal = SingleWire.Signal();
+    
 //     bool HitFlag = false; 
-    for(unsigned int Sample = 0; Sample < SingleWire.Signal().size(); Sample++ )
+    for(unsigned int Sample = 0; Sample < Signal.size(); Sample++ )
     {
-      if( SingleWire.Signal().at(Sample) >= Threshold && HitEdge.back().second )
+      if( Signal.at(Sample) >= Threshold)
       {
-	HitEdge.push_back(std::make_pair(Sample,0));
+        // If we go over the threshold the first time, save the time tick
+        if (HitEdge.back().second)
+        {
+          HitEdge.push_back(std::make_pair(Sample,0));
+          HitPeak.push_back(std::make_pair(Signal.at(Sample), Sample));
+        }
+        if (Signal.at(Sample) > HitPeak.back().first) 
+        {
+          HitPeak.back().first = SingleWire.Signal().at(Sample);
+          HitPeak.back().second = Sample;
+        }
       }
-      else if( !HitEdge.back().second && SingleWire.Signal().at(Sample) < Threshold )
+      else if( !HitEdge.back().second && Signal.at(Sample) < Threshold )
       {
 	HitEdge.back().second = Sample;
       }
     }
+    
+    for(auto const& Pairs : HitPeak) std::cout << "Peaks: Value/Tick " << Pairs.first << " " << Pairs.second << std::endl;
+    
     
     short int LocalIndex = 0;
     for(auto const& Pairs : HitEdge)
