@@ -85,7 +85,7 @@
 #include <iterator>
 
 // Laser Module Classes
-#include "LaserBeam.h"
+// #include "LaserBeam.h"
 
 
 namespace {
@@ -421,8 +421,6 @@ namespace LaserCalibration {
     unsigned RawIndex = 1477;
     unsigned UWireNumber = 1026;
     unsigned VWireNumber = 196;
-    
-    lasercal::LaserBeam Wischiwaschi;
     
     const lariov::IDetPedestalProvider& PedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
     TH1F* SingleWire = new TH1F("You","Fuck",DigitVecHandle->at(UMap.at(UWireNumber)).Samples(),0,DigitVecHandle->at(UMap.at(UWireNumber)).Samples()-1);
