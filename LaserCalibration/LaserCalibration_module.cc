@@ -402,6 +402,11 @@ namespace LaserCalibration {
     fRun    = event.run();
     fSubRun = event.subRun();
     
+    std::cout << "Event ID: " << fEvent << std::endl;
+    std::cout << "Event Time (low): " << event.time().timeLow() << std::endl;
+    std::cout << "Event Time (hig): " << event.time().timeHigh() << std::endl;
+
+    
     // This is the handle to the raw data of this event (simply a pointer to std::vector<raw::RawDigit>)   
     art::ValidHandle< std::vector<raw::RawDigit> > DigitVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>(fCalDataModuleLabel);
     
@@ -437,7 +442,7 @@ namespace LaserCalibration {
     // Loop over downstream laser system
     if(fLCSNumber == 2)
     {
-      // Loop over 10 wires at the edge of the TPC based on the wire map
+      // Loop over 10 collection wires at the edge of the TPC based on the wire map
       for(unsigned int WireIndex = YMap.size()-1; WireIndex >= YMap.size() - 10; WireIndex--)
       {
         // Get the raw data for this particular wire
