@@ -85,7 +85,7 @@
 #include <iterator>
 
 // Laser Module Classes
-#include "LaserBeam.h"
+#include "LaserObjects/LaserBeam.h"
 
 
 namespace {

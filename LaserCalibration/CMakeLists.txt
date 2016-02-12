@@ -1,5 +1,6 @@
 
 simple_plugin(LaserCalibration "module"
+			LaserObjects
 			Geometry_service
                         Geometry
 			RecoBaseArt
