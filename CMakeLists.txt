@@ -56,6 +56,7 @@ include(BuildPlugins)
 
 # source
 add_subdirectory(LaserCalibration)
+add_subdirectory(LaserObjects)
 
 # ups - table and config files
 add_subdirectory(ups)

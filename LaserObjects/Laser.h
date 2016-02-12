@@ -12,20 +12,20 @@ namespace lasercal
   {
     Laser();
     // Constructor using track (this includes already beam)
-    Laser(std::vector<laser::LaserTrack> Track);
+    Laser(std::vector<lasercal::LaserTrack> Track);
     // Constructor using beam and only beam is filled
-    Laser(std::vector<laser::Beam> Beam);
+    Laser(std::vector<lasercal::LaserBeam> LaserBeam);
     
-    std::vector<laser::LaserTrack> fLaserTracks;
-    std::vector<laser::Beam> fLaserBeams;
+    std::vector<lasercal::LaserTrack> fLaserTracks;
+    std::vector<lasercal::LaserBeam> fLaserBeams;
     
     // here beam and track are filled
-    void AppendTrack(laser::LaserTrack);
+    void AppendTrack(lasercal::LaserTrack);
     // only beam is filled
-    void AppendBeam(laser::Beam);
+    void AppendBeam(lasercal::LaserBeam);
     
-    laser::LaserTrack GetTrack(const unsigned long int&);
-    laser::Beam GetBeam(const unsigned long int&);
+    lasercal::LaserTrack GetTrack(const unsigned long int&);
+    lasercal::LaserBeam GetBeam(const unsigned long int&);
     
     unsigned long int GetNumberOfTracks();
     unsigned long int GetNumberOfBeams();

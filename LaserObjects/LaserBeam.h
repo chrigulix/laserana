@@ -21,8 +21,8 @@
 #include <TVector3.h>
 #include <TF1.h>
 
-#ifndef BEAM_H
-#define BEAM_H
+#ifndef LASERBEAM_H
+#define LASERBEAM_H
 
 namespace lasercal
 {

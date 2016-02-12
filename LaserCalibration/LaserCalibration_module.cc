@@ -85,7 +85,7 @@
 #include <iterator>
 
 // Laser Module Classes
-// #include "LaserBeam.h"
+#include "LaserBeam.h"
 
 
 namespace {
@@ -409,6 +409,8 @@ namespace LaserCalibration {
     std::cout << "Event Time (low): " << event.time().timeLow() << std::endl;
     std::cout << "Event Time (hig): " << event.time().timeHigh() << std::endl;
 
+    
+    lasercal::LaserBeam beam;
     
     // This is the handle to the raw data of this event (simply a pointer to std::vector<raw::RawDigit>)   
     art::ValidHandle< std::vector<raw::RawDigit> > DigitVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>(fCalDataModuleLabel);
