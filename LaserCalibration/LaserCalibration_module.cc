@@ -84,6 +84,9 @@
 #include <memory>
 #include <iterator>
 
+// Laser Module Classes
+// #include "LaserBeam.h"
+
 
 namespace {
   
@@ -421,9 +424,11 @@ namespace LaserCalibration {
     WireVec->reserve(DigitVecHandle->size());
     
     unsigned RawIndex = 1477;
+    unsigned UWireNumber = 1026;
+    unsigned VWireNumber = 196;
     
     const lariov::IDetPedestalProvider& PedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
-    TH1F* SingleWire = new TH1F("You","Fuck",DigitVecHandle->at(RawIndex).Samples(),0,DigitVecHandle->at(RawIndex).Samples()-1);
+    TH1F* SingleWire = new TH1F("You","Fuck",DigitVecHandle->at(UMap.at(UWireNumber)).Samples(),0,DigitVecHandle->at(UMap.at(UWireNumber)).Samples()-1);
     
     std::vector<short> RawADC;
     std::vector<float> RawROI;
@@ -465,10 +470,10 @@ namespace LaserCalibration {
         // Now look for hits in the ROI
 	std::vector<recob::Hit> HitVector = LaserHitFinder(WireVec->back(), CollectionThreshold, RawDigit.Channel());
 	
-	for(auto const& hit : HitVector)
-	{
-	  std::cout << "ADC count per Hit " << WireIndex << " " << hit.SummedADC() << std::endl;
-	}
+// 	for(auto const& hit : HitVector)
+// 	{
+// 	  std::cout << "ADC count per Hit " << WireIndex << " " << hit.SummedADC() << std::endl;
+// 	}
       }
     }
     
@@ -569,13 +574,13 @@ namespace LaserCalibration {
     
 //     std::cout << "WireID 3000 " << YMap.at(3000) << std::endl;
     
-    float Pedestal = PedestalRetrievalAlg.PedRms(DigitVecHandle->at(RawIndex).Channel());
-    for(unsigned samples = 0; samples < DigitVecHandle->at(RawIndex).Samples(); samples++)
-      SingleWire->SetBinContent(samples,DigitVecHandle->at(RawIndex).ADC(samples) - Pedestal);
+    float Pedestal = PedestalRetrievalAlg.PedMean(DigitVecHandle->at(UMap.at(UWireNumber)).Channel());
+    for(unsigned samples = 0; samples < DigitVecHandle->at(UMap.at(UWireNumber)).Samples(); samples++)
+      SingleWire->SetBinContent(samples,DigitVecHandle->at(UMap.at(UWireNumber)).ADC(samples) - Pedestal);
 //     for(unsigned samples = 0; samples < WireVec->at(RawIndex).NSignal(); samples++)
 //       SingleWire->SetBinContent(samples,WireVec->at(RawIndex).Signal().at(samples));
-    std::cout << "Pedestal " << PedestalRetrievalAlg.PedMean(DigitVecHandle->at(RawIndex).Channel()) << " " << PedestalRetrievalAlg.PedRms(DigitVecHandle->at(RawIndex).Channel()) << std::endl;
-    std::cout << "Errors " << PedestalRetrievalAlg.PedMeanErr(DigitVecHandle->at(RawIndex).Channel()) << " " << PedestalRetrievalAlg.PedRmsErr(DigitVecHandle->at(RawIndex).Channel()) << std::endl;
+    std::cout << "Pedestal " << PedestalRetrievalAlg.PedMean(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << " " << PedestalRetrievalAlg.PedRms(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << std::endl;
+    std::cout << "Errors " << PedestalRetrievalAlg.PedMeanErr(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << " " << PedestalRetrievalAlg.PedRmsErr(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << std::endl;
     TCanvas* C1 = new TCanvas("Fuck","You",1400,1000);
     SingleWire->Draw();
     C1 -> Print("Fuck.png","png");
