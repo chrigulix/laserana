@@ -597,7 +597,7 @@ namespace LaserCalibration {
     
     int HitEnd = -9999;
     int HitStart = - 9999;
-    int Peak = - 9999;
+    float Peak = - 9999;
     int PeakTime = -9999;
     int HitIdx = 0;
 
@@ -628,12 +628,12 @@ namespace LaserCalibration {
 	HitEnd = sample;
         Above = false;
         
-        std::cout << "Hit " << HitIdx << "\n"
-                << " Time: Start/Stop: " << HitStart << "/" << HitEnd << "\n" 
-                << " Peak: Value/Tick: " << Peak << "/" << PeakTime << std::endl;
+//         std::cout << "Hit " << HitIdx << "\n"
+//                 << " Time: Start/Stop: " << HitStart << "/" << HitEnd << "\n" 
+//                 << " Peak: Value/Tick: " << Peak << "/" << PeakTime << std::endl;
 
         LaserHits.push_back(recob::HitCreator(SingleWire, fGeometry->ChannelToWire(Channel).front(), HitStart, HitEnd, 
-			  (float) (HitStart - HitEnd), (float) (HitStart - HitEnd)/2, (float)0., (float)0., (float)0., 
+			  (float) (HitStart - HitEnd), (float) PeakTime, 0.5, Peak, sqrt(Peak), 
 			  (float)0., (float)0., (short int)1, HitIdx, (float)1., 0).move());
         HitIdx++;
       }
