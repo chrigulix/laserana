@@ -1,6 +1,6 @@
 
 simple_plugin(LaserReco "module"
-			LaserObjects
+# 			LaserObjects
 			Geometry_service
                         Geometry
 			RecoBaseArt

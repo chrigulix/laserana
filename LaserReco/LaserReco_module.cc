@@ -85,7 +85,7 @@
 #include <iterator>
 
 // Laser Module Classes
-#include "LaserObjects/LaserBeam.h"
+// #include "LaserObjects/LaserBeam.h"
 
 
 namespace {
@@ -186,9 +186,9 @@ namespace LaserReco {
     // This method is called once, at the start of the job. In this
     //  example, it will define the histograms and n-tuples we'll write.
     // Define the histograms and n-tuples
-    virtual void beginJob() /*override*/;
+    virtual void beginJob() override;
     
-    virtual void endJob() /*override*/;
+    virtual void endJob() override;
 
     // This method is called once, at the start of each run. It's a
     // good place to read databases or files that may have
@@ -199,12 +199,12 @@ namespace LaserReco {
     // method is called 'reconfigure' because it might be called in the
     // middle of a job; e.g., if the user changes parameter values in an
     // interactive event display.
-    virtual void reconfigure(fhicl::ParameterSet const& parameterSet) /*override*/;
+    virtual void reconfigure(fhicl::ParameterSet const& parameterSet) override;
 
     // The analysis routine, called once per event. 
-    virtual void produce (art::Event& event) /*override*/;
+    virtual void produce (art::Event& event) override;
     
-    std::vector<recob::Hit> LaserHitFinder(recob::Wire const& SingleWire, float const& Threshold, raw::ChannelID_t const& Channel); 
+    std::vector<recob::Hit> LaserHitFinder(recob::Wire const& SingleWire, raw::ChannelID_t const& Channel); 
 
   private:
 
@@ -213,6 +213,9 @@ namespace LaserReco {
 
     // The parameters we'll read from the .fcl file.
     bool fWireMapGenerator;               ///< Decide if you want to produce a wire map (recomended if you don't have it)
+    float fUPlaneThreshold;		  ///< U-plane threshold in ADC counts for the laser hit finder
+    float fVPlaneThreshold;		  ///< U-plane threshold in ADC counts for the laser hit finder
+    float fYPlaneThreshold;		  ///< U-plane threshold in ADC counts for the laser hit finder
     std::string fSimulationProducerLabel; ///< The name of the producer that tracked simulated particles through the detector
     std::string fHitProducerLabel;        ///< The name of the producer that created hits
     std::string fClusterProducerLabel;    ///< The name of the producer that created clusters
@@ -389,6 +392,9 @@ namespace LaserReco {
     // Read parameters from the .fcl file. The names in the arguments
     // to p.get<TYPE> must match names in the .fcl file.
     fWireMapGenerator        = parameterSet.get< bool        >("GenerateWireMap");
+    fUPlaneThreshold	     = parameterSet.get< float	     >("UPlaneHitThreshold");
+    fVPlaneThreshold	     = parameterSet.get< float	     >("VPlaneHitThreshold");
+    fYPlaneThreshold	     = parameterSet.get< float	     >("YPlaneHitThreshold");
     fSimulationProducerLabel = parameterSet.get< std::string >("SimulationLabel");
     fHitProducerLabel        = parameterSet.get< std::string >("HitLabel");
     fClusterProducerLabel    = parameterSet.get< std::string >("ClusterLabel");
@@ -410,7 +416,7 @@ namespace LaserReco {
     std::cout << "Event Time (hig): " << event.time().timeHigh() << std::endl;
 
     
-    lasercal::LaserBeam beam;
+//     lasercal::LaserBeam beam;
     
     // This is the handle to the raw data of this event (simply a pointer to std::vector<raw::RawDigit>)   
     art::ValidHandle< std::vector<raw::RawDigit> > DigitVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>(fCalDataModuleLabel);
@@ -470,7 +476,7 @@ namespace LaserReco {
 	WireVec->emplace_back(recob::WireCreator( std::move(RegionOfInterest), RawDigit ).move());
 	
         // Now look for hits in the ROI
-	std::vector<recob::Hit> HitVector = LaserHitFinder(WireVec->back(), CollectionThreshold, RawDigit.Channel());
+	std::vector<recob::Hit> HitVector = LaserHitFinder(WireVec->back(), RawDigit.Channel());
 	
 // 	for(auto const& hit : HitVector)
 // 	{
@@ -603,7 +609,7 @@ namespace LaserReco {
   } // LaserReco::analyze()
   
   //------------------------------------------------------------------------
-  std::vector<recob::Hit> LaserReco::LaserHitFinder(recob::Wire const& SingleWire, float const& Threshold, raw::ChannelID_t const& Channel)
+  std::vector<recob::Hit> LaserReco::LaserHitFinder(recob::Wire const& SingleWire, raw::ChannelID_t const& Channel)
   {
     std::vector<recob::Hit> LaserHits;
     
@@ -613,20 +619,20 @@ namespace LaserReco {
     int PeakTime = -9999;
     int HitIdx = 0;
 
-    bool Above = false;
+    bool AboveThreshold = false;
  
     auto Signal = SingleWire.Signal();
 
     // loop over wire
     for(unsigned int sample = 0; sample < Signal.size(); sample++ )
     {
-      if( Signal.at(sample) >= Threshold)
+      if( Signal.at(sample) >= fYPlaneThreshold)
       {
         // If we go over the threshold the first time, save the time tick
-        if (!Above)
+        if (!AboveThreshold)
         {
           HitStart = sample;
-          Above = true;
+          AboveThreshold = true;
           Peak = Signal.at(sample);
         }
         if (Signal.at(sample) > Peak) 
@@ -635,14 +641,10 @@ namespace LaserReco {
           PeakTime = sample;
         }
       }
-      else if( Above && Signal.at(sample) < Threshold )
+      else if( AboveThreshold && Signal.at(sample) < fYPlaneThreshold )
       {
 	HitEnd = sample;
-        Above = false;
-        
-//         std::cout << "Hit " << HitIdx << "\n"
-//                 << " Time: Start/Stop: " << HitStart << "/" << HitEnd << "\n" 
-//                 << " Peak: Value/Tick: " << Peak << "/" << PeakTime << std::endl;
+        AboveThreshold = false;
 
         LaserHits.push_back(recob::HitCreator(SingleWire, fGeometry->ChannelToWire(Channel).front(), HitStart, HitEnd, 
 			  (float) (HitStart - HitEnd), (float) PeakTime, 0.5, Peak, sqrt(Peak), 
