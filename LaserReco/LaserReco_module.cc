@@ -77,6 +77,7 @@
 // C++ Includes
 #include <map>
 #include <vector>
+#include <array>
 #include <string>
 #include <cmath>
 #include <typeinfo>
@@ -204,7 +205,9 @@ namespace LaserReco {
     // The analysis routine, called once per event. 
     virtual void produce (art::Event& event) override;
     
-    std::vector<recob::Hit> LaserHitFinder(recob::Wire const& SingleWire, raw::ChannelID_t const& Channel); 
+    std::vector<recob::Hit> LaserHitFinder(recob::Wire const& SingleWire, raw::ChannelID_t const& Channel);
+    
+    std::vector<recob::Hit> UPlaneHitFinder(recob::Wire const& SingleWire, raw::ChannelID_t const& Channel);
 
   private:
 
@@ -214,8 +217,9 @@ namespace LaserReco {
     // The parameters we'll read from the .fcl file.
     bool fWireMapGenerator;               ///< Decide if you want to produce a wire map (recomended if you don't have it)
     float fUPlaneThreshold;		  ///< U-plane threshold in ADC counts for the laser hit finder
-    float fVPlaneThreshold;		  ///< U-plane threshold in ADC counts for the laser hit finder
-    float fYPlaneThreshold;		  ///< U-plane threshold in ADC counts for the laser hit finder
+    float fVPlaneThreshold;		  ///< V-plane threshold in ADC counts for the laser hit finder
+    float fYPlaneThreshold;		  ///< Y-plane threshold in ADC counts for the laser hit finder
+    //std::array<float,3> fUVYThresholds;	  ///< U,V,Y-plane threshold in ADC counts for the laser hit finder
     std::string fSimulationProducerLabel; ///< The name of the producer that tracked simulated particles through the detector
     std::string fHitProducerLabel;        ///< The name of the producer that created hits
     std::string fClusterProducerLabel;    ///< The name of the producer that created clusters
@@ -283,6 +287,12 @@ namespace LaserReco {
     
     unsigned short fLCSNumber;
     
+    // Threshold array
+    std::array<float,3> fUVYThresholds;
+    
+    // Collection Hits Analysis
+    TH2F* CollectionHits;
+    
   }; // class LaserReco
   
   DEFINE_ART_MODULE(LaserReco)
@@ -303,7 +313,8 @@ namespace LaserReco {
     // Read in the parameters from the .fcl file.
     this->reconfigure(pset);
     
-    produces< std::vector<recob::Wire> >("blibla");
+//     produces< std::vector<recob::Wire> >("blibla");
+//     produces< std::vector<recob::Hit> >("LaserHits");
   }
 
   
@@ -335,8 +346,14 @@ namespace LaserReco {
       delete pYMap;
     }
     
+    // TODO: Temporary
+    CollectionHits = new TH2F("Width vs. Amplitude","Width vs. Amplitude",500,0,500,1000,0,1000);
+    
     // TODO: Change later
     fLCSNumber = 2;
+    
+    // Fill threshold
+    fUVYThresholds = {fUPlaneThreshold, fVPlaneThreshold, fYPlaneThreshold};
 
     // Access ART's TFileService, which will handle creating and writing
     // histograms and n-tuples for us. 
@@ -352,6 +369,15 @@ namespace LaserReco {
   
   void  LaserReco::endJob()
   {
+    TFile* OFile = new TFile("HitHist.root", "RECREATE");
+    CollectionHits->Write();
+    
+    TCanvas* C2 = new TCanvas("Hits","You",1400,1000);
+    CollectionHits->Draw();
+    C2 -> Print("Hits.png","png");
+    delete C2;
+//     delete CollectionHits;
+    
     if(fWireMapGenerator)
     {
       TFile* OutputFile = new TFile(fFileName.c_str(), "RECREATE");
@@ -391,29 +417,30 @@ namespace LaserReco {
   {
     // Read parameters from the .fcl file. The names in the arguments
     // to p.get<TYPE> must match names in the .fcl file.
-    fWireMapGenerator        = parameterSet.get< bool        >("GenerateWireMap");
-    fUPlaneThreshold	     = parameterSet.get< float	     >("UPlaneHitThreshold");
-    fVPlaneThreshold	     = parameterSet.get< float	     >("VPlaneHitThreshold");
-    fYPlaneThreshold	     = parameterSet.get< float	     >("YPlaneHitThreshold");
-    fSimulationProducerLabel = parameterSet.get< std::string >("SimulationLabel");
-    fHitProducerLabel        = parameterSet.get< std::string >("HitLabel");
-    fClusterProducerLabel    = parameterSet.get< std::string >("ClusterLabel");
-    fSelectedPDG             = parameterSet.get< int         >("PDGcode");
-    fBinSize                 = parameterSet.get< double      >("BinSize");
-    fCalDataModuleLabel      = parameterSet.get<art::InputTag>("CalDataModuleLabel");
+    fWireMapGenerator        = parameterSet.get< bool        	     >("GenerateWireMap");
+    fUPlaneThreshold	     = parameterSet.get< float        	     >("UPlaneHitThreshold");
+    fVPlaneThreshold	     = parameterSet.get< float        	     >("VPlaneHitThreshold");
+    fYPlaneThreshold	     = parameterSet.get< float        	     >("YPlaneHitThreshold");
+//     fUVYThresholds	     = parameterSet.get< std::array<float,3> >("UVYHitThresholds");
+    fSimulationProducerLabel = parameterSet.get< std::string 	     >("SimulationLabel");
+    fHitProducerLabel        = parameterSet.get< std::string 	     >("HitLabel");
+    fClusterProducerLabel    = parameterSet.get< std::string 	     >("ClusterLabel");
+    fSelectedPDG             = parameterSet.get< int         	     >("PDGcode");
+    fBinSize                 = parameterSet.get< double      	     >("BinSize");
+    fCalDataModuleLabel      = parameterSet.get< art::InputTag	     >("CalDataModuleLabel");
   }
 
   //-----------------------------------------------------------------------
   void LaserReco::produce(art::Event& event) 
   {
     // Start by fetching some basic event information for our n-tuple.
-    fEvent  = event.id().event(); 
-    fRun    = event.run();
-    fSubRun = event.subRun();
+//     fEvent  = event.id().event(); 
+//     fRun    = event.run();
+//     fSubRun = event.subRun();
     
-    std::cout << "Event ID: " << fEvent << std::endl;
-    std::cout << "Event Time (low): " << event.time().timeLow() << std::endl;
-    std::cout << "Event Time (hig): " << event.time().timeHigh() << std::endl;
+//     std::cout << "Event ID: " << fEvent << std::endl;
+//     std::cout << "Event Time (low): " << event.time().timeLow() << std::endl;
+//     std::cout << "Event Time (hig): " << event.time().timeHigh() << std::endl;
 
     
 //     lasercal::LaserBeam beam;
@@ -422,7 +449,11 @@ namespace LaserReco {
     art::ValidHandle< std::vector<raw::RawDigit> > DigitVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>(fCalDataModuleLabel);
     
     // Prepairing the wire signal vector. It will be just the raw signal with subtracted pedestial
-    std::unique_ptr< std::vector<recob::Wire> > WireVec(new std::vector<recob::Wire>); 
+    std::unique_ptr< std::vector<recob::Wire> > WireVec(new std::vector<recob::Wire>);
+    
+    // Prepairing the hit vector
+    std::unique_ptr< std::vector<recob::Hit> > HitVec(new std::vector<recob::Hit>);
+    
 //     std::vector<recob::Wire> WireVec;
     
     // Preparing WireID vector
@@ -436,7 +467,7 @@ namespace LaserReco {
     unsigned VWireNumber = 196;
     
     const lariov::IDetPedestalProvider& PedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
-    TH1F* SingleWire = new TH1F("You","Fuck",DigitVecHandle->at(UMap.at(UWireNumber)).Samples(),0,DigitVecHandle->at(UMap.at(UWireNumber)).Samples()-1);
+//     TH1F* SingleWire = new TH1F("You","Fuck",DigitVecHandle->at(UMap.at(UWireNumber)).Samples(),0,DigitVecHandle->at(UMap.at(UWireNumber)).Samples()-1);
     
     std::vector<short> RawADC;
     std::vector<float> RawROI;
@@ -453,37 +484,39 @@ namespace LaserReco {
     recob::Wire::RegionsOfInterest_t RegionOfInterest;
     
     // Loop over downstream laser system
-    if(fLCSNumber == 2)
-    {
+//     if(fLCSNumber == 2)
+//     {
       // Loop over 10 collection wires at the edge of the TPC based on the wire map
-      for(unsigned int WireIndex = YMap.size()-1; WireIndex >= YMap.size() - 10; WireIndex--)
-      {
+//       for(unsigned int WireIndex = YMap.size()-1; WireIndex >= YMap.size() - 10; WireIndex--)
+//       {
         // Get the raw data for this particular wire
-        auto RawDigit = DigitVecHandle->at(YMap.at(WireIndex));
-	raw::Uncompress(RawDigit.ADCs(), RawADC, RawDigit.Compression());
+//         auto RawDigit = DigitVecHandle->at(YMap.at(WireIndex));
+// 	raw::Uncompress(RawDigit.ADCs(), RawADC, RawDigit.Compression());
         
-        // copy only the region of interest into the the RawROI vector
-	std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI, RawROI.begin());
+        // copy only the region of interest into the the RawROI vector TODO Watch commented stuff
+// 	std::copy(RawADC.begin()/*+StartROI*/, RawADC.begin()/*+EndROI*/, RawROI.begin());
 
         // Subtract pedestal from samples in ROI
-	for(auto & RawSample : RawROI)
-	{
-	  RawSample -= PedestalRetrievalAlg.PedMean(RawDigit.Channel());
-	}
+// 	for(auto & RawSample : RawROI)
+// 	{
+// 	  RawSample -= PedestalRetrievalAlg.PedMean(RawDigit.Channel());
+// 	}
 	
         // Create a wire from the selected ROI (1. copy raw into ROI container, 2. copy the ROI vector into a wire container)
-        RegionOfInterest.add_range(StartROI,RawROI.begin(),RawROI.end());
-	WireVec->emplace_back(recob::WireCreator( std::move(RegionOfInterest), RawDigit ).move());
+//         RegionOfInterest.add_range(StartROI,RawROI.begin(),RawROI.end());
+// 	WireVec->emplace_back(recob::WireCreator( std::move(RegionOfInterest), RawDigit ).move());
 	
         // Now look for hits in the ROI
-	std::vector<recob::Hit> HitVector = LaserHitFinder(WireVec->back(), RawDigit.Channel());
+// 	std::vector<recob::Hit> HitVector = LaserHitFinder(WireVec->back(), RawDigit.Channel());
 	
 // 	for(auto const& hit : HitVector)
 // 	{
 // 	  std::cout << "ADC count per Hit " << WireIndex << " " << hit.SummedADC() << std::endl;
 // 	}
-      }
-    }
+//       }      
+//     }
+    
+//     WireVec->clear();
     
 //     for(size_t rdIter = 0; rdIter < DigitVecHandle->size(); ++rdIter)
 
@@ -540,6 +573,10 @@ namespace LaserReco {
 //       std::cout << "Fuuuuuck" << std::endl;
       if(fGeometry->ChannelToWire(channel).front().Plane == 2) // If wire plane is Y-plane
       {
+	std::vector<recob::Hit> YPlaneHits = LaserHitFinder(WireVec->back(), RawDigit.Channel());
+	
+	HitVec->insert(HitVec->end(), YPlaneHits.begin(), YPlaneHits.end());
+	
 	if(fWireMapGenerator) YMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
       }
       else if(fGeometry->ChannelToWire(channel).front().Plane == 1) // If wire plane is V-plane
@@ -548,6 +585,10 @@ namespace LaserReco {
       }
       else if(fGeometry->ChannelToWire(channel).front().Plane == 0) // If wire plane is U-plane 
       {
+	std::vector<recob::Hit> UPlaneHits = UPlaneHitFinder(WireVec->back(), RawDigit.Channel());
+	
+	HitVec->insert(HitVec->end(), UPlaneHits.begin(), UPlaneHits.end());
+	
 	if(fWireMapGenerator) UMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
       }
       
@@ -582,19 +623,20 @@ namespace LaserReco {
     
 //     std::cout << "WireID 3000 " << YMap.at(3000) << std::endl;
     
-    float Pedestal = PedestalRetrievalAlg.PedMean(DigitVecHandle->at(UMap.at(UWireNumber)).Channel());
-    for(unsigned samples = 0; samples < DigitVecHandle->at(UMap.at(UWireNumber)).Samples(); samples++)
-      SingleWire->SetBinContent(samples,DigitVecHandle->at(UMap.at(UWireNumber)).ADC(samples) - Pedestal);
+//     float Pedestal = PedestalRetrievalAlg.PedMean(DigitVecHandle->at(UMap.at(UWireNumber)).Channel());
+//     for(unsigned samples = 0; samples < DigitVecHandle->at(UMap.at(UWireNumber)).Samples(); samples++)
+//       SingleWire->SetBinContent(samples,DigitVecHandle->at(UMap.at(UWireNumber)).ADC(samples) - Pedestal);
 //     for(unsigned samples = 0; samples < WireVec->at(RawIndex).NSignal(); samples++)
 //       SingleWire->SetBinContent(samples,WireVec->at(RawIndex).Signal().at(samples));
-    std::cout << "Pedestal " << PedestalRetrievalAlg.PedMean(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << " " << PedestalRetrievalAlg.PedRms(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << std::endl;
-    std::cout << "Errors " << PedestalRetrievalAlg.PedMeanErr(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << " " << PedestalRetrievalAlg.PedRmsErr(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << std::endl;
-    TCanvas* C1 = new TCanvas("Fuck","You",1400,1000);
-    SingleWire->Draw();
-    C1 -> Print("Fuck.png","png");
-    delete SingleWire;
-    delete C1;
-    event.put(std::move(WireVec), "blibla");
+//     std::cout << "Pedestal " << PedestalRetrievalAlg.PedMean(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << " " << PedestalRetrievalAlg.PedRms(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << std::endl;
+//     std::cout << "Errors " << PedestalRetrievalAlg.PedMeanErr(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << " " << PedestalRetrievalAlg.PedRmsErr(DigitVecHandle->at(UMap.at(UWireNumber)).Channel()) << std::endl;
+//     TCanvas* C1 = new TCanvas("Fuck","You",1400,1000);
+//     SingleWire->Draw();
+//     C1 -> Print("Fuck.png","png");
+//     delete SingleWire;
+//     delete C1;
+//     event.put(std::move(WireVec), "blibla");
+//     event.put(std::move(HitVec), "LaserHits");
     
 //     auto const& theWire = Wires[5];
     
@@ -641,10 +683,65 @@ namespace LaserReco {
           PeakTime = sample;
         }
       }
-      else if( AboveThreshold && Signal.at(sample) < fYPlaneThreshold )
+      else if( AboveThreshold && Signal.at(sample) < fYPlaneThreshold)
       {
 	HitEnd = sample;
         AboveThreshold = false;
+	
+	if(HitEnd-HitStart > 10.) CollectionHits->Fill(HitEnd-HitStart, Peak);
+// 	std::cout << HitEnd - HitStart << " " << Peak << std::endl;
+
+        LaserHits.push_back(recob::HitCreator(SingleWire, fGeometry->ChannelToWire(Channel).front(), HitStart, HitEnd, 
+			  (float) (HitStart - HitEnd)/2, (float) PeakTime, 0.5, Peak, sqrt(Peak), 
+			  (float)0., (float)0., (short int)1, HitIdx, (float)1., 0).move());
+        HitIdx++;
+      }
+    }
+        
+    return LaserHits;
+  }
+  
+  // U-Plane hit finder
+  std::vector<recob::Hit> LaserReco::UPlaneHitFinder(recob::Wire const& SingleWire, raw::ChannelID_t const& Channel)
+  {
+    std::vector<recob::Hit> LaserHits;
+    
+    int HitEnd = -9999;
+    int HitStart = - 9999;
+    float Peak = - 9999;
+    int PeakTime = -9999;
+    int HitIdx = 0;
+
+    bool BelowThreshold = false;
+ 
+    auto Signal = SingleWire.Signal();
+
+    // loop over wire
+    for(unsigned int sample = 0; sample < Signal.size(); sample++ )
+    {
+      if( Signal.at(sample) <= fUPlaneThreshold)
+      {
+        // If we go over the threshold the first time, save the time tick
+        if (!BelowThreshold)
+        {
+          HitStart = sample;
+          BelowThreshold = true;
+          Peak = Signal.at(sample);
+        }
+        if (Signal.at(sample) < Peak) 
+        {
+          Peak = Signal.at(sample);
+          PeakTime = sample;
+        }
+      }
+      else if( BelowThreshold && Signal.at(sample) > fUPlaneThreshold)
+      {
+	HitEnd = sample;
+        BelowThreshold = false;
+	
+//         std::cout << "Hit " << HitIdx << "\n"
+//                   << " Time: Start/Stop: " << HitStart << "/" << HitEnd << "\n" 
+//                   << " Peak: Value/Tick: " << Peak << "/" << PeakTime << std::endl;
 
         LaserHits.push_back(recob::HitCreator(SingleWire, fGeometry->ChannelToWire(Channel).front(), HitStart, HitEnd, 
 			  (float) (HitStart - HitEnd), (float) PeakTime, 0.5, Peak, sqrt(Peak), 
