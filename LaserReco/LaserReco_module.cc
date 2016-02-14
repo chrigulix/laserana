@@ -291,7 +291,7 @@ namespace LaserReco {
     std::array<float,3> fUVYThresholds;
     
     // Collection Hits Analysis
-    TH2F* CollectionHits;
+    TH2D* CollectionHits;
     
   }; // class LaserReco
   
@@ -347,7 +347,7 @@ namespace LaserReco {
     }
     
     // TODO: Temporary
-    CollectionHits = new TH2F("Width vs. Amplitude","Width vs. Amplitude",500,0,500,1000,0,1000);
+    CollectionHits = new TH2D("Width vs. Amplitude","Width vs. Amplitude",3000,0,3000,16000,0,16000);
     
     // TODO: Change later
     fLCSNumber = 2;
