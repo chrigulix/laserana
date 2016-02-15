@@ -51,7 +51,7 @@ physics:
       module_type:         "LaserReco"
       GenerateWireMap:     false
       UPlaneHitThreshold:  -10.0
-      VPlaneHitThreshold:  -10.0
+      VPlaneHitThreshold:  10.0
       YPlaneHitThreshold:  10.0
       SimulationLabel: 	   "largeant"
       HitLabel:            "gaushit"
