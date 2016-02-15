@@ -102,7 +102,14 @@ namespace LaserDataMerger {
     virtual void produce (art::Event& event) /*override*/;
     
   private:
-
+    
+    // All this goes into the root tree
+    TTree* fTimeAnalysis;
+    int fEvent;
+    int time_s;
+    int time_ms;
+    
+    
     unsigned short fLCSNumber;            ///< Laser Calibration System identifier ()
  
   }; // class LaserDataMerger
@@ -130,6 +137,11 @@ namespace LaserDataMerger {
   //-----------------------------------------------------------------------
   void LaserDataMerger::beginJob()
   {
+    art::ServiceHandle<art::TFileService> tfs;
+    fTimeAnalysis = tfs->make<TTree>("TimeAnalysis", "TimeAnalysis");
+    fTimeAnalysis->Branch("event",     &fEvent,      "Event ID");
+    fTimeAnalysis->Branch("time_s",    &time_s,      "Unix Time");
+    fTimeAnalysis->Branch("time_ms",   &time_ms,      "Time in ms");
   }
   
   
@@ -151,12 +163,15 @@ namespace LaserDataMerger {
   //-----------------------------------------------------------------------
   void LaserDataMerger::produce(art::Event& event) 
   {
-    int time_s = event.time().timeHigh();
-    int time_ms = event.time().timeLow();
-    std::cout << "Event ID: " << fEvent << std::endl;
-    std::cout << "Event Time (low): " << event.time().timeLow() << std::endl;
-    std::cout << "Event Time (hig): " << event.time().timeHigh() << std::endl;
-        
+    fEvent = event.id().event();
+    time_s = event.time().timeHigh();
+    time_ms = event.time().timeLow();
+//    std::cout << "Event ID: " << fEvent << std::endl;
+//    std::cout << "Time (low): " << event.time().value() << std::endl;
+//    std::cout << "Event Time (low): " << event.time().timeLow() << std::endl;
+//    std::cout << "Event Time (hig): " << event.time().timeHigh() << std::endl;
+    
+    fTimeAnalysis->Fill();
   } // LaserDataMerger::analyze()
 
 } // namespace LaserDataMerger

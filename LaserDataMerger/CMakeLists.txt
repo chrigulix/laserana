@@ -24,5 +24,4 @@ simple_plugin(LaserDataMerger "module"
 
 install_headers()
 install_fhicl()
-install_source( EXTRAS ADDITIONAL_NOTES.txt README.txt )
 install_scripts()
