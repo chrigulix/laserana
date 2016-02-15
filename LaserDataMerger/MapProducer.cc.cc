@@ -102,9 +102,23 @@ namespace LaserDataMerger {
     virtual void produce (art::Event& event) /*override*/;
     
   private:
-
+    
+    // ficl parameters
+    art::InputTag fCalDataModuleLabel;    ///< Label which tells us what to load
+    bool fWireMapGenerator;               ///< Decide if you want to produce a wire map (recomended if you don't have it)
     unsigned short fLCSNumber;            ///< Laser Calibration System identifier ()
- 
+    /// @}
+
+    // Other variables that will be shared between different methods.
+    geo::GeometryCore const* fGeometry;       ///< pointer to Geometry provider
+     
+    std::string fFileName = "WireIndexMap.root";
+    
+    std::map<unsigned int, unsigned int> UMap;
+    std::map<unsigned int, unsigned int> VMap;
+    std::map<unsigned int, unsigned int> YMap;
+    
+    
   }; // class LaserDataMerger
   
   DEFINE_ART_MODULE(LaserDataMerger)
@@ -119,24 +133,57 @@ namespace LaserDataMerger {
   LaserDataMerger::LaserDataMerger(fhicl::ParameterSet const& pset)
 //     : EDProducer()
   {
-
+    // get a pointer to the geometry service provider
+    fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+    
     // Read in the parameters from the .fcl file.
     this->reconfigure(pset);
     
-    //produces< std::vector<recob::Wire> >("blibla");
+    produces< std::vector<recob::Wire> >("blibla");
   }
 
   
   //-----------------------------------------------------------------------
   void LaserDataMerger::beginJob()
   {
+    
+    if(!fWireMapGenerator)
+    {
+      TFile* InputFile = new TFile(fFileName.c_str(), "READ");
+      
+      std::map<unsigned int, unsigned int>* pUMap;
+      std::map<unsigned int, unsigned int>* pVMap;
+      std::map<unsigned int, unsigned int>* pYMap;
+      
+      InputFile->GetObject("UMap",pUMap);
+      InputFile->GetObject("VMap",pVMap);
+      InputFile->GetObject("YMap",pYMap);
+      
+      UMap = *pUMap;
+      VMap = *pVMap;
+      YMap = *pYMap;
+      
+      delete pUMap;
+      delete pVMap;
+      delete pYMap;
+    }
+    
+    // TODO: Change later
+    fLCSNumber = 2; 
   }
   
   
   
   void  LaserDataMerger::endJob()
   {
-      
+    if(fWireMapGenerator)
+    {
+      TFile* OutputFile = new TFile(fFileName.c_str(), "RECREATE");
+    
+      OutputFile->WriteObject(&UMap,"UMap");
+      OutputFile->WriteObject(&VMap,"VMap");
+      OutputFile->WriteObject(&YMap,"YMap");
+    }
   }
    
  
@@ -145,19 +192,47 @@ namespace LaserDataMerger {
     // Read parameters from the .fcl file. The names in the arguments
     // to p.get<TYPE> must match names in the .fcl file.
     
-    //fLaserSystemFile        = parameterSet.get< bool        >("LaserSystemFile");
+    fWireMapGenerator        = parameterSet.get< bool        >("GenerateWireMap");
+    fCalDataModuleLabel      = parameterSet.get<art::InputTag>("CalDataModuleLabel");
   }
 
   //-----------------------------------------------------------------------
   void LaserDataMerger::produce(art::Event& event) 
   {
-    int time_s = event.time().timeHigh();
-    int time_ms = event.time().timeLow();
-    std::cout << "Event ID: " << fEvent << std::endl;
-    std::cout << "Event Time (low): " << event.time().timeLow() << std::endl;
-    std::cout << "Event Time (hig): " << event.time().timeHigh() << std::endl;
+
+       // This is the handle to the raw data of this event (simply a pointer to std::vector<raw::RawDigit>)   
+    art::ValidHandle< std::vector<raw::RawDigit> > DigitVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>(fCalDataModuleLabel);
+    
+        TH1F* SingleWire = new TH1F("You","Fuck",DigitVecHandle->at(UMap.at(UWireNumber)).Samples(),0,DigitVecHandle->at(UMap.at(UWireNumber)).Samples()-1);
+        
+    unsigned int Index = 0;
+    // Loop over all physical readout channels
+    for(auto const & RawDigit : *DigitVecHandle)
+    {
+      raw::ChannelID_t channel = RawDigit.Channel();
+      
+      // Create a Wire object with the raw signal
+      
+      if(fGeometry->ChannelToWire(channel).front().Plane == 2) // If wire plane is Y-plane
+      {
+	if(fWireMapGenerator) YMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
+      }
+      else if(fGeometry->ChannelToWire(channel).front().Plane == 1) // If wire plane is V-plane
+      {
+	if(fWireMapGenerator) VMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
+      }
+      else if(fGeometry->ChannelToWire(channel).front().Plane == 0) // If wire plane is U-plane 
+      {
+	if(fWireMapGenerator) UMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
+      }
+      Index++;
+    }
         
   } // LaserDataMerger::analyze()
+  
+  //------------------------------------------------------------------------  
+  // This macro has to be defined for this module to be invoked from a
+  // .fcl file; see LaserDataMerger.fcl for more information.
 
 } // namespace LaserDataMerger
 
