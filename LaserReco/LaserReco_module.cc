@@ -262,7 +262,9 @@ namespace LaserReco {
     this->reconfigure(pset);
     
 //     produces< std::vector<recob::Wire> >("blibla");
-    produces< std::vector<recob::Hit> >("LaserHits");
+    produces< std::vector<recob::Hit> >("UPlaneLaserHits");
+    produces< std::vector<recob::Hit> >("VPlaneLaserHits");
+    produces< std::vector<recob::Hit> >("YPlaneLaserHits");
   }
 
   
@@ -295,7 +297,7 @@ namespace LaserReco {
     }
     
     // TODO: Temporary
-    CollectionHits = new TH2D("Width vs. Amplitude","Width vs. Amplitude",1000,0,1000,3500,0,3500);
+    CollectionHits = new TH2D("PeakDist vs.HitWidth","PeakDist vs. HitWidth",1000,0,1000,1000,0,1000);
     
     // TODO: Change later
     fLCSNumber = 2;
@@ -320,10 +322,10 @@ namespace LaserReco {
     TFile* OFile = new TFile("HitHist.root", "RECREATE");
     CollectionHits->Write();
     
-    TCanvas* C2 = new TCanvas("Hits","You",1400,1000);
-    CollectionHits->Draw();
-    C2 -> Print("Hits.png","png");
-    delete C2;
+//     TCanvas* C2 = new TCanvas("Hits","You",1400,1000);
+//     CollectionHits->Draw();
+//     C2 -> Print("Hits.png","png");
+//     delete C2;
 //     delete CollectionHits;
     
     if(fWireMapGenerator)
@@ -382,8 +384,10 @@ namespace LaserReco {
     // Prepairing the wire signal vector. It will be just the raw signal with subtracted pedestial
     std::unique_ptr< std::vector<recob::Wire> > WireVec(new std::vector<recob::Wire>);
     
-    // Prepairing the hit vector
-    std::unique_ptr< std::vector<recob::Hit> > HitVec(new std::vector<recob::Hit>);
+    // Prepairing the hit vectors for all planes
+    std::unique_ptr< std::vector<recob::Hit> > UHitVec(new std::vector<recob::Hit>);
+    std::unique_ptr< std::vector<recob::Hit> > VHitVec(new std::vector<recob::Hit>);
+    std::unique_ptr< std::vector<recob::Hit> > YHitVec(new std::vector<recob::Hit>);
     
     // Preparing WireID vector
     std::vector<geo::WireID> WireIDs;
@@ -450,7 +454,8 @@ namespace LaserReco {
 //     for(size_t rdIter = 0; rdIter < DigitVecHandle->size(); ++rdIter)
 
     unsigned int Index = 0;
-    // Loop over all physical readout channels
+    
+    // Loop over all raw digit entries
     for(auto const & RawDigit : *DigitVecHandle)
     {
 //       art::Ptr<raw::RawDigit> RawDigit(DigitVecHandle, rdIter);
@@ -504,7 +509,7 @@ namespace LaserReco {
       {
 	std::vector<recob::Hit> YPlaneHits = LaserHitFinder(WireVec->back(), RawDigit.Channel());
 	
-	HitVec->insert(HitVec->end(), YPlaneHits.begin(), YPlaneHits.end());
+	YHitVec->insert(YHitVec->end(), YPlaneHits.begin(), YPlaneHits.end());
 	
 	if(fWireMapGenerator) YMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
       }
@@ -512,7 +517,7 @@ namespace LaserReco {
       {
 	std::vector<recob::Hit> VPlaneHits = VPlaneHitFinder(WireVec->back(), RawDigit.Channel());
 	
-	HitVec->insert(HitVec->end(), VPlaneHits.begin(), VPlaneHits.end());
+	VHitVec->insert(VHitVec->end(), VPlaneHits.begin(), VPlaneHits.end());
 	
 	if(fWireMapGenerator) VMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
       }
@@ -520,14 +525,14 @@ namespace LaserReco {
       {
 	std::vector<recob::Hit> UPlaneHits = UPlaneHitFinder(WireVec->back(), RawDigit.Channel());
 	
-	HitVec->insert(HitVec->end(), UPlaneHits.begin(), UPlaneHits.end());
+	UHitVec->insert(UHitVec->end(), UPlaneHits.begin(), UPlaneHits.end());
 	
 	if(fWireMapGenerator) UMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
       }
       
       Index++;
       
-    }
+    } // end loop over raw digit entries
     
     
 //     float Pedestal = PedestalRetrievalAlg.PedMean(DigitVecHandle->at(UMap.at(UWireNumber)).Channel());
@@ -543,16 +548,12 @@ namespace LaserReco {
 //     delete SingleWire;
 //     delete C1;
 //     event.put(std::move(WireVec), "blibla");
-    event.put(std::move(HitVec), "LaserHits");
     
-//     auto const& theWire = Wires[5];
     
-//     raw::ChannelID_t theChannel = theWire.Channel();
-//     std::vector<geo::WireID> wids = fGeometry->ChannelToWire(theChannel);
-//     unsigned short thePlane = wids[0].Plane;
-//     unsigned short theWireNum = wids[0].Wire;
-
-
+    // Fill Hits of all planes into the new
+    event.put(std::move(UHitVec), "UPlaneLaserHits");
+    event.put(std::move(VHitVec), "VPlaneLaserHits");
+    event.put(std::move(YHitVec), "YPlaneLaserHits");
   } // LaserReco::analyze()
   
   //------------------------------------------------------------------------
@@ -708,7 +709,6 @@ namespace LaserReco {
       {
 	if (!BelowThreshold)
         {
-          HitStart = sample;
           BelowThreshold = true;
           Dip = Signal.at(sample);
 	  DipTime = sample;
@@ -725,10 +725,10 @@ namespace LaserReco {
         BelowThreshold = false;
 	Handover_flag = false;
 	
-	CollectionHits->Fill(DipTime-PeakTime, Peak);
+	CollectionHits->Fill(DipTime-PeakTime, HitEnd-HitStart);
 
         LaserHits.push_back(recob::HitCreator(SingleWire, fGeometry->ChannelToWire(Channel).front(), HitStart, HitEnd, 
-			  (float) (HitEnd - HitStart)/2, (float) PeakTime, 0.5, Peak, sqrt(Peak), 
+			  (float) (DipTime - PeakTime)/2, (float) (PeakTime + (DipTime-PeakTime)/2), 0.5, Peak - Dip, sqrt(Peak-Dip), 
 			  (float)0., (float)0., (short int)1, HitIdx, (float)1., 0).move());
         HitIdx++;
       }
