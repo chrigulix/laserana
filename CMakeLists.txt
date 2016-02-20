@@ -59,6 +59,7 @@ add_subdirectory(LaserCalibration)
 add_subdirectory(LaserObjects)
 add_subdirectory(LaserReco)
 add_subdirectory(LaserDataMerger)
+add_subdirectory(HitAna)
 
 # ups - table and config files
 add_subdirectory(ups)

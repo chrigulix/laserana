@@ -100,8 +100,6 @@ namespace {
   
   // We will define this function at the end, but we at least declare it here
   // so that the module can freely use it.
-  /// Utility function to get the diagonal of the detector
-  float DetectorDiagonal(geo::GeometryCore const& geom);
   
 } // local namespace
 
@@ -253,7 +251,6 @@ namespace LaserReco {
   //-----------------------------------------------------------------------
   // Constructor
   LaserReco::LaserReco(fhicl::ParameterSet const& pset)
-//     : EDProducer()
   {
     // get a pointer to the geometry service provider
     fGeometry = &*(art::ServiceHandle<geo::Geometry>());
@@ -262,9 +259,9 @@ namespace LaserReco {
     this->reconfigure(pset);
     
 //     produces< std::vector<recob::Wire> >("blibla");
-    produces< std::vector<recob::Hit> >("UPlaneLaserHits");
+//     produces< std::vector<recob::Hit> >("UPlaneLaserHits");
     produces< std::vector<recob::Hit> >("VPlaneLaserHits");
-    produces< std::vector<recob::Hit> >("YPlaneLaserHits");
+//     produces< std::vector<recob::Hit> >("YPlaneLaserHits");
   }
 
   
@@ -273,7 +270,6 @@ namespace LaserReco {
   {
     // Get the detector length, to determine the maximum bin edge of one
     // of the histograms.
-    const double detectorLength = DetectorDiagonal(*fGeometry);
     
     if(!fWireMapGenerator)
     {
@@ -551,9 +547,9 @@ namespace LaserReco {
     
     
     // Fill Hits of all planes into the new
-    event.put(std::move(UHitVec), "UPlaneLaserHits");
+//     event.put(std::move(UHitVec), "UPlaneLaserHits");
     event.put(std::move(VHitVec), "VPlaneLaserHits");
-    event.put(std::move(YHitVec), "YPlaneLaserHits");
+//     event.put(std::move(YHitVec), "YPlaneLaserHits");
   } // LaserReco::analyze()
   
   //------------------------------------------------------------------------
@@ -744,18 +740,5 @@ namespace LaserReco {
   // .fcl file; see LaserReco.fcl for more information.
 
 } // namespace LaserReco
-
-
-namespace {
-  // time to define that function...
-  float DetectorDiagonal(geo::GeometryCore const& geom) {
-    const double length = geom.DetLength();
-    const double width = 2. * geom.DetHalfWidth();
-    const double height = 2. * geom.DetHalfHeight();
-    
-    return std::sqrt(length*length + width*width + height*height);
-  } // DetectorDiagonal()
-} // local namespace
-
 
 #endif // LaserReco_Module
