@@ -571,6 +571,7 @@ namespace LaserReco {
           HitStart = sample;
           AboveThreshold = true;
           Peak = Signal.at(sample);
+	  PeakTime = sample;
         }
         if (Signal.at(sample) > Peak) 
         {
@@ -622,6 +623,7 @@ namespace LaserReco {
           HitStart = sample;
           BelowThreshold = true;
           Peak = Signal.at(sample);
+	  PeakTime = sample;
         }
         if (Signal.at(sample) < Peak) 
         {

@@ -299,11 +299,6 @@ namespace HitAna {
   
   void  HitAna::endJob()
   {
-    std::cout << fUHitWidthVsPeak->GetBinContent(0,50) << std::endl;
-    std::cout << fUHitWidthVsPeak->GetBinContent(1001,50)<< std::endl;
-    
-    std::cout << fUHitWidthVsPeak->GetBinContent(20,0) << std::endl;
-    std::cout << fUHitWidthVsPeak->GetBinContent(20,3501) << std::endl;
 //     TFile* OFile = new TFile("HitHist.root", "RECREATE");
 //     CollectionHits->Write();
     
@@ -362,9 +357,9 @@ namespace HitAna {
     art::ValidHandle< std::vector<recob::Hit> > VPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fVPlaneTag);
     art::ValidHandle< std::vector<recob::Hit> > YPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fYPlaneTag);
     
-    fUCanvas = new TCanvas("U-Plane Hits","U-Plane Hits",500,700);
-    fVCanvas = new TCanvas("V-Plane Hits","V-Plane Hits",500,700);
-    fYCanvas = new TCanvas("Y-Plane Hits","Y-Plane Hits",500,700);
+    fUCanvas = new TCanvas("U-Plane Hits","U-Plane Hits",1000,700);
+//     fVCanvas = new TCanvas("V-Plane Hits","V-Plane Hits",1000,700);
+//     fYCanvas = new TCanvas("Y-Plane Hits","Y-Plane Hits",1000,700);
     
     std::vector<float> HitWireNumber;
     std::vector<float> HitTimeBin;
@@ -397,7 +392,7 @@ namespace HitAna {
     }// end loop over y-plane hits entries
     
     TVectorT<float> TWireNumber(HitWireNumber.size(),HitWireNumber.data());
-    TVectorT<float> TTimeBin(HitTimeBin.size(),HitWireNumber.data());
+    TVectorT<float> TTimeBin(HitTimeBin.size(),HitTimeBin.data());
     
     
     fUPlaneHits = new TGraph(TWireNumber,TTimeBin);
@@ -408,22 +403,18 @@ namespace HitAna {
     
     while(true)
     {
-      std::cout << "Fuck Begin" << std::endl;
-//       if(!gROOT->IsBatch())
-//       {
+      if(!gROOT->IsBatch())
+      {
 	fUCanvas->cd();
-	fUPlaneHits->Draw();
-	std::cout << "Fuck Drawn" << std::endl;
+	fUPlaneHits->Draw("ap");
 	fUCanvas->Modified();
 	fUCanvas->Update();
-//       }
-//       else
-//       {
-// 	std::cout << "Shit!" << std::endl; 
-//       }
-      std::cout << "Fuck Let's Wait" << std::endl;
-      gSystem->Sleep(100);
-      std::cout << "Fucking Waited Enough" << std::endl;
+      }
+      else
+      {
+	std::cout << "You are not in batch mode! Now drawings!" << std::endl; 
+      }
+      gSystem->Sleep(500);
       if(gSystem->ProcessEvents()) break;
     }
     
