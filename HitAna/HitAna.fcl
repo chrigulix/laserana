@@ -4,22 +4,24 @@
 #include "services_microboone.fcl"
 #include "reco_uboone_data_minimal.fcl"
 
-process_name: RecoDataMinimal
+process_name: LaserHitAna
 
 services:
 {
   scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService:            { fileName: "Hit_Analysis_Hist.root" }
-  Timing:                  {}
-  #SimpleMemoryCheck:       { ignoreTotal: 1 } # default is one
-  RandomNumberGenerator:   {} #ART native random number generator
+  #Timing:                  {}
+  SimpleMemoryCheck:       { ignoreTotal: 1 } # default is one
+  #RandomNumberGenerator:   {} #ART native random number generator
   #message:                 @local::microboone_message_services_prod_debug
   #FileCatalogMetadata:     @local::art_file_catalog_data
   @table::microboone_reco_minimal_services
 }
+
 services.DatabaseUtil.ShouldConnect: false
 services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+services.TimeService.InheritClockConfig: false
 
 #source is now a root file
 source:
@@ -33,25 +35,15 @@ source:
 # Modules are grouped by type.
 physics:
 {
-
- #producers:
- #{
- # @table::microboone_reco_minimal_producers
- #}
-
- #filters:
- #{ 
- # @table::microboone_reco_minimal_filters
- #}
-
  analyzers:
   {
     HitAna: 
     {
       module_type:         "HitAna"
-      UPlaneHitModuleLabel:  "UPlaneLaserHits"
-      VPlaneHitModuleLabel:  "VPlaneLaserHits"
-      YPlaneHitModuleLabel:  "YPlaneLaserHits"
+      HitModuleLabel:	   "LaserReco"
+      UPlaneInstanceLabel: "UPlaneLaserHits"
+      VPlaneInstanceLabel: "VPlaneLaserHits"
+      YPlaneInstanceLabel: "YPlaneLaserHits"
       CalDataModuleLabel:  "daq"
     }
   }
@@ -86,38 +78,4 @@ outputs:
 }
 
 ### Here we include the file giving us run/data dependent overrides
-#include "uboone_data_runSettings.fcl"
-
-### Here we try to suppress known and pointless messages
-services.message.destinations :
-{
-  STDCOUT: 
-  {
-     type:      "cout"      #tells the message service to output this destination to cout
-     threshold: "WARNING"   #tells the message service that this destination applies to WARNING and higher level messages
-     append:     true       #says to append all messages to the output
-     categories:
-     {
-       ChannelFilter:
-       {
-         limit: 0
-         reportEvery: 0
-       }
-       TrackStitcher:
-       {
-         limit: 0
-         reportEvery: 0
-       }
-       CRHitRemoval:
-       {
-         limit: 0
-         reportEvery: 0
-       }
-       default:
-       {
-         limit: -1  #don't print anything at the infomsg level except the explicitly named categories
-         reportEvery: 1
-       }
-     }
-  }
-}
+##include "uboone_data_runSettings.fcl"

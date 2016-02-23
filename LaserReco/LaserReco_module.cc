@@ -236,9 +236,6 @@ namespace LaserReco {
     // Threshold array
     std::array<float,3> fUVYThresholds;
     
-    // Collection Hits Analysis
-    TH2D* CollectionHits;
-    
   }; // class LaserReco
   
   DEFINE_ART_MODULE(LaserReco)
@@ -259,9 +256,9 @@ namespace LaserReco {
     this->reconfigure(pset);
     
 //     produces< std::vector<recob::Wire> >("blibla");
-//     produces< std::vector<recob::Hit> >("UPlaneLaserHits");
+    produces< std::vector<recob::Hit> >("UPlaneLaserHits");
     produces< std::vector<recob::Hit> >("VPlaneLaserHits");
-//     produces< std::vector<recob::Hit> >("YPlaneLaserHits");
+    produces< std::vector<recob::Hit> >("YPlaneLaserHits");
   }
 
   
@@ -292,8 +289,7 @@ namespace LaserReco {
       delete pYMap;
     }
     
-    // TODO: Temporary
-    CollectionHits = new TH2D("PeakDist vs.HitWidth","PeakDist vs. HitWidth",1000,0,1000,1000,0,1000);
+//     CollectionHits = new TH2D("PeakDist vs.HitWidth","PeakDist vs. HitWidth",3000,0,3000,3500,0,3500);
     
     // TODO: Change later
     fLCSNumber = 2;
@@ -315,9 +311,6 @@ namespace LaserReco {
   
   void  LaserReco::endJob()
   {
-    TFile* OFile = new TFile("HitHist.root", "RECREATE");
-    CollectionHits->Write();
-    
 //     TCanvas* C2 = new TCanvas("Hits","You",1400,1000);
 //     CollectionHits->Draw();
 //     C2 -> Print("Hits.png","png");
@@ -547,9 +540,9 @@ namespace LaserReco {
     
     
     // Fill Hits of all planes into the new
-//     event.put(std::move(UHitVec), "UPlaneLaserHits");
+    event.put(std::move(UHitVec), "UPlaneLaserHits");
     event.put(std::move(VHitVec), "VPlaneLaserHits");
-//     event.put(std::move(YHitVec), "YPlaneLaserHits");
+    event.put(std::move(YHitVec), "YPlaneLaserHits");
   } // LaserReco::analyze()
   
   //------------------------------------------------------------------------
@@ -641,10 +634,6 @@ namespace LaserReco {
 	HitEnd = sample;
         BelowThreshold = false;
 	
-//         std::cout << "Hit " << HitIdx << "\n"
-//                   << " Time: Start/Stop: " << HitStart << "/" << HitEnd << "\n" 
-//                   << " Peak: Value/Tick: " << Peak << "/" << PeakTime << std::endl;
-
         LaserHits.push_back(recob::HitCreator(SingleWire, fGeometry->ChannelToWire(Channel).front(), HitStart, HitEnd, 
 			  (float) (HitStart - HitEnd), (float) PeakTime, 0.5, Peak, sqrt(Peak), 
 			  (float)0., (float)0., (short int)1, HitIdx, (float)1., 0).move());
@@ -720,8 +709,6 @@ namespace LaserReco {
 	HitEnd = sample;
         BelowThreshold = false;
 	Handover_flag = false;
-	
-	CollectionHits->Fill(DipTime-PeakTime, HitEnd-HitStart);
 
         LaserHits.push_back(recob::HitCreator(SingleWire, fGeometry->ChannelToWire(Channel).front(), HitStart, HitEnd, 
 			  (float) (DipTime - PeakTime)/2, (float) (PeakTime + (DipTime-PeakTime)/2), 0.5, Peak - Dip, sqrt(Peak-Dip), 

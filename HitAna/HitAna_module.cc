@@ -68,11 +68,15 @@
 // <http://root.cern.ch/root/html532/ClassIndex.html>
 #include "TH1.h"
 #include "TH2.h"
+#include "TGraph.h"
 #include "TCanvas.h"
 #include "TTree.h"
 #include "TLorentzVector.h"
 #include "TVector3.h"
+#include "TVectorT.h"
 #include "TFile.h"
+#include "TROOT.h"
+#include "TSystem.h"
 
 // C++ Includes
 #include <map>
@@ -210,10 +214,16 @@ namespace HitAna {
     // go from this custom example to your own task.
 
     // The parameters we'll read from the .fcl file.
-    art::InputTag fCalDataModuleLabel;    ///< CalData module label
-    art::InputTag fUPlaneHitModuleLabel;  ///< Name of the U-plane hit data product
-    art::InputTag fVPlaneHitModuleLabel;  ///< Name of the V-plane hit data product
-    art::InputTag fYPlaneHitModuleLabel;  ///< Name of the Y-plane hit data product
+    //art::InputTag fCalDataModuleLabel;    ///< CalData module label
+    std::string fHitModuleLabel;
+    std::string fUPlaneInstanceLabel;  ///< Name of the U-plane hit data product
+    std::string fVPlaneInstanceLabel;  ///< Name of the V-plane hit data product
+    std::string fYPlaneInstanceLabel;  ///< Name of the Y-plane hit data product
+    
+    // Initialize input tags for getting hit data
+    art::InputTag fUPlaneTag;
+    art::InputTag fVPlaneTag;
+    art::InputTag fYPlaneTag;
     //std::array<float,3> fUVYThresholds;	  ///< U,V,Y-plane threshold in ADC counts for the laser hit finder
     
     // Other variables that will be shared between different methods.
@@ -237,7 +247,15 @@ namespace HitAna {
     TH2D* fVHitPeakDistVsWidth;
     TH2D* fYHitWidthVsPeak;
     
+    // Hit Graphs for all planes
+    TGraph* fUPlaneHits;
+    TGraph* fVPlaneHits;
+    TGraph* fYPlaneHits;
     
+    // Canvases for drawing hit graphs
+    TCanvas* fUCanvas;
+    TCanvas* fVCanvas;
+    TCanvas* fYCanvas;
     
   }; // class HitAna
   
@@ -262,23 +280,30 @@ namespace HitAna {
   
   //-----------------------------------------------------------------------
   void HitAna::beginJob()
-  {std::cout << "FUUUUUUUUUUUUUUUUUUUUCK" << std::endl;
+  {
     // Initialize the Art TFile service
     art::ServiceHandle<art::TFileService> TFileServiceHandle;
     
     // Make histograms
-    fUHitWidthVsPeak 		= TFileServiceHandle->make<TH2D>("U-Plane Width vs.Peak","Width vs. Peak",1000,0,1000,3500,0,3500);
-    fVHitWidthVsPeak		= TFileServiceHandle->make<TH2D>("V-Plane Width vs.Peak","Widtht vs. Peak",1000,0,1000,3500,0,3500);
-    fVHitPeakDistVsPeak		= TFileServiceHandle->make<TH2D>("V-Plane Peak Dist vs.Peak","PeakDist vs. Peak",1000,0,1000,3500,0,3500);
-    fVHitPeakDistVsWidth 	= TFileServiceHandle->make<TH2D>("V-Plane Peak Dist vs.Hit Width","PeakDist vs. HitWidth",1000,0,1000,1000,0,1000);
-    fYHitWidthVsPeak		= TFileServiceHandle->make<TH2D>("Y-Plane Width vs. Peak","Width vs. Peak",1000,0,1000,3500,0,3500);
-    std::cout << "FUUUUUUUUUUUUUUUUUUUUCK" << std::endl;
+    fUHitWidthVsPeak 	 = TFileServiceHandle->make<TH2D>("U-Plane Width vs.Peak","Width vs. Peak",1000,0,1000,3500,0,3500);
+    fVHitWidthVsPeak	 = TFileServiceHandle->make<TH2D>("V-Plane Width vs.Peak","Widtht vs. Peak",1000,0,1000,3500,0,3500);
+    fVHitPeakDistVsPeak	 = TFileServiceHandle->make<TH2D>("V-Plane Peak Dist vs.Peak","PeakDist vs. Peak",1000,0,1000,3500,0,3500);
+    fVHitPeakDistVsWidth = TFileServiceHandle->make<TH2D>("V-Plane Peak Dist vs.Hit Width","PeakDist vs. HitWidth",1000,0,1000,1000,0,1000);
+    fYHitWidthVsPeak	 = TFileServiceHandle->make<TH2D>("Y-Plane Width vs. Peak","Width vs. Peak",1000,0,1000,3500,0,3500);
+    
+    gROOT->Reset();
+//     fUPlaneHits		 = TFileServiceHandle->make<TGraph>("","",)
   }
   
   
   
   void  HitAna::endJob()
   {
+    std::cout << fUHitWidthVsPeak->GetBinContent(0,50) << std::endl;
+    std::cout << fUHitWidthVsPeak->GetBinContent(1001,50)<< std::endl;
+    
+    std::cout << fUHitWidthVsPeak->GetBinContent(20,0) << std::endl;
+    std::cout << fUHitWidthVsPeak->GetBinContent(20,3501) << std::endl;
 //     TFile* OFile = new TFile("HitHist.root", "RECREATE");
 //     CollectionHits->Write();
     
@@ -291,7 +316,7 @@ namespace HitAna {
    
   //-----------------------------------------------------------------------
   void HitAna::beginRun(const art::Run& /*run*/)
-  {std::cout << "FUUUUUUUUUUUUUUUUUUUUCK" << std::endl;
+  {
     // art expects this function to have a art::Run argument;
     // C++ expects us to use all the arguments we are given,
     // or it will warn that we could have forgotten to use it
@@ -318,34 +343,93 @@ namespace HitAna {
   {
     // Read parameters from the .fcl file. The names in the arguments
     // to p.get<TYPE> must match names in the .fcl file.
-//     fUPlaneHitModuleLabel    = parameterSet.get< art::InputTag >("UPlaneHitModuleLabel");
-    fVPlaneHitModuleLabel    = parameterSet.get< art::InputTag >("VPlaneHitModuleLabel");
-//     fYPlaneHitModuleLabel    = parameterSet.get< art::InputTag >("YPlaneHitModuleLabel");
-//     fCalDataModuleLabel      = parameterSet.get< art::InputTag >("CalDataModuleLabel");
-//     fUVYThresholds	     = parameterSet.get< std::array<float,3> >("UVYHitThresholds");
+    fHitModuleLabel          = parameterSet.get< std::string >("HitModuleLabel");
+    fUPlaneInstanceLabel    = parameterSet.get< std::string >("UPlaneInstanceLabel");
+    fVPlaneInstanceLabel    = parameterSet.get< std::string >("VPlaneInstanceLabel");
+    fYPlaneInstanceLabel    = parameterSet.get< std::string >("YPlaneInstanceLabel");
+
+    // Create input tags
+    fUPlaneTag = art::InputTag(fHitModuleLabel,fUPlaneInstanceLabel);
+    fVPlaneTag = art::InputTag(fHitModuleLabel,fVPlaneInstanceLabel);
+    fYPlaneTag = art::InputTag(fHitModuleLabel,fYPlaneInstanceLabel);
   }
 
   //-----------------------------------------------------------------------
   void HitAna::analyze(const art::Event& event) 
   {
-    
-    std::cout << "FUUUUUUUUUUUUUUUUUUUUCK" << std::endl;
     // This is the handle to the hit data of this event (simply a pointer to std::vector<recob::hit>)   
-    art::ValidHandle< std::vector<recob::Hit> > UPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fUPlaneHitModuleLabel);
-    std::cout << "FUUUUUUUUUUUUUUUUUUUUCK" << std::endl;
-    art::ValidHandle< std::vector<recob::Hit> > VPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fVPlaneHitModuleLabel);
-    std::cout << "FUUUUUUUUUUUUUUUUUUUUCK" << std::endl;
-    art::ValidHandle< std::vector<recob::Hit> > YPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fYPlaneHitModuleLabel);
-    std::cout << "FUUUUUUUUUUUUUUUUUUUUCK" << std::endl;
+    art::ValidHandle< std::vector<recob::Hit> > UPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fUPlaneTag);
+    art::ValidHandle< std::vector<recob::Hit> > VPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fVPlaneTag);
+    art::ValidHandle< std::vector<recob::Hit> > YPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fYPlaneTag);
     
-    // Loop over all recob wires entries
+    fUCanvas = new TCanvas("U-Plane Hits","U-Plane Hits",500,700);
+    fVCanvas = new TCanvas("V-Plane Hits","V-Plane Hits",500,700);
+    fYCanvas = new TCanvas("Y-Plane Hits","Y-Plane Hits",500,700);
+    
+    std::vector<float> HitWireNumber;
+    std::vector<float> HitTimeBin;
+    
+    // Loop over all u-plane hits
+    for(auto const & UPlaneHit : *UPlaneHitVecHandle)
+    {
+      // Fill histograms
+      fUHitWidthVsPeak->Fill(UPlaneHit.EndTick()-UPlaneHit.StartTick(),-UPlaneHit.PeakAmplitude());
+      
+      // Fill vector for T-Graph
+      HitWireNumber.push_back((float)UPlaneHit.WireID().Wire);
+      HitTimeBin.push_back((float)UPlaneHit.PeakTime());
+    }// end loop over u-plane hits entries
+    
+    // Loop over all v-plane hits 
     for(auto const & VPlaneHit : *VPlaneHitVecHandle)
     {
+      // Fill histograms
       fVHitWidthVsPeak->Fill(VPlaneHit.EndTick()-VPlaneHit.StartTick(),VPlaneHit.PeakAmplitude());
       fVHitPeakDistVsPeak->Fill(VPlaneHit.RMS()*2.,VPlaneHit.PeakAmplitude());
       fVHitPeakDistVsWidth->Fill(VPlaneHit.RMS()*2.,VPlaneHit.EndTick()-VPlaneHit.StartTick());
-      
-    } // end loop over raw digit entries
+    } // end loop over v-plane hits entries
+    
+    // Loop over all y-plane hits
+    for(auto const & YPlaneHit : *YPlaneHitVecHandle)
+    {
+      // Fill histograms
+      fYHitWidthVsPeak->Fill(YPlaneHit.EndTick()-YPlaneHit.StartTick(),YPlaneHit.PeakAmplitude());
+    }// end loop over y-plane hits entries
+    
+    TVectorT<float> TWireNumber(HitWireNumber.size(),HitWireNumber.data());
+    TVectorT<float> TTimeBin(HitTimeBin.size(),HitWireNumber.data());
+    
+    
+    fUPlaneHits = new TGraph(TWireNumber,TTimeBin);
+    
+    fUCanvas->cd();
+    fUPlaneHits->Draw();
+    fUCanvas->Print("FuckThat.png","png");
+    
+    while(true)
+    {
+      std::cout << "Fuck Begin" << std::endl;
+//       if(!gROOT->IsBatch())
+//       {
+	fUCanvas->cd();
+	fUPlaneHits->Draw();
+	std::cout << "Fuck Drawn" << std::endl;
+	fUCanvas->Modified();
+	fUCanvas->Update();
+//       }
+//       else
+//       {
+// 	std::cout << "Shit!" << std::endl; 
+//       }
+      std::cout << "Fuck Let's Wait" << std::endl;
+      gSystem->Sleep(100);
+      std::cout << "Fucking Waited Enough" << std::endl;
+      if(gSystem->ProcessEvents()) break;
+    }
+    
+//     delete fUCanvas;
+//     delete fVCanvas;
+//     delete fYCanvas;
     
   } // HitAna::analyze()
 
