@@ -476,7 +476,7 @@ namespace LaserReco {
 // 	RegionOfInterest.add_range(StartROI)
 //       }
 //       std::cout << "Fuuuuuck" << std::endl;
-      RegionOfInterest.add_range(StartROI,RawROI.begin(),RawROI.end());
+      RegionOfInterest.add_range(0,RawROI.begin(),RawROI.end());
 //       std::cout << "Fuuuuuck" << std::endl;
       
       // Create a Wire object with the raw signal
@@ -615,6 +615,11 @@ namespace LaserReco {
     // loop over wire
     for(unsigned int sample = 0; sample < Signal.size(); sample++ )
     {
+//       if( fGeometry->ChannelToWire(SingleWire.Channel()).front().Wire == 1641 )
+//       {
+// 	std::cout << "Sample: " << sample << " " << Signal.at(sample) << std::endl;
+//       }
+      
       if( Signal.at(sample) <= fUPlaneThreshold)
       {
         // If we go over the threshold the first time, save the time tick

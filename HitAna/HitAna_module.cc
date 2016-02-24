@@ -370,9 +370,12 @@ namespace HitAna {
       // Fill histograms
       fUHitWidthVsPeak->Fill(UPlaneHit.EndTick()-UPlaneHit.StartTick(),-UPlaneHit.PeakAmplitude());
       
-      // Fill vector for T-Graph
-      HitWireNumber.push_back((float)UPlaneHit.WireID().Wire);
-      HitTimeBin.push_back((float)UPlaneHit.PeakTime());
+      // Fill vector for T-Graph with cuts
+      if(-UPlaneHit.PeakAmplitude() > 25)
+      {
+	HitWireNumber.push_back((float)UPlaneHit.WireID().Wire);
+	HitTimeBin.push_back((float)UPlaneHit.PeakTime());
+      }
     }// end loop over u-plane hits entries
     
     // Loop over all v-plane hits 
