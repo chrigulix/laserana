@@ -207,6 +207,8 @@ namespace HitAna {
     // The analysis routine, called once per event. 
     virtual void analyze(const art::Event& event) override;
     
+    virtual TGraph* FillGraph(const std::vector<float>& WireNumber, const std::vector<float>& PeakTime);
+    
 
   private:
 
@@ -358,11 +360,16 @@ namespace HitAna {
     art::ValidHandle< std::vector<recob::Hit> > YPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fYPlaneTag);
     
     fUCanvas = new TCanvas("U-Plane Hits","U-Plane Hits",1000,700);
-//     fVCanvas = new TCanvas("V-Plane Hits","V-Plane Hits",1000,700);
-//     fYCanvas = new TCanvas("Y-Plane Hits","Y-Plane Hits",1000,700);
+    fVCanvas = new TCanvas("V-Plane Hits","V-Plane Hits",1000,700);
+    fYCanvas = new TCanvas("Y-Plane Hits","Y-Plane Hits",1000,700);
     
     std::vector<float> HitWireNumber;
     std::vector<float> HitTimeBin;
+    
+    HitWireNumber.reserve(UPlaneHitVecHandle->size());
+    HitTimeBin.reserve(UPlaneHitVecHandle->size());
+    
+    std::cout << "U FUCK" << std::endl;
     
     // Loop over all u-plane hits
     for(auto const & UPlaneHit : *UPlaneHitVecHandle)
@@ -378,6 +385,15 @@ namespace HitAna {
       }
     }// end loop over u-plane hits entries
     
+    fUPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
+    
+    std::cout << "V FUCK" << std::endl;
+    HitWireNumber.clear();
+    HitTimeBin.clear();
+    
+    HitWireNumber.reserve(VPlaneHitVecHandle->size());
+    HitTimeBin.reserve(VPlaneHitVecHandle->size());
+    
     // Loop over all v-plane hits 
     for(auto const & VPlaneHit : *VPlaneHitVecHandle)
     {
@@ -385,24 +401,42 @@ namespace HitAna {
       fVHitWidthVsPeak->Fill(VPlaneHit.EndTick()-VPlaneHit.StartTick(),VPlaneHit.PeakAmplitude());
       fVHitPeakDistVsPeak->Fill(VPlaneHit.RMS()*2.,VPlaneHit.PeakAmplitude());
       fVHitPeakDistVsWidth->Fill(VPlaneHit.RMS()*2.,VPlaneHit.EndTick()-VPlaneHit.StartTick());
+      
+      // Fill vector for T-Graph with cuts
+      if(true)
+      {
+	HitWireNumber.push_back((float)VPlaneHit.WireID().Wire);
+	HitTimeBin.push_back((float)VPlaneHit.PeakTime());
+      }
     } // end loop over v-plane hits entries
+    
+    fVPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
+    
+    std::cout << "Y FUCK" << std::endl;
+    
+    HitWireNumber.clear();
+    HitTimeBin.clear();
+    
+    HitWireNumber.reserve(YPlaneHitVecHandle->size());
+    HitTimeBin.reserve(YPlaneHitVecHandle->size());
     
     // Loop over all y-plane hits
     for(auto const & YPlaneHit : *YPlaneHitVecHandle)
     {
       // Fill histograms
       fYHitWidthVsPeak->Fill(YPlaneHit.EndTick()-YPlaneHit.StartTick(),YPlaneHit.PeakAmplitude());
+      
+      // Fill vector for T-Graph with cuts
+      if(true)
+      {
+	HitWireNumber.push_back((float)YPlaneHit.WireID().Wire);
+	HitTimeBin.push_back((float)YPlaneHit.PeakTime());
+      }
     }// end loop over y-plane hits entries
     
-    TVectorT<float> TWireNumber(HitWireNumber.size(),HitWireNumber.data());
-    TVectorT<float> TTimeBin(HitTimeBin.size(),HitTimeBin.data());
+    fYPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
     
-    
-    fUPlaneHits = new TGraph(TWireNumber,TTimeBin);
-    
-    fUCanvas->cd();
-    fUPlaneHits->Draw();
-    fUCanvas->Print("FuckThat.png","png");
+    std::cout << "BEGIN LOOP FUCK" << std::endl;
     
     while(true)
     {
@@ -412,6 +446,16 @@ namespace HitAna {
 	fUPlaneHits->Draw("ap");
 	fUCanvas->Modified();
 	fUCanvas->Update();
+	
+	fVCanvas->cd();
+	fVPlaneHits->Draw("ap");
+	fVCanvas->Modified();
+	fVCanvas->Update();
+	
+	fYCanvas->cd();
+	fYPlaneHits->Draw("ap");
+	fYCanvas->Modified();
+	fYCanvas->Update();
       }
       else
       {
@@ -426,6 +470,14 @@ namespace HitAna {
 //     delete fYCanvas;
     
   } // HitAna::analyze()
+  
+  TGraph* HitAna::FillGraph(const std::vector<float>& WireNumber, const std::vector<float>& PeakTime)
+  {
+    TVectorT<float> TWireNumber(WireNumber.size(),WireNumber.data());
+    TVectorT<float> TTimeBin(PeakTime.size(),PeakTime.data());
+    
+    return new TGraph(TWireNumber,TTimeBin);
+  }
 
 } // namespace HitAna
 
