@@ -18,6 +18,7 @@ services:
 services.TimeService.InheritClockConfig: false
 services.DatabaseUtil.ShouldConnect: false
 services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+#services.IChannelStatusService.ChannelStatusProvider.UseDB: true
 
 #source is now a root file
 source:
@@ -33,17 +34,29 @@ physics:
 {
  producers:
   {
-    ApplyField: 
+    trackkalmanhit: 
     {
-      module_type:         "ApplyField"
-      TrackModuleLabel:    "cctrack"
-
+      module_type:        "ApplyField"
+      TrackModuleLabel:   "trackkalmanhit"
+      TrackInstanceLabel: "" 
+    }
+    cctrack:
+    {
+      module_type:        "ApplyField"
+      TrackModuleLabel:   "cctrack"
+      TrackInstanceLabel: ""
+    }
+    pandoraNu:
+    {
+      module_type:        "ApplyField"
+      TrackModuleLabel:   "pandoraNu"
+      TrackInstanceLabel: ""
     }
   }
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- reco: [ ApplyField ]
+ reco: [ trackkalmanhit, cctrack, pandoraNu ]
 
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]

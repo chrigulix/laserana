@@ -64,6 +64,8 @@
 #include "CalibrationDBI/Interface/IChannelStatusService.h"
 #include "CalibrationDBI/Interface/IChannelStatusProvider.h"
 
+#include "SpaceCharge/SpaceCharge.h"
+
 // ROOT includes. Note: To look up the properties of the ROOT classes,
 // use the ROOT web site; e.g.,
 // <http://root.cern.ch/root/html532/ClassIndex.html>
@@ -92,7 +94,8 @@
 
 namespace 
 {
-
+  // Applies field correction to to a track
+  recob::Track TrackCorrector(const recob::Track& InputTrack);
 } // local namespace
 
 
@@ -105,7 +108,6 @@ namespace ApplyField
     /// Default constructor
     explicit ApplyField(fhicl::ParameterSet const& parameterSet);
 
-    
     virtual void beginJob() override;
     
     virtual void endJob() override;
@@ -116,7 +118,10 @@ namespace ApplyField
     
   private:
 
-    art::InputTag fTrackModuleLabel;    ///< CalData module label
+    std::string fTrackModuleLabel;    ///< Track module label
+    std::string fTrackInstanceLabel;    ///< Track instance label
+    art::InputTag fTrackTag; ///< Track tags
+    
   }; // class ApplyField
   
   DEFINE_ART_MODULE(ApplyField)
@@ -132,6 +137,8 @@ namespace ApplyField
   {
     // Read in the parameters from the .fcl file.
     this->reconfigure(pset);
+      
+    produces< std::vector<recob::Track> >("FieldCorrection");
     
 //     produces< std::vector<recob::Wire> >("blibla");
 //     produces< std::vector<recob::Hit> >("UPlaneLaserHits");
@@ -157,19 +164,41 @@ namespace ApplyField
   void ApplyField::reconfigure(fhicl::ParameterSet const& parameterSet)
   {
     // Read parameter set
-    fTrackModuleLabel      = parameterSet.get< art::InputTag	     >("TrackModuleLabel");
+    fTrackModuleLabel = parameterSet.get< std::string >("TrackModuleLabel");
+    fTrackInstanceLabel = parameterSet.get< std::string >("TrackInstanceLabel");
+    
+    fTrackTag = art::InputTag(fTrackModuleLabel,fTrackInstanceLabel);
   }
 
   //-----------------------------------------------------------------------
   void ApplyField::produce(art::Event& event) 
   {
-    // This is the handle to the raw data of this event (simply a pointer to std::vector<raw::RawDigit>)   
-    art::ValidHandle< std::vector<recob::Track> > TrackVecHandle = event.getValidHandle<std::vector<recob::Track>>(fTrackModuleLabel);
+    // Grab the space charge service handle which sets up the intorpolation polynomial
+    art::ServiceHandle<spacecharge::SpaceCharge> SpaceChargeHandle;
     
+    // Initialize output track (with applied correction)
+    std::unique_ptr< std::vector<recob::Track> > CorrectedTracksPointer(new std::vector<recob::Track>); 
+    
+    // This is the handle to the raw data of this event (simply a pointer to std::vector<raw::RawDigit>)
+    art::ValidHandle< std::vector<recob::Track> > TrackVecHandle = event.getValidHandle< std::vector<recob::Track> >(fTrackTag);
+   
     for(const auto& Track : *TrackVecHandle)
     {
-      std::cout << Track.NumberTrajectoryPoints() << std::endl;
+      CorrectedTracksPointer->push_back(TrackCorrector(Track));
+//       recob::Track CorrectedTrack( std::vector< TVector3 > const &  	xyz,
+// 		std::vector< TVector3 > const &  	dxdydz,
+// // 		std::vector< std::vector< double > >  	dQdx = std::vector< std::vector<double> >(0),
+// 		std::vector< double >  	fitMomentum = std::vector<double>(2, util::kBogusD),
+// 		int  	ID = -1 )
+
+      
+      
+      
+      
     }
+    
+    event.put(std::move(CorrectedTracksPointer),"FieldCorrection");
+    
     
     // Prepairing the wire signal vector. It will be just the raw signal with subtracted pedestial
 //     std::unique_ptr< std::vector<recob::Wire> > WireVec(new std::vector<recob::Wire>);
@@ -178,8 +207,28 @@ namespace ApplyField
 //     event.put(std::move(UHitVec), "UPlaneLaserHits");
 //     event.put(std::move(VHitVec), "VPlaneLaserHits");
 //     event.put(std::move(YHitVec), "YPlaneLaserHits");
-  } // ApplyField::analyze()
+  } // ApplyField::produce()
   
 } // namespace ApplyField
+
+namespace
+{
+  recob::Track TrackCorrector(const recob::Track& InputTrack)
+  {
+    // Initialize corrected track points and directions
+    std::vector<TVector3> TrackPointsCorrected;
+    std::vector<TVector3> TrackDirectionsCorrected;
+    
+    // Fill track points and apply correction
+    for(unsigned int point_no = 0; point_no < InputTrack.NumberTrajectoryPoints(); point_no++)
+    {
+      TrackPointsCorrected.push_back(InputTrack.LocationAtPoint(point_no)/*+ Correction*/);
+      TrackDirectionsCorrected.push_back(InputTrack.DirectionAtPoint(point_no)/* + Correction */);
+    }
+    
+    // Create and return output track
+    return recob::Track(TrackPointsCorrected,TrackDirectionsCorrected);
+  }
+}
 
 #endif // ApplyField_Module
