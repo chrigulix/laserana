@@ -221,6 +221,7 @@ namespace HitAna {
     std::string fUPlaneInstanceLabel;  ///< Name of the U-plane hit data product
     std::string fVPlaneInstanceLabel;  ///< Name of the V-plane hit data product
     std::string fYPlaneInstanceLabel;  ///< Name of the Y-plane hit data product
+    bool fDrawHits; ///< Determines if you draw hits or not
     
     // Initialize input tags for getting hit data
     art::InputTag fUPlaneTag;
@@ -244,10 +245,16 @@ namespace HitAna {
     
     // Hits Analysis Histogram
     TH2D* fUHitWidthVsPeak;
+    TH2D* fUPeakDivWidth;
+    
     TH2D* fVHitWidthVsPeak;
     TH2D* fVHitPeakDistVsPeak;
     TH2D* fVHitPeakDistVsWidth;
+    TH2D* fVPeakDivWidth;
+    TH2D* fVPeakDivPeakDist;
+    
     TH2D* fYHitWidthVsPeak;
+    TH2D* fYPeakDivWidth;
     
     // Hit Graphs for all planes
     TGraph* fUPlaneHits;
@@ -283,18 +290,30 @@ namespace HitAna {
   //-----------------------------------------------------------------------
   void HitAna::beginJob()
   {
-    // Initialize the Art TFile service
-    art::ServiceHandle<art::TFileService> TFileServiceHandle;
+    // If the event draw flag is enabled
+    if(fDrawHits)
+    {
+      fUCanvas = new TCanvas("U-Plane Hits","U-Plane Hits",1000,700);
+      fVCanvas = new TCanvas("V-Plane Hits","V-Plane Hits",1000,700);
+      fYCanvas = new TCanvas("Y-Plane Hits","Y-Plane Hits",1000,700);
+    }
+    else
+    {
+      // Initialize the Art TFile service
+      art::ServiceHandle<art::TFileService> TFileServiceHandle;
     
-    // Make histograms
-    fUHitWidthVsPeak 	 = TFileServiceHandle->make<TH2D>("U-Plane Width vs.Peak","Width vs. Peak",1000,0,1000,3500,0,3500);
-    fVHitWidthVsPeak	 = TFileServiceHandle->make<TH2D>("V-Plane Width vs.Peak","Widtht vs. Peak",1000,0,1000,3500,0,3500);
-    fVHitPeakDistVsPeak	 = TFileServiceHandle->make<TH2D>("V-Plane Peak Dist vs.Peak","PeakDist vs. Peak",1000,0,1000,3500,0,3500);
-    fVHitPeakDistVsWidth = TFileServiceHandle->make<TH2D>("V-Plane Peak Dist vs.Hit Width","PeakDist vs. HitWidth",1000,0,1000,1000,0,1000);
-    fYHitWidthVsPeak	 = TFileServiceHandle->make<TH2D>("Y-Plane Width vs. Peak","Width vs. Peak",1000,0,1000,3500,0,3500);
-    
-    gROOT->Reset();
-//     fUPlaneHits		 = TFileServiceHandle->make<TGraph>("","",)
+      // Make histograms
+      fUHitWidthVsPeak	   = TFileServiceHandle->make<TH2D>("U-Plane Width vs. Peak","Width vs. Peak",1000,0,1000,2100,0,2100);
+      fUPeakDivWidth	   = TFileServiceHandle->make<TH2D>("U-Plane Width vs. Peak/Width","Peak height devided by Width",1000,0,1000,2100,0,2100);
+      fVHitWidthVsPeak	   = TFileServiceHandle->make<TH2D>("V-Plane Width vs. Peak","Widtht vs. Peak",1000,0,1000,4100,0,4100);
+      fVHitPeakDistVsPeak  = TFileServiceHandle->make<TH2D>("V-Plane Peak Dist vs. Peak","PeakDist vs. Peak",1000,0,1000,4100,0,4100);
+      fVHitPeakDistVsWidth = TFileServiceHandle->make<TH2D>("V-Plane Peak Dist vs. Hit Width","PeakDist vs. HitWidth",1000,0,1000,1000,0,1000);
+      fVPeakDivWidth	   = TFileServiceHandle->make<TH2D>("V-Plane Width vs. Peak/Width","Peak height devided by Width",1000,0,1000,4100,0,4100);
+      fVPeakDivPeakDist	   = TFileServiceHandle->make<TH2D>("V-Plane PeakDist vs. Peak/PeakDist","Peak height devided by Peak distance",1000,0,1000,4100,0,4100);
+      fYHitWidthVsPeak	   = TFileServiceHandle->make<TH2D>("Y-Plane Width vs. Peak","Width vs. Peak",1000,0,1000,3500,0,3500);
+      fYPeakDivWidth	   = TFileServiceHandle->make<TH2D>("Y-Plane Width vs. Peak/Width","Peak height devided by Width",1000,0,1000,3500,0,3500);
+      gROOT->Reset();
+    }
   }
   
   
@@ -340,10 +359,11 @@ namespace HitAna {
   {
     // Read parameters from the .fcl file. The names in the arguments
     // to p.get<TYPE> must match names in the .fcl file.
-    fHitModuleLabel          = parameterSet.get< std::string >("HitModuleLabel");
+    fHitModuleLabel         = parameterSet.get< std::string >("HitModuleLabel");
     fUPlaneInstanceLabel    = parameterSet.get< std::string >("UPlaneInstanceLabel");
     fVPlaneInstanceLabel    = parameterSet.get< std::string >("VPlaneInstanceLabel");
     fYPlaneInstanceLabel    = parameterSet.get< std::string >("YPlaneInstanceLabel");
+    fDrawHits		    = parameterSet.get< bool 	    >("DrawHits");
 
     // Create input tags
     fUPlaneTag = art::InputTag(fHitModuleLabel,fUPlaneInstanceLabel);
@@ -359,35 +379,36 @@ namespace HitAna {
     art::ValidHandle< std::vector<recob::Hit> > VPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fVPlaneTag);
     art::ValidHandle< std::vector<recob::Hit> > YPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fYPlaneTag);
     
-    fUCanvas = new TCanvas("U-Plane Hits","U-Plane Hits",1000,700);
-    fVCanvas = new TCanvas("V-Plane Hits","V-Plane Hits",1000,700);
-    fYCanvas = new TCanvas("Y-Plane Hits","Y-Plane Hits",1000,700);
-    
     std::vector<float> HitWireNumber;
     std::vector<float> HitTimeBin;
     
     HitWireNumber.reserve(UPlaneHitVecHandle->size());
     HitTimeBin.reserve(UPlaneHitVecHandle->size());
     
-    std::cout << "U FUCK" << std::endl;
-    
     // Loop over all u-plane hits
     for(auto const & UPlaneHit : *UPlaneHitVecHandle)
     {
       // Fill histograms
-      fUHitWidthVsPeak->Fill(UPlaneHit.EndTick()-UPlaneHit.StartTick(),-UPlaneHit.PeakAmplitude());
-      
+      if(!fDrawHits)
+      {
+	fUHitWidthVsPeak->Fill(UPlaneHit.EndTick()-UPlaneHit.StartTick(),-UPlaneHit.PeakAmplitude());
+	fUPeakDivWidth->Fill(UPlaneHit.EndTick()-UPlaneHit.StartTick(),-UPlaneHit.PeakAmplitude()/(UPlaneHit.EndTick()-UPlaneHit.StartTick()));
+      }
       // Fill vector for T-Graph with cuts
-      if(-UPlaneHit.PeakAmplitude() > 25)
+//       if( fabs(UPlaneHit.PeakAmplitude()) > 20 && fabs(UPlaneHit.RMS()) > 5)
+      else if(fabs(UPlaneHit.PeakAmplitude())/(UPlaneHit.EndTick()-UPlaneHit.StartTick()) > 1 && UPlaneHit.EndTick()-UPlaneHit.StartTick() > 16)
       {
 	HitWireNumber.push_back((float)UPlaneHit.WireID().Wire);
 	HitTimeBin.push_back((float)UPlaneHit.PeakTime());
       }
     }// end loop over u-plane hits entries
     
-    fUPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
+    if(HitWireNumber.size())
+    {
+      fUCanvas->cd();
+      fUPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
+    }
     
-    std::cout << "V FUCK" << std::endl;
     HitWireNumber.clear();
     HitTimeBin.clear();
     
@@ -398,21 +419,29 @@ namespace HitAna {
     for(auto const & VPlaneHit : *VPlaneHitVecHandle)
     {
       // Fill histograms
-      fVHitWidthVsPeak->Fill(VPlaneHit.EndTick()-VPlaneHit.StartTick(),VPlaneHit.PeakAmplitude());
-      fVHitPeakDistVsPeak->Fill(VPlaneHit.RMS()*2.,VPlaneHit.PeakAmplitude());
-      fVHitPeakDistVsWidth->Fill(VPlaneHit.RMS()*2.,VPlaneHit.EndTick()-VPlaneHit.StartTick());
-      
+      if(!fDrawHits)
+      {
+	fVHitWidthVsPeak->Fill(VPlaneHit.EndTick()-VPlaneHit.StartTick(),VPlaneHit.PeakAmplitude());
+	fVHitPeakDistVsPeak->Fill(VPlaneHit.RMS()*2.,VPlaneHit.PeakAmplitude());
+	fVHitPeakDistVsWidth->Fill(VPlaneHit.RMS()*2.,VPlaneHit.EndTick()-VPlaneHit.StartTick());
+	fVPeakDivWidth->Fill(VPlaneHit.EndTick()-VPlaneHit.StartTick(),VPlaneHit.PeakAmplitude()/(VPlaneHit.EndTick()-VPlaneHit.StartTick()));
+	fVPeakDivPeakDist->Fill(VPlaneHit.RMS()*2.,VPlaneHit.PeakAmplitude()/VPlaneHit.RMS()*2.);
+      }
       // Fill vector for T-Graph with cuts
-      if(true)
+//       if(VPlaneHit.PeakAmplitude() > 20 && fabs(VPlaneHit.RMS()) < 5 && fabs(VPlaneHit.EndTick()-VPlaneHit.StartTick()) > 5)
+      else if(VPlaneHit.PeakAmplitude()/(VPlaneHit.EndTick()-VPlaneHit.StartTick()) > 1 && VPlaneHit.EndTick()-VPlaneHit.StartTick() > 12
+	 && VPlaneHit.PeakAmplitude()/(VPlaneHit.RMS()*2.) > 1 && VPlaneHit.RMS()*2. < 20)
       {
 	HitWireNumber.push_back((float)VPlaneHit.WireID().Wire);
 	HitTimeBin.push_back((float)VPlaneHit.PeakTime());
       }
     } // end loop over v-plane hits entries
     
-    fVPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
-    
-    std::cout << "Y FUCK" << std::endl;
+    if(HitWireNumber.size())
+    {
+      fVCanvas->cd();
+      fVPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
+    }
     
     HitWireNumber.clear();
     HitTimeBin.clear();
@@ -424,36 +453,41 @@ namespace HitAna {
     for(auto const & YPlaneHit : *YPlaneHitVecHandle)
     {
       // Fill histograms
-      fYHitWidthVsPeak->Fill(YPlaneHit.EndTick()-YPlaneHit.StartTick(),YPlaneHit.PeakAmplitude());
-      
+      if(!fDrawHits)
+      {
+	fYHitWidthVsPeak->Fill(YPlaneHit.EndTick()-YPlaneHit.StartTick(),YPlaneHit.PeakAmplitude());
+	fYPeakDivWidth->Fill(YPlaneHit.EndTick()-YPlaneHit.StartTick(),YPlaneHit.PeakAmplitude()/(YPlaneHit.EndTick()-YPlaneHit.StartTick()));
+      }
       // Fill vector for T-Graph with cuts
-      if(true)
+      else if(YPlaneHit.PeakAmplitude()/(YPlaneHit.EndTick()-YPlaneHit.StartTick()) > 1 && fabs(YPlaneHit.RMS()) > 5 /*&& fabs(YPlaneHit.RMS()) < 100*/)
       {
 	HitWireNumber.push_back((float)YPlaneHit.WireID().Wire);
 	HitTimeBin.push_back((float)YPlaneHit.PeakTime());
       }
     }// end loop over y-plane hits entries
     
-    fYPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
+    if(HitWireNumber.size())
+    {
+      fYCanvas->cd();
+      fYPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
+    }
     
-    std::cout << "BEGIN LOOP FUCK" << std::endl;
-    
-    while(true)
+    while(fDrawHits)
     {
       if(!gROOT->IsBatch())
       {
 	fUCanvas->cd();
-	fUPlaneHits->Draw("ap");
+	if(HitWireNumber.size()) fUPlaneHits->Draw("ap");
 	fUCanvas->Modified();
 	fUCanvas->Update();
 	
 	fVCanvas->cd();
-	fVPlaneHits->Draw("ap");
+	if(HitWireNumber.size()) fVPlaneHits->Draw("ap");
 	fVCanvas->Modified();
 	fVCanvas->Update();
 	
 	fYCanvas->cd();
-	fYPlaneHits->Draw("ap");
+	if(HitWireNumber.size()) fYPlaneHits->Draw("ap");
 	fYCanvas->Modified();
 	fYCanvas->Update();
       }
@@ -461,13 +495,13 @@ namespace HitAna {
       {
 	std::cout << "You are not in batch mode! Now drawings!" << std::endl; 
       }
+      
+//       std::string response;
+//       std::cout << "Proceed? " << std::endl;
+//       std::cin >> response;
       gSystem->Sleep(500);
       if(gSystem->ProcessEvents()) break;
-    }
-    
-//     delete fUCanvas;
-//     delete fVCanvas;
-//     delete fYCanvas;
+    }// end Draw loop
     
   } // HitAna::analyze()
   

@@ -42,8 +42,9 @@ physics:
     SECAna: 
     {
       module_type:         "SECAna"
-      FileName: "SansField.txt"
-      TrackModuleLabel:   ["trackkalmanhit"]
+      FileName: "WithPandoraCosmicMCTrueTrack.txt"
+      MCTrackTag: "mcreco"
+      TrackModuleLabel:   ["pandoraCosmic"]
       TrackInstanceLabel: [""]
     }
   }

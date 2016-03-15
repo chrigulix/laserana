@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo $ART_INC > .kdev_include_patht
+echo $ART_INC > .kdev_include_paths
 echo $LARSIM_INC >> .kdev_include_paths
 echo $LARDATA_INC >> .kdev_include_paths
 echo $BOOST_INC >> .kdev_include_paths
