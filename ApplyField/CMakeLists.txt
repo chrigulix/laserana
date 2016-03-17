@@ -1,5 +1,6 @@
 
-simple_plugin(LaserReco "module"
+simple_plugin(ApplyField "module"
+			SpaceCharge_service
 			LaserObjects
 			Geometry_service
                         Geometry

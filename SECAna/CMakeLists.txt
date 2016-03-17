@@ -1,5 +1,5 @@
 
-simple_plugin(LaserReco "module"
+simple_plugin(SECAna "module"
 			LaserObjects
 			Geometry_service
                         Geometry

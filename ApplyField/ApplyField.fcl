@@ -18,6 +18,7 @@ services:
 services.TimeService.InheritClockConfig: false
 services.DatabaseUtil.ShouldConnect: false
 services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+#services.IChannelStatusService.ChannelStatusProvider.UseDB: true
 
 #source is now a root file
 source:
@@ -33,21 +34,29 @@ physics:
 {
  producers:
   {
-    LaserReco: 
+    trackkalmanhit: 
     {
-      module_type:         "LaserReco"
-      GenerateWireMap:     false
-      UPlaneHitThreshold:  -10.0
-      VPlaneHitThreshold:  10.0
-      YPlaneHitThreshold:  10.0
-      CalDataModuleLabel:  "daq"
-      MinAllowedChannelStatus: 4
+      module_type:        "ApplyField"
+      TrackModuleLabel:   "trackkalmanhit"
+      TrackInstanceLabel: "" 
+    }
+    cctrack:
+    {
+      module_type:        "ApplyField"
+      TrackModuleLabel:   "cctrack"
+      TrackInstanceLabel: ""
+    }
+    pandoraNu:
+    {
+      module_type:        "ApplyField"
+      TrackModuleLabel:   "pandoraNu"
+      TrackInstanceLabel: ""
     }
   }
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- reco: [ LaserReco ]
+ reco: [ trackkalmanhit, cctrack, pandoraNu ]
 
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -68,7 +77,7 @@ outputs:
    fileName:    "%ifb_%tc_LaserHitFinder.root"
    #sam_ignore:  true
    dataTier:    "reconstructed-2d"
-   outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
+   #outputCommands: ["keep *_*_*_*", "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
    compressionLevel: 1
  }
 }
