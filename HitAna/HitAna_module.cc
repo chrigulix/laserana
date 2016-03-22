@@ -448,7 +448,7 @@ namespace HitAna {
 //       if(VPlaneHit.PeakAmplitude() > 20 && fabs(VPlaneHit.RMS()) < 5 && fabs(VPlaneHit.EndTick()-VPlaneHit.StartTick()) > 5)
       else if(   VPlaneHit.PeakAmplitude()/(VPlaneHit.EndTick()-VPlaneHit.StartTick()) > 1 
 	      && VPlaneHit.EndTick()-VPlaneHit.StartTick() > 12
-	      &&(VPlaneHit.PeakAmplitude()/(VPlaneHit.RMS()*2.) > 5 || VPlaneHit.PeakAmplitude() > 1000)  
+	      &&(VPlaneHit.PeakAmplitude()/(VPlaneHit.RMS()*2.) > 2 || VPlaneHit.PeakAmplitude() > 1000)  
 	      && VPlaneHit.RMS()*2. > 4
 	      /*&& VPlaneHit.RMS()*2. < 20*/)
       {
