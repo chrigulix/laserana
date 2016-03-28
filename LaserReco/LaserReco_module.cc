@@ -491,10 +491,17 @@ namespace LaserReco {
     // Create Laser Hits out of Wires
     LaserObjects::LaserHits AllLaserHits(WireVec,fGeometry,fUVYThresholds);
     
+    // Filter for time matches of at least two planes
+    AllLaserHits.TimeMatchFilter();
+    
     // Fill plane specific hit vectors
     UHitVec = AllLaserHits.GetPlaneHits(0);
     VHitVec = AllLaserHits.GetPlaneHits(1);
     YHitVec = AllLaserHits.GetPlaneHits(2);
+    
+    std::cout << UHitVec->size() << std::endl;
+    std::cout << VHitVec->size() << std::endl;
+    std::cout << YHitVec->size() << std::endl;
     
     // Fill Hits of all planes into the new
     event.put(std::move(UHitVec), "UPlaneLaserHits");

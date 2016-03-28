@@ -1,5 +1,4 @@
 #include "LaserObjects/LaserHits.h"
-#include "LaserHits.h"
 
 
 LaserObjects::LaserHits::LaserHits(const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds)
@@ -139,7 +138,53 @@ std::map<float, recob::Hit> LaserObjects::LaserHits::FindSingleWireHits(const re
 
 void LaserObjects::LaserHits::TimeMatchFilter()
 {
+  std::array< std::vector<std::map<float, recob::Hit>>, 3 > NewHitMapsByPlane;
   
+  for(size_t plane_no =0; plane_no < fHitMapsByPlane.size(); plane_no++)
+  {
+    // Reserve memory space
+    NewHitMapsByPlane.at(plane_no).resize(fHitMapsByPlane.at(plane_no).size());
+  }
+  
+  float TimeMatchDifference = 3.0;
+
+  // Loop over first two planes
+  for(size_t plane_no =0; plane_no < fHitMapsByPlane.size() - 1; plane_no++)
+  {
+    // Loops over planes to compare 
+    for(size_t second_plane_no = plane_no + 1; second_plane_no < fHitMapsByPlane.size(); second_plane_no++)
+    {
+      // Loop over all Maps (channels) of the first plane
+      for(size_t  map_index = 0; map_index < fHitMapsByPlane.at(plane_no).size(); map_index++)
+      {
+	// Loop over all Maps (channels) of the second comparison plane
+	for(size_t  second_map_index = 0; second_map_index < fHitMapsByPlane.at(second_plane_no).size(); second_map_index++)
+	{
+	  // Loop over all hits in the first Map
+	  for(const auto& Hits : fHitMapsByPlane.at(plane_no).at(map_index))
+	  {
+	    // Loop over all Hit iterators of the second compairison set 
+	    // that are found within the a time match difference of the first hit
+	    for(auto Hit_Iter = fHitMapsByPlane.at(second_plane_no).at(second_map_index).lower_bound(Hits.first-TimeMatchDifference);
+	        Hit_Iter != fHitMapsByPlane.at(second_plane_no).at(second_map_index).end(); Hit_Iter++) 
+	    {
+	      // If the hit difference is bigger than the time match difference go out of the loop
+	      if(std::abs(Hit_Iter->first - Hits.first) > TimeMatchDifference) 
+	      {
+		break;
+	      }
+	      // If there are hits within this difference write them into a new selection of hits
+	      NewHitMapsByPlane.at(plane_no).at(map_index).insert(Hits);
+	      NewHitMapsByPlane.at(second_plane_no).at(second_map_index).insert(*Hit_Iter);
+	    }// loop over hits in comparison map
+	  }// loop over hits in the first map
+	}// loop over other maps
+      }// loop over all maps
+    }// loop over other planes
+  }// Loop over first two planes
+  
+  // Overwrite old data with filtered hits
+  fHitMapsByPlane = NewHitMapsByPlane;
 }
 
 
@@ -189,6 +234,10 @@ std::map<float, recob::Hit> LaserObjects::LaserHits::UPlaneHitFinder(const recob
       HitEnd = sample;
       BelowThreshold = false;
       
+      if( fabs(Peak) > 25 
+	  &&(fabs(Peak)/(HitEnd - HitStart) > 1 || fabs(Peak) > 1000) 
+	  && HitEnd - HitStart > 10)
+      {
       // Create a new map entry with hit time as a key
       LaserHits.emplace( std::make_pair(
 					(float) PeakTime,
@@ -213,6 +262,7 @@ std::map<float, recob::Hit> LaserObjects::LaserHits::UPlaneHitFinder(const recob
 			);
       
       HitIdx++;
+      }
     }
   }
   return LaserHits;
@@ -290,6 +340,16 @@ std::map<float, recob::Hit> LaserObjects::LaserHits::VPlaneHitFinder(const recob
       BelowThreshold = false;
       Handover_flag = false;
       
+//       std::cout << ((Peak-Dip)/(HitEnd-HitStart) << " "
+// 		<< Peak-Dip << " "
+// 		<< (Peak/(PeakTime-DipTime > 2 << " "
+// 		<< PeakTime-DipTime
+      
+      if( ((Peak-Dip)/(HitEnd-HitStart) > 1 || Peak-Dip > 1000)
+	  && HitEnd-HitStart > 12
+	  &&(Peak/(DipTime-PeakTime > 2 || Peak-Dip > 1000))  
+	  && DipTime-PeakTime > 4 )
+      {
       // Create a new map entry with hit time as a key
       LaserHits.emplace( std::make_pair(
                                         (float) HitTime,
@@ -313,6 +373,7 @@ std::map<float, recob::Hit> LaserObjects::LaserHits::VPlaneHitFinder(const recob
 			               ) 
 			);
       HitIdx++;
+      }
     }
   }
   return LaserHits;
@@ -363,6 +424,10 @@ std::map<float,recob::Hit> LaserObjects::LaserHits::YPlaneHitFinder(const recob:
       HitEnd = sample;
       AboveThreshold = false;
       
+      if( (Peak/(HitEnd-HitStart) > 1.5 || Peak > 1000)
+          && HitEnd-HitStart > 6 ) 
+      {
+      
       // Create a new map entry with hit time as a key
       LaserHits.emplace( std::make_pair(
 					(float) PeakTime,
@@ -387,6 +452,7 @@ std::map<float,recob::Hit> LaserObjects::LaserHits::YPlaneHitFinder(const recob:
 			);
       
       HitIdx++;
+      }
     }
   }
   return LaserHits;
