@@ -33,15 +33,6 @@ source:
 # Modules are grouped by type.
 physics:
 {
-
- #producers:
- {
-  LaserDataMerger:
-    {
-        TimemapFile:        "TimeMap.root"
-    }
- }
-
  #filters:
  #{ 
  # @table::microboone_reco_minimal_filters
@@ -52,6 +43,8 @@ physics:
     LaserDataMerger: 
     {
       module_type:         "LaserDataMerger"
+      ReadTimeMap:          false
+      TimemapFile:        "TimeMap.root"
     }
   }
 
