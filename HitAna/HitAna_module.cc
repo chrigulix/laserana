@@ -405,7 +405,7 @@ namespace HitAna {
       // Fill vector for T-Graph with cuts
 //       if( fabs(UPlaneHit.PeakAmplitude()) > 20 && fabs(UPlaneHit.RMS()) > 5)
       else if(   fabs(UPlaneHit.PeakAmplitude()) > 25 
-	      &&(fabs(UPlaneHit.PeakAmplitude())/(UPlaneHit.EndTick()-UPlaneHit.StartTick()) > 1 || UPlaneHit.PeakAmplitude() > 1000) 
+	      &&(fabs(UPlaneHit.PeakAmplitude())/(UPlaneHit.EndTick()-UPlaneHit.StartTick()) > 1 || fabs(UPlaneHit.PeakAmplitude()) > 1000) 
 	      && UPlaneHit.EndTick()-UPlaneHit.StartTick() > 10)
       {
 	HitWireNumber.push_back((float)UPlaneHit.WireID().Wire);
@@ -446,9 +446,9 @@ namespace HitAna {
       }
       // Fill vector for T-Graph with cuts
 //       if(VPlaneHit.PeakAmplitude() > 20 && fabs(VPlaneHit.RMS()) < 5 && fabs(VPlaneHit.EndTick()-VPlaneHit.StartTick()) > 5)
-      else if(   VPlaneHit.PeakAmplitude()/(VPlaneHit.EndTick()-VPlaneHit.StartTick()) > 1 
+      else if(  (VPlaneHit.PeakAmplitude()/(VPlaneHit.EndTick()-VPlaneHit.StartTick()) > 1 || VPlaneHit.PeakAmplitude() > 1000)
 	      && VPlaneHit.EndTick()-VPlaneHit.StartTick() > 12
-	      &&(VPlaneHit.PeakAmplitude()/(VPlaneHit.RMS()*2.) > 5 || VPlaneHit.PeakAmplitude() > 1000)  
+	      &&(VPlaneHit.PeakAmplitude()/(VPlaneHit.RMS()*2.) > 2 || VPlaneHit.PeakAmplitude() > 1000)  
 	      && VPlaneHit.RMS()*2. > 4
 	      /*&& VPlaneHit.RMS()*2. < 20*/)
       {
