@@ -108,7 +108,10 @@ namespace LaserDataMerger {
     unsigned int time_s;
     unsigned int time_ms;
     
+    bool fDebug = false;
+    
     bool fReadTimeMap = false;
+    bool fGenerateTimeInfo = false;
     std::string fTimemapFile;             ///< File containing information about timing
     
     unsigned short fLCSNumber;            ///< Laser Calibration System identifier ()
@@ -139,12 +142,13 @@ namespace LaserDataMerger {
   void LaserDataMerger::beginJob()
   {
     art::ServiceHandle<art::TFileService> tfs;
-    if (fReadTimeMap) {
+    if (fGenerateTimeInfo) {
       fTimeAnalysis = tfs->make<TTree>("TimeAnalysis", "TimeAnalysis");
       fTimeAnalysis->Branch("event",     &fEvent);
       fTimeAnalysis->Branch("time_s",    &time_s);
       fTimeAnalysis->Branch("time_ms",   &time_ms);
      }
+    else if (fReadTimeMap) {}
   }
   
   
@@ -160,6 +164,7 @@ namespace LaserDataMerger {
     // Read parameters from the .fcl file. The names in the arguments
     // to p.get<TYPE> must match names in the .fcl file.
     fReadTimeMap        = parameterSet.get< bool >("ReadTimeMap");
+    fGenerateTimeInfo   = parameterSet.get< bool >("GenerateTimeInfo");
     fTimemapFile        = parameterSet.get< std::string >("TimemapFile");
     //fLaserSystemFile        = parameterSet.get< bool        >("LaserSystemFile");
   }
@@ -167,14 +172,21 @@ namespace LaserDataMerger {
   //-----------------------------------------------------------------------
   void LaserDataMerger::produce(art::Event& event) 
   {
+   
+   if (fGenerateTimeInfo) {
+     
     fEvent = (unsigned int) event.id().event();
     time_s = (unsigned int) event.time().timeHigh();
     time_ms = (unsigned int) event.time().timeLow();
-  std::cout << "Event ID: " << fEvent << std::endl;
-  std::cout << "Event Time (low): " << time_s  << std::endl;
-  std::cout << "Event Time (hig): " << time_ms << std::endl;
     
-    if (fReadTimeMap) fTimeAnalysis->Fill();
+    if (fDebug) {
+      std::cout << "Event ID: " << fEvent << std::endl;
+      std::cout << "Event Time (low): " << time_s  << std::endl;
+      std::cout << "Event Time (hig): " << time_ms << std::endl;
+     }
+    fTimeAnalysis->Fill();
+    
+    }
   } // LaserDataMerger::analyze()
 
 } // namespace LaserDataMerger

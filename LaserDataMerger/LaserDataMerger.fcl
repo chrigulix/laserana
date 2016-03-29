@@ -10,7 +10,7 @@ services:
 {
   scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
-  TFileService:            { fileName: "reco_stage_1_hist.root" }
+  TFileService:            { fileName: "TimeInfo.root" }
   #Timing:                  {}
   #SimpleMemoryCheck:       { ignoreTotal: 1 } # default is one
   #RandomNumberGenerator:   {} #ART native random number generator
@@ -42,9 +42,10 @@ physics:
   {
     LaserDataMerger: 
     {
-      module_type:         "LaserDataMerger"
+      module_type:          "LaserDataMerger"
       ReadTimeMap:          false
-      TimemapFile:        "TimeMap.root"
+      GenerateTimeInfo:     true
+      TimemapFile:          "TimeMap.root"
     }
   }
 
