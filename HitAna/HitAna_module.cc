@@ -68,7 +68,7 @@
 // <http://root.cern.ch/root/html532/ClassIndex.html>
 #include "TH1.h"
 #include "TH2.h"
-#include "TGraph.h"
+#include "TGraphAsymmErrors.h"
 #include "TCanvas.h"
 #include "TTree.h"
 #include "TLorentzVector.h"
@@ -207,7 +207,10 @@ namespace HitAna {
     // The analysis routine, called once per event. 
     virtual void analyze(const art::Event& event) override;
     
-    virtual TGraph* FillGraph(const std::vector<float>& WireNumber, const std::vector<float>& PeakTime);
+    virtual TGraphAsymmErrors* FillGraph(const std::vector<float>& WireNumber, 
+					 const std::vector<float>& PeakTime,
+					 const std::vector<float>& LowerHitTimeErr,
+					 const std::vector<float>& UpperHitTimeErr);
     
 
   private:
@@ -257,9 +260,9 @@ namespace HitAna {
     TH2D* fYPeakDivWidth;
     
     // Hit Graphs for all planes
-    TGraph* fUPlaneHits;
-    TGraph* fVPlaneHits;
-    TGraph* fYPlaneHits;
+    TGraphAsymmErrors* fUPlaneHits;
+    TGraphAsymmErrors* fVPlaneHits;
+    TGraphAsymmErrors* fYPlaneHits;
     
     // Canvases for drawing hit graphs
     TCanvas* fUCanvas;
@@ -381,9 +384,14 @@ namespace HitAna {
     
     std::vector<float> HitWireNumber;
     std::vector<float> HitTimeBin;
+    std::vector<float> LowerHitTimeErr;
+    std::vector<float> UpperHitTimeErr;
     
     HitWireNumber.reserve(UPlaneHitVecHandle->size());
     HitTimeBin.reserve(UPlaneHitVecHandle->size());
+    LowerHitTimeErr.reserve(UPlaneHitVecHandle->size());
+    UpperHitTimeErr.reserve(UPlaneHitVecHandle->size());
+    
     
     // Loop over all u-plane hits
     for(auto const & UPlaneHit : *UPlaneHitVecHandle)
@@ -396,24 +404,33 @@ namespace HitAna {
       }
       // Fill vector for T-Graph with cuts
 //       if( fabs(UPlaneHit.PeakAmplitude()) > 20 && fabs(UPlaneHit.RMS()) > 5)
-      else if(fabs(UPlaneHit.PeakAmplitude())/(UPlaneHit.EndTick()-UPlaneHit.StartTick()) > 1 && UPlaneHit.EndTick()-UPlaneHit.StartTick() > 16)
+      else if(   fabs(UPlaneHit.PeakAmplitude()) > 25 
+	      &&(fabs(UPlaneHit.PeakAmplitude())/(UPlaneHit.EndTick()-UPlaneHit.StartTick()) > 1 || fabs(UPlaneHit.PeakAmplitude()) > 1000) 
+	      && UPlaneHit.EndTick()-UPlaneHit.StartTick() > 10)
       {
 	HitWireNumber.push_back((float)UPlaneHit.WireID().Wire);
 	HitTimeBin.push_back((float)UPlaneHit.PeakTime());
+	LowerHitTimeErr.push_back((float)UPlaneHit.PeakTime()-UPlaneHit.StartTick());
+	UpperHitTimeErr.push_back(UPlaneHit.EndTick()-(float)UPlaneHit.PeakTime());
       }
     }// end loop over u-plane hits entries
     
     if(HitWireNumber.size())
     {
       fUCanvas->cd();
-      fUPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
+      fUPlaneHits = FillGraph(HitWireNumber,HitTimeBin,LowerHitTimeErr,UpperHitTimeErr);
     }
     
     HitWireNumber.clear();
     HitTimeBin.clear();
+    LowerHitTimeErr.clear();
+    UpperHitTimeErr.clear();
+    
     
     HitWireNumber.reserve(VPlaneHitVecHandle->size());
     HitTimeBin.reserve(VPlaneHitVecHandle->size());
+    LowerHitTimeErr.reserve(VPlaneHitVecHandle->size());
+    UpperHitTimeErr.reserve(VPlaneHitVecHandle->size());
     
     // Loop over all v-plane hits 
     for(auto const & VPlaneHit : *VPlaneHitVecHandle)
@@ -429,25 +446,34 @@ namespace HitAna {
       }
       // Fill vector for T-Graph with cuts
 //       if(VPlaneHit.PeakAmplitude() > 20 && fabs(VPlaneHit.RMS()) < 5 && fabs(VPlaneHit.EndTick()-VPlaneHit.StartTick()) > 5)
-      else if(VPlaneHit.PeakAmplitude()/(VPlaneHit.EndTick()-VPlaneHit.StartTick()) > 1 && VPlaneHit.EndTick()-VPlaneHit.StartTick() > 12
-	 && VPlaneHit.PeakAmplitude()/(VPlaneHit.RMS()*2.) > 1 && VPlaneHit.RMS()*2. < 20)
+      else if(  (VPlaneHit.PeakAmplitude()/(VPlaneHit.EndTick()-VPlaneHit.StartTick()) > 1 || VPlaneHit.PeakAmplitude() > 1000)
+	      && VPlaneHit.EndTick()-VPlaneHit.StartTick() > 12
+	      &&(VPlaneHit.PeakAmplitude()/(VPlaneHit.RMS()*2.) > 2 || VPlaneHit.PeakAmplitude() > 1000)  
+	      && VPlaneHit.RMS()*2. > 4
+	      /*&& VPlaneHit.RMS()*2. < 20*/)
       {
 	HitWireNumber.push_back((float)VPlaneHit.WireID().Wire);
 	HitTimeBin.push_back((float)VPlaneHit.PeakTime());
+	LowerHitTimeErr.push_back((float)VPlaneHit.PeakTime()-VPlaneHit.StartTick());
+	UpperHitTimeErr.push_back(VPlaneHit.EndTick()-(float)VPlaneHit.PeakTime());
       }
     } // end loop over v-plane hits entries
     
     if(HitWireNumber.size())
     {
       fVCanvas->cd();
-      fVPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
+      fVPlaneHits = FillGraph(HitWireNumber,HitTimeBin,LowerHitTimeErr,UpperHitTimeErr);
     }
     
     HitWireNumber.clear();
     HitTimeBin.clear();
+    LowerHitTimeErr.clear();
+    UpperHitTimeErr.clear();
     
     HitWireNumber.reserve(YPlaneHitVecHandle->size());
     HitTimeBin.reserve(YPlaneHitVecHandle->size());
+    LowerHitTimeErr.reserve(YPlaneHitVecHandle->size());
+    UpperHitTimeErr.reserve(YPlaneHitVecHandle->size());
     
     // Loop over all y-plane hits
     for(auto const & YPlaneHit : *YPlaneHitVecHandle)
@@ -459,17 +485,21 @@ namespace HitAna {
 	fYPeakDivWidth->Fill(YPlaneHit.EndTick()-YPlaneHit.StartTick(),YPlaneHit.PeakAmplitude()/(YPlaneHit.EndTick()-YPlaneHit.StartTick()));
       }
       // Fill vector for T-Graph with cuts
-      else if(YPlaneHit.PeakAmplitude()/(YPlaneHit.EndTick()-YPlaneHit.StartTick()) > 1 && fabs(YPlaneHit.RMS()) > 5 /*&& fabs(YPlaneHit.RMS()) < 100*/)
+      else if(  (YPlaneHit.PeakAmplitude()/(YPlaneHit.EndTick()-YPlaneHit.StartTick()) > 1.5 || YPlaneHit.PeakAmplitude() > 1000)
+	      && YPlaneHit.EndTick()-YPlaneHit.StartTick() > 6
+	      /*&& fabs(YPlaneHit.RMS()) < 100*/)
       {
 	HitWireNumber.push_back((float)YPlaneHit.WireID().Wire);
 	HitTimeBin.push_back((float)YPlaneHit.PeakTime());
+	LowerHitTimeErr.push_back((float)YPlaneHit.PeakTime()-YPlaneHit.StartTick());
+	UpperHitTimeErr.push_back(YPlaneHit.EndTick()-(float)YPlaneHit.PeakTime());
       }
     }// end loop over y-plane hits entries
     
     if(HitWireNumber.size())
     {
       fYCanvas->cd();
-      fYPlaneHits = FillGraph(HitWireNumber,HitTimeBin);
+      fYPlaneHits = FillGraph(HitWireNumber,HitTimeBin,LowerHitTimeErr,UpperHitTimeErr);
     }
     
     while(fDrawHits)
@@ -505,12 +535,21 @@ namespace HitAna {
     
   } // HitAna::analyze()
   
-  TGraph* HitAna::FillGraph(const std::vector<float>& WireNumber, const std::vector<float>& PeakTime)
+  TGraphAsymmErrors* HitAna::FillGraph(const std::vector<float>& WireNumber, 
+				       const std::vector<float>& PeakTime,
+				       const std::vector<float>& LowerHitTimeErr,
+				       const std::vector<float>& UpperHitTimeErr)
   {
+    std::vector<float> WireError(WireNumber.size(),0.5);
+    
     TVectorT<float> TWireNumber(WireNumber.size(),WireNumber.data());
     TVectorT<float> TTimeBin(PeakTime.size(),PeakTime.data());
+    TVectorT<float> TLowerHitError(LowerHitTimeErr.size(),LowerHitTimeErr.data());
+    TVectorT<float> TUpperHitError(UpperHitTimeErr.size(),UpperHitTimeErr.data());
+    TVectorT<float> TWireError(WireError.size(),WireError.data());
     
-    return new TGraph(TWireNumber,TTimeBin);
+    
+    return new TGraphAsymmErrors(TWireNumber,TTimeBin,TWireError,TWireError,TLowerHitError,TUpperHitError);
   }
 
 } // namespace HitAna

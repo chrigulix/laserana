@@ -5,6 +5,11 @@ include_directories( $ENV{NUTOOLS_INC} )
 art_make( BASENAME_ONLY
 	  LIBRARY_NAME  LaserObjects
           LIB_LIBRARIES 
+			Geometry_service
+                        Geometry
+			RecoBaseArt
+			RecoBase
+			RawData
 			${ROOT_BASIC_LIB_LIST}
                         ${ROOT_EG}
         )
