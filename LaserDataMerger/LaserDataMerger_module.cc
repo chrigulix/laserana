@@ -37,8 +37,8 @@
 
 // Framework includes
 #include "art/Utilities/Exception.h"
-// #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/EDProducer.h"
+
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
@@ -77,12 +77,6 @@
 #include "LaserObjects/LaserBeam.h"
 
 
-namespace {
-  
-  
-} // local namespace
-
-
 namespace LaserDataMerger {
 
   class LaserDataMerger : public art::EDProducer
@@ -93,10 +87,12 @@ namespace LaserDataMerger {
 
     virtual void beginJob() /*override*/;
     
+    void beginRun(const art::Run& run);
+    
     virtual void endJob() /*override*/;
 
     virtual void reconfigure(fhicl::ParameterSet const& parameterSet) /*override*/;
-
+    
     // The analysis routine, called once per event. 
     virtual void produce (art::Event& event) /*override*/;
     
@@ -112,14 +108,14 @@ namespace LaserDataMerger {
     
     bool fReadTimeMap = false;
     bool fGenerateTimeInfo = false;
-    std::string fTimemapFile;             ///< File containing information about timing
+    std::string TimemapFile;             ///< File containing information about timing
+    
+    unsigned int RunNumber = 0;
     
     unsigned short fLCSNumber;            ///< Laser Calibration System identifier ()
  
   }; // class LaserDataMerger
   
-  DEFINE_ART_MODULE(LaserDataMerger)
-
 
   //-----------------------------------------------------------------------
   //-----------------------------------------------------------------------
@@ -128,7 +124,6 @@ namespace LaserDataMerger {
   //-----------------------------------------------------------------------
   // Constructor
   LaserDataMerger::LaserDataMerger(fhicl::ParameterSet const& pset)
-//     : EDProducer()
   {
 
     // Read in the parameters from the .fcl file.
@@ -141,31 +136,49 @@ namespace LaserDataMerger {
   //-----------------------------------------------------------------------
   void LaserDataMerger::beginJob()
   {
+    std::cout << "BEGIN JOB" << std::endl;
+  }
+  
+  void LaserDataMerger::beginRun(const art::Run& run) {
+    //RunNumber = run.run();
+    std::cout << "BEGIN RUN" << std::endl;
+    
     art::ServiceHandle<art::TFileService> tfs;
     if (fGenerateTimeInfo) {
+      // Initialize time info root file
       fTimeAnalysis = tfs->make<TTree>("TimeAnalysis", "TimeAnalysis");
       fTimeAnalysis->Branch("event",     &fEvent);
       fTimeAnalysis->Branch("time_s",    &time_s);
       fTimeAnalysis->Branch("time_ms",   &time_ms);
+      
      }
-    else if (fReadTimeMap) {}
+    else if (fReadTimeMap) {
+      
+      std::string TimemapFile = "TimeMap-" + std::to_string(RunNumber) + ".root";
+      
+      std::cout << "what" << TimemapFile << std::endl;
+      
+      TFile* InputFile = new TFile(TimemapFile.c_str(), "READ");
+      TTree *tree = (TTree*)InputFile->Get("tree");
+      
+      unsigned int map;
+      tree->SetBranchAddress("map", &map);
+      
+     }
+    return;
   }
-  
-  
+
   
   void  LaserDataMerger::endJob()
-  {
-      
+  {   
   }
    
- 
   void LaserDataMerger::reconfigure(fhicl::ParameterSet const& parameterSet)
   {
     // Read parameters from the .fcl file. The names in the arguments
     // to p.get<TYPE> must match names in the .fcl file.
     fReadTimeMap        = parameterSet.get< bool >("ReadTimeMap");
     fGenerateTimeInfo   = parameterSet.get< bool >("GenerateTimeInfo");
-    fTimemapFile        = parameterSet.get< std::string >("TimemapFile");
     //fLaserSystemFile        = parameterSet.get< bool        >("LaserSystemFile");
   }
 
@@ -174,7 +187,7 @@ namespace LaserDataMerger {
   {
    
    if (fGenerateTimeInfo) {
-     
+     // 
     fEvent = (unsigned int) event.id().event();
     time_s = (unsigned int) event.time().timeHigh();
     time_ms = (unsigned int) event.time().timeLow();
@@ -189,6 +202,8 @@ namespace LaserDataMerger {
     }
   } // LaserDataMerger::analyze()
 
+DEFINE_ART_MODULE(LaserDataMerger)
+  
 } // namespace LaserDataMerger
 
 #endif // LaserDataMerger_Module
