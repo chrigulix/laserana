@@ -108,7 +108,7 @@ namespace LaserDataMerger {
     
     bool fReadTimeMap = false;
     bool fGenerateTimeInfo = false;
-    std::string TimemapFile;             ///< File containing information about timing
+    std::string fTimemapFile;             ///< File containing information about timing
     
     unsigned int RunNumber = 0;
     
@@ -136,15 +136,9 @@ namespace LaserDataMerger {
   //-----------------------------------------------------------------------
   void LaserDataMerger::beginJob()
   {
-    std::cout << "BEGIN JOB" << std::endl;
-  }
-  
-  void LaserDataMerger::beginRun(const art::Run& run) {
-    //RunNumber = run.run();
-    std::cout << "BEGIN RUN" << std::endl;
-    
     art::ServiceHandle<art::TFileService> tfs;
     if (fGenerateTimeInfo) {
+       std::cout << "GENERATING TIME OUTPUT" << std::endl;
       // Initialize time info root file
       fTimeAnalysis = tfs->make<TTree>("TimeAnalysis", "TimeAnalysis");
       fTimeAnalysis->Branch("event",     &fEvent);
@@ -154,9 +148,14 @@ namespace LaserDataMerger {
      }
     else if (fReadTimeMap) {
       
-      std::string TimemapFile = "TimeMap-" + std::to_string(RunNumber) + ".root";
+      std::cout << "READING TIMEMAP" << std::endl;
       
-      std::cout << "what" << TimemapFile << std::endl;
+      // TODO: Build the filename from the run number provided by the beginRun()
+      // function. For now you have to provide the filename in the fhcl file.
+      //RunNumber = run.run();
+      //std::string TimemapFile = "TimeMap-" + std::to_string(RunNumber) + ".root";
+      
+      std::string TimemapFile = fTimemapFile;
       
       TFile* InputFile = new TFile(TimemapFile.c_str(), "READ");
       TTree *tree = (TTree*)InputFile->Get("tree");
@@ -166,6 +165,10 @@ namespace LaserDataMerger {
       
      }
     return;
+  }
+  
+  void LaserDataMerger::beginRun(const art::Run& run) {
+    std::cout << "BEGIN RUN" << std::endl;
   }
 
   
@@ -179,6 +182,7 @@ namespace LaserDataMerger {
     // to p.get<TYPE> must match names in the .fcl file.
     fReadTimeMap        = parameterSet.get< bool >("ReadTimeMap");
     fGenerateTimeInfo   = parameterSet.get< bool >("GenerateTimeInfo");
+    fTimemapFile        = parameterSet.get< std::string >("TimemapFile");
     //fLaserSystemFile        = parameterSet.get< bool        >("LaserSystemFile");
   }
 
