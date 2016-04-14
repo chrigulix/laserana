@@ -85,16 +85,16 @@ namespace LaserDataMerger {
  
     explicit LaserDataMerger(fhicl::ParameterSet const& parameterSet);
 
-    virtual void beginJob() /*override*/;
+    virtual void beginJob() override;
+        
+    virtual void beginRun(art::Run& run) override;
     
-    void beginRun(const art::Run& run);
-    
-    virtual void endJob() /*override*/;
+    virtual void endJob() override;
 
-    virtual void reconfigure(fhicl::ParameterSet const& parameterSet) /*override*/;
+    virtual void reconfigure(fhicl::ParameterSet const& parameterSet) override;
     
     // The analysis routine, called once per event. 
-    virtual void produce (art::Event& event) /*override*/;
+    virtual void produce (art::Event& event) override;
     
   private:
     
@@ -136,9 +136,14 @@ namespace LaserDataMerger {
   //-----------------------------------------------------------------------
   void LaserDataMerger::beginJob()
   {
-    art::ServiceHandle<art::TFileService> tfs;
+    
+  }
+  
+  void LaserDataMerger::beginRun(art::Run& run) {
+    
+   art::ServiceHandle<art::TFileService> tfs;
     if (fGenerateTimeInfo) {
-       std::cout << "GENERATING TIME OUTPUT" << std::endl;
+      std::cout << "GENERATING TIME OUTPUT" << std::endl;
       // Initialize time info root file
       fTimeAnalysis = tfs->make<TTree>("TimeAnalysis", "TimeAnalysis");
       fTimeAnalysis->Branch("event",     &fEvent);
@@ -148,27 +153,22 @@ namespace LaserDataMerger {
      }
     else if (fReadTimeMap) {
       
-      std::cout << "READING TIMEMAP" << std::endl;
-      
+           
       // TODO: Build the filename from the run number provided by the beginRun()
       // function. For now you have to provide the filename in the fhcl file.
-      //RunNumber = run.run();
-      //std::string TimemapFile = "TimeMap-" + std::to_string(RunNumber) + ".root";
+      RunNumber = run.run();
+      std::string TimemapFile = "TimeMap-" + std::to_string(RunNumber) + ".root";
       
-      std::string TimemapFile = fTimemapFile;
+      std::cout << "READING TIMEMAP FILE: " << TimemapFile << std::endl;
       
       TFile* InputFile = new TFile(TimemapFile.c_str(), "READ");
       TTree *tree = (TTree*)InputFile->Get("tree");
-      
+            
       unsigned int map;
       tree->SetBranchAddress("map", &map);
       
      }
     return;
-  }
-  
-  void LaserDataMerger::beginRun(const art::Run& run) {
-    std::cout << "BEGIN RUN" << std::endl;
   }
 
   
