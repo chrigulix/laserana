@@ -159,8 +159,7 @@ namespace LaserDataMerger {
       RunNumber = run.run();
       std::string TimemapFile = "TimeMap-" + std::to_string(RunNumber) + ".root";
       
-      std::cout << "READING TIMEMAP FILE: " << TimemapFile << std::endl;
-      
+      std::cout << "READING TIMEMAP FILE: " << TimemapFile << std::endl; 
       TFile* InputFile = new TFile(TimemapFile.c_str(), "READ");
       TTree *tree = (TTree*)InputFile->Get("tree");
             
