@@ -85,16 +85,16 @@ namespace LaserDataMerger {
  
     explicit LaserDataMerger(fhicl::ParameterSet const& parameterSet);
 
-    virtual void beginJob() override;
+    virtual void beginJob();
         
-    virtual void beginRun(art::Run& run) override;
+    virtual void beginRun(art::Run& run);
     
-    virtual void endJob() override;
+    virtual void endJob();
 
-    virtual void reconfigure(fhicl::ParameterSet const& parameterSet) override;
+    virtual void reconfigure(fhicl::ParameterSet const& parameterSet);
     
     // The analysis routine, called once per event. 
-    virtual void produce (art::Event& event) override;
+    virtual void produce (art::Event& event);
     
   private:
     
@@ -105,6 +105,9 @@ namespace LaserDataMerger {
     unsigned int time_ms;
     
     bool fDebug = false;
+    
+    std::map<unsigned int, unsigned int > timemap; ///< Key value: idex of event, corresponding index in laser data file
+    
     
     bool fReadTimeMap = false;
     bool fGenerateTimeInfo = false;
@@ -161,11 +164,20 @@ namespace LaserDataMerger {
       
       std::cout << "READING TIMEMAP FILE: " << TimemapFile << std::endl; 
       TFile* InputFile = new TFile(TimemapFile.c_str(), "READ");
-      TTree *tree = (TTree*)InputFile->Get("tree");
-            
-      unsigned int map;
-      tree->SetBranchAddress("map", &map);
+      TTree *tree = (TTree*)InputFile->Get("tree");      
       
+      unsigned int map_root;
+      tree->SetBranchAddress("map", &map_root);
+      Long64_t nentries = tree->GetEntries ();
+      
+      for (Long64_t idx = 0; idx < nentries; idx++) {
+        tree->GetEntry(idx);
+        
+        timemap.insert( std::pair<unsigned int, unsigned int>(idx, map_root));
+        
+        std::cout << "entry: " << timemap.at(idx) << std::endl; 
+        
+       }
      }
     return;
   }
