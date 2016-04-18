@@ -73,6 +73,9 @@
 #include <memory>
 #include <iterator>
 
+#include <fstream>
+#include <boost/tokenizer.hpp>
+
 // Laser Module Classes
 #include "LaserObjects/LaserBeam.h"
 
@@ -107,6 +110,7 @@ namespace LaserDataMerger {
 
 		std::map< Long64_t, unsigned int > timemap; ///< Key value: idex of event, corresponding index in laser data file
 
+        std::vector< std::vector<double> > laser_values; ///< line by line csv container
 
 		bool fReadTimeMap = false;
 		bool fGenerateTimeInfo = false;
@@ -157,8 +161,9 @@ namespace LaserDataMerger {
 
 		} else if (fReadTimeMap) {
 			RunNumber = run.run();
+            
+            // read the timemap root file (generated in python)
 			std::string TimemapFile = "TimeMap-" + std::to_string(RunNumber) + ".root";
-
 			std::cout << "READING TIMEMAP FILE: " << TimemapFile << std::endl;
 			TFile* InputFile = new TFile(TimemapFile.c_str(), "READ");
 			TTree *tree = (TTree*) InputFile->Get("tree");
@@ -172,6 +177,34 @@ namespace LaserDataMerger {
 				timemap.insert(std::pair< Long64_t, unsigned int >(idx, map_root));
 			}
 			delete InputFile;
+            
+            // read the laser data filevector< vector<double> > csv_values;
+            fstream file("Run-" + std::to_string(RunNumber) + ".txt", std::ios::in);
+
+            if (file)
+            {
+                typedef boost::tokenizer< boost::char_separator<char> > Tokenizer;
+                boost::char_separator<char> sep(",");
+                std::string line;
+
+                while (getline(file, line))
+                {
+                    Tokenizer info(line, sep);   // tokenize the line of data
+                    std::vector<double> values;
+
+                    for (Tokenizer::iterator it = info.begin(); it != info.end(); ++it)
+                    {
+                        // convert data into double value, and store
+                        values.push_back(std::strtod(it->c_str(), 0));
+                    }
+
+                    // store array of values
+                    laser_values.push_back(values);
+                    std::cout << laser_values.back().back() << std::endl;
+                }
+                
+            }
+            
 		}
 		return;
 	}
@@ -207,7 +240,7 @@ namespace LaserDataMerger {
 			fTimeAnalysis->Fill();
 
 		} else if (fReadTimeMap) {
-            std::cout << timemap.at(fEvent) << std::endl;
+            std::cout << "Event is" << timemap.at(fEvent) << std::endl;
             
         }
 	} // LaserDataMerger::analyze()
