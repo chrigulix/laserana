@@ -203,11 +203,8 @@ namespace LaserReco {
     // The analysis routine, called once per event. 
     virtual void produce (art::Event& event) override;
     
-    std::vector<recob::Hit> YPlaneHitFinder(recob::Wire const& SingleWire, raw::ChannelID_t const& Channel);
-    
-    std::vector<recob::Hit> UPlaneHitFinder(recob::Wire const& SingleWire, raw::ChannelID_t const& Channel);
-    
-    std::vector<recob::Hit> VPlaneHitFinder(recob::Wire const& SingleWire, raw::ChannelID_t const& Channel);
+    // Wire crossing finder
+    std::vector< std::pair<geo::WireID, geo::WireID> > CrossingWireRanges(geo::WireID WireID);
 
   private:
 
@@ -230,9 +227,7 @@ namespace LaserReco {
     
     std::string fFileName = "WireIndexMap.root";
     
-    std::map<unsigned int, unsigned int> UMap;
-    std::map<unsigned int, unsigned int> VMap;
-    std::map<unsigned int, unsigned int> YMap;
+    std::vector< std::map<unsigned int, unsigned int> > WireMaps;
     
     unsigned short fLCSNumber;
     
@@ -280,9 +275,9 @@ namespace LaserReco {
       InputFile->GetObject("VMap",pVMap);
       InputFile->GetObject("YMap",pYMap);
       
-      UMap = *pUMap;
-      VMap = *pVMap;
-      YMap = *pYMap;
+      WireMaps.push_back(std::move(*pUMap));
+      WireMaps.push_back(std::move(*pVMap));
+      WireMaps.push_back(std::move(*pYMap));
       
       delete pUMap;
       delete pVMap;
@@ -316,15 +311,6 @@ namespace LaserReco {
 //     C2 -> Print("Hits.png","png");
 //     delete C2;
 //     delete CollectionHits;
-    
-    if(fWireMapGenerator)
-    {
-      TFile* OutputFile = new TFile(fFileName.c_str(), "RECREATE");
-    
-      OutputFile->WriteObject(&UMap,"UMap");
-      OutputFile->WriteObject(&VMap,"VMap");
-      OutputFile->WriteObject(&YMap,"YMap");
-    }
   }
    
   //-----------------------------------------------------------------------
@@ -411,10 +397,10 @@ namespace LaserReco {
     if(fLCSNumber == 2)
     {
       // Loop over N collection wires at the edge of the TPC based on the wire map
-      for(unsigned int WireIndex = YMap.size()-1; WireIndex >= YMap.size() - 13; WireIndex--)
+      for(unsigned int WireIndex = WireMaps.back().size()-1; WireIndex >= WireMaps.back().size() - 13; WireIndex--)
       {
         // Get the raw data for this particular wire
-        auto RawDigit = DigitVecHandle->at(YMap.at(WireIndex));
+        auto RawDigit = DigitVecHandle->at(WireMaps.back().at(WireIndex));
 	
 	// Get Channel number
 	raw::ChannelID_t channel = RawDigit.Channel();
@@ -492,7 +478,7 @@ namespace LaserReco {
     LaserObjects::LaserHits AllLaserHits(WireVec,fGeometry,fUVYThresholds);
     
     // Filter for time matches of at least two planes
-    AllLaserHits.TimeMatchFilter();
+//     AllLaserHits.TimeMatchFilter();
     
     // Fill plane specific hit vectors
     UHitVec = AllLaserHits.GetPlaneHits(0);
@@ -508,6 +494,58 @@ namespace LaserReco {
     event.put(std::move(VHitVec), "VPlaneLaserHits");
     event.put(std::move(YHitVec), "YPlaneLaserHits");
   } // LaserReco::analyze()
+  
+  // Gives out a vector of WireIDs which cross a certain input wire
+  std::vector< std::pair<geo::WireID, geo::WireID> > LaserReco::CrossingWireRanges(geo::WireID WireID)
+  {
+    // Initialize the return pair vector
+    std::vector< std::pair<geo::WireID, geo::WireID> > CrossingWireRangeVec;
+    
+    // Initialize start and end point of wire
+    double Start[3], End[3];
+    
+    // Fill the wire End points
+    fGeometry->WireEndPoints(WireID, Start, End);
+    
+    // Loop over target plane number
+    for(unsigned int plane_no = 0; plane_no < 3; plane_no++)
+    {
+      // Search for crossing wires only if the aren't on the same plane
+      if(plane_no != WireID.Plane)
+      {
+	// Generate PlaneID for microboone (cryostatID = 0, TPCID = 0, plane number)
+	auto TargetPlaneID = geo::PlaneID(0,0,plane_no);
+	
+	// Get the closest wire on the target plane to the wire start position
+	auto FirstWireID = fGeometry->NearestWireID(Start, TargetPlaneID);
+	
+	// Get the closest wire on the target plane to the wire end postion
+	auto LastWireID = fGeometry->NearestWireID(End, TargetPlaneID);
+	
+	// Check if wires are in right order
+	if(FirstWireID.Wire > LastWireID.Wire)
+	{
+	  // Swap them if order is decending
+	  std::swap(FirstWireID, LastWireID);
+	}
+	
+	// Generate a dummy intersection coordinate, because shit only works that way (eye roll)
+	geo::WireIDIntersection DummyMcDumbFace;
+	
+	// Check if first and last wires are crossing, if not take one next to them
+	if( !fGeometry->WireIDsIntersect(WireID, FirstWireID, DummyMcDumbFace) )
+	{
+	  ++(FirstWireID.Wire);
+	}
+	if( !fGeometry->WireIDsIntersect(WireID, LastWireID, DummyMcDumbFace) )
+	{
+	  --(LastWireID.Wire);
+	}
+	CrossingWireRangeVec.push_back( std::make_pair(FirstWireID,LastWireID) );
+      }
+    }
+    return CrossingWireRangeVec;
+  }
 
 } // namespace LaserReco
 
