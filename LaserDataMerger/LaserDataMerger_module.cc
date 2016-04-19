@@ -80,172 +80,215 @@
 #include "LaserObjects/LaserBeam.h"
 
 
-namespace LaserDataMerger {
+namespace LaserDataMerger
+{
 
-	class LaserDataMerger : public art::EDProducer {
-	public:
+class LaserDataMerger : public art::EDProducer
+{
+public:
 
-		explicit LaserDataMerger(fhicl::ParameterSet const& parameterSet);
+    explicit LaserDataMerger(fhicl::ParameterSet const& parameterSet);
 
-		virtual void beginJob() override;
+    virtual void beginJob() override;
 
-		virtual void beginRun(art::Run& run);
+    virtual void beginRun(art::Run& run);
 
-		virtual void endJob() override;
+    virtual void endJob() override;
 
-		virtual void reconfigure(fhicl::ParameterSet const& parameterSet) override;
+    virtual void reconfigure(fhicl::ParameterSet const& parameterSet) override;
 
-		// The analysis routine, called once per event. 
-		virtual void produce(art::Event& event) override;
+    // The analysis routine, called once per event. 
+    virtual void produce(art::Event& event) override;
 
-	private:
+private:
 
-		// All this goes into the root tree
-		TTree* fTimeAnalysis;
-		unsigned int fEvent;
-		unsigned int time_s;
-		unsigned int time_ms;
+    // All this goes into the root tree
+    TTree* fTimeAnalysis;
+    unsigned int fEvent;
+    unsigned int time_s;
+    unsigned int time_ms;
 
-		bool fDebug = false;
+    bool fDebug = false;
 
-		std::map< Long64_t, unsigned int > timemap; ///< Key value: idex of event, corresponding index in laser data file
+    std::map< Long64_t, unsigned int > timemap;         ///< Key value: index of event, corresponding index in laser data file
 
-        std::vector< std::vector<double> > laser_values; ///< line by line csv container
+    std::vector< std::vector<double> > laser_values;    ///< line by line csv container
 
-		bool fReadTimeMap = false;
-		bool fGenerateTimeInfo = false;
-		std::string fTimemapFile; ///< File containing information about timing
+    bool fReadTimeMap = false;
+    bool fGenerateTimeInfo = false;
+    std::string fTimemapFile; ///< File containing information about timing
 
-		unsigned int RunNumber = 0;
+    unsigned int RunNumber = 0;
 
-		unsigned short fLCSNumber; ///< Laser Calibration System identifier ()
+    unsigned short fLCSNumber; ///< Laser Calibration System identifier ()
+    
+    enum DataStructure {
+        LaserSystem,                ///< which laser system: 1 or 2
+        Status,                     ///< not defined yet
+        RotaryPosition,             ///< Position Rotary Heidenhain Encoder
+        LinearPosition,             ///< Position Linear Heidenhain Encoder
+        AttenuatorPosition,         ///< Position Attenuator Watt Pilot
+        AperturePosition,           ///< Position Iris Standa            
+        TriggerTimeSec,             ///< Epoch time (in seconds) of Laser Server at receive of Encoder data
+        TriggerTimeUsec,            ///< Fraction to add to Epoch time in microseconds
+        TriggerCount,               ///< Trigger Counter by Heidenhain Encoder
+        RunControlStep,             ///< Run Counter of step in calibration run
+        LaserShotCounter,           ///< umber of pulses shot with UV laser (not yet read out)
+        MirrorBoxAxis1,             ///< Motorized Mirror Zaber T-OMG at box
+        MirrorBoxAxis2,             ///< Motorized Mirror Zaber T-OMG at box
+        MirrorFeedthroughAxis1,     ///< Motorized Mirror Zaber T-OMG at flange
+        MirrorFeedthroughAxis2      ///< Motorized Mirror Zaber T-OMG at flange
+    };
 
-	}; // class LaserDataMerger
+}; // class LaserDataMerger
 
 
-	//-----------------------------------------------------------------------
-	//-----------------------------------------------------------------------
-	// class implementation
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+// class implementation
 
-	//-----------------------------------------------------------------------
-	// Constructor
+//-----------------------------------------------------------------------
+// Constructor
 
-	LaserDataMerger::LaserDataMerger(fhicl::ParameterSet const& pset)
-	{
+LaserDataMerger::LaserDataMerger(fhicl::ParameterSet const& pset)
+{
 
-		// Read in the parameters from the .fcl file.
-		this->reconfigure(pset);
+    // Read in the parameters from the .fcl file.
+    this->reconfigure(pset);
 
-		//produces< std::vector<recob::Wire> >("blibla");
-	}
+    //produces< std::vector<recob::Wire> >("blibla");
+}
 
 
-	//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
-	void LaserDataMerger::beginJob()
-	{
+void LaserDataMerger::beginJob()
+{
 
-	}
+}
 
-	void LaserDataMerger::beginRun(art::Run& run)
-	{
+void LaserDataMerger::beginRun(art::Run& run)
+{
 
-		art::ServiceHandle<art::TFileService> tfs;
-		if (fGenerateTimeInfo) {
-			std::cout << "GENERATING TIME OUTPUT" << std::endl;
-			// Initialize time info root file
-			fTimeAnalysis = tfs->make<TTree>("TimeAnalysis", "TimeAnalysis");
-			fTimeAnalysis->Branch("event", &fEvent);
-			fTimeAnalysis->Branch("time_s", &time_s);
-			fTimeAnalysis->Branch("time_ms", &time_ms);
+    art::ServiceHandle<art::TFileService> tfs;
+    if (fGenerateTimeInfo)
+    {
+        std::cout << "GENERATING TIME OUTPUT" << std::endl;
+        // Initialize time info root file
+        fTimeAnalysis = tfs->make<TTree>("TimeAnalysis", "TimeAnalysis");
+        fTimeAnalysis->Branch("event", &fEvent);
+        fTimeAnalysis->Branch("time_s", &time_s);
+        fTimeAnalysis->Branch("time_ms", &time_ms);
 
-		} else if (fReadTimeMap) {
-			RunNumber = run.run();
+    }
+    else if (fReadTimeMap)
+    {
+        RunNumber = run.run();
+
+        // read the timemap root file (generated in python)
+        std::string TimemapFile = "TimeMap-" + std::to_string(RunNumber) + ".root";
+        std::cout << "READING TIMEMAP FILE: " << TimemapFile << std::endl;
+        TFile* InputFile = new TFile(TimemapFile.c_str(), "READ");
+        TTree *tree = (TTree*) InputFile->Get("tree");
+
+        unsigned int map_root;
+        tree->SetBranchAddress("map", &map_root);
+        Long64_t nentries = tree->GetEntries();
+
+        for (Long64_t idx = 0; idx < nentries; idx++)
+        {
+            tree->GetEntry(idx);
+            timemap.insert(std::pair< Long64_t, unsigned int >(idx, map_root));
             
-            // read the timemap root file (generated in python)
-			std::string TimemapFile = "TimeMap-" + std::to_string(RunNumber) + ".root";
-			std::cout << "READING TIMEMAP FILE: " << TimemapFile << std::endl;
-			TFile* InputFile = new TFile(TimemapFile.c_str(), "READ");
-			TTree *tree = (TTree*) InputFile->Get("tree");
+            if (fDebug){
+                std::cout << "idx: " << idx << " mapped to: " << timemap.at(idx) << std::endl;
+            }
+        }
+        delete InputFile;
 
-			unsigned int map_root;
-			tree->SetBranchAddress("map", &map_root);
-			Long64_t nentries = tree->GetEntries();
 
-			for (Long64_t idx = 0; idx < nentries; idx++) {
-				tree->GetEntry(idx);
-				timemap.insert(std::pair< Long64_t, unsigned int >(idx, map_root));
-			}
-			delete InputFile;
-            
-            // read the laser data filevector< vector<double> > csv_values;
-            fstream file("Run-" + std::to_string(RunNumber) + ".txt", std::ios::in);
+        // read the laser data file into a vector
+        std::string LaserFile = "Run-" + std::to_string(RunNumber) + ".txt";
+        fstream file(LaserFile, std::ios::in);
 
-            if (file)
+        if (file)
+        {
+            typedef boost::tokenizer< boost::char_separator<char> > Tokenizer;
+            boost::char_separator<char> sep(" ");
+            std::string line;
+
+            while (getline(file, line))
             {
-                typedef boost::tokenizer< boost::char_separator<char> > Tokenizer;
-                boost::char_separator<char> sep(",");
-                std::string line;
+                Tokenizer info(line, sep); // tokenize the line of data
+                std::vector<double> values;
 
-                while (getline(file, line))
+                for (Tokenizer::iterator it = info.begin(); it != info.end(); ++it)
                 {
-                    Tokenizer info(line, sep);   // tokenize the line of data
-                    std::vector<double> values;
+                    // convert data into double value, and store
+                    values.push_back(std::strtod(it->c_str(), 0));
+                }
 
-                    for (Tokenizer::iterator it = info.begin(); it != info.end(); ++it)
-                    {
-                        // convert data into double value, and store
-                        values.push_back(std::strtod(it->c_str(), 0));
+                // store array of values
+                laser_values.push_back(values);
+                
+                if (fDebug) {
+                    for (unsigned int idx = 0; idx < 15; idx++){
+                        std::cout << laser_values.back().at(idx) << " ";
                     }
-
-                    // store array of values
-                    laser_values.push_back(values);
-                    std::cout << laser_values.back().back() << std::endl;
+                    std::cout << std::endl;
                 }
                 
             }
-            
-		}
-		return;
-	}
-
-	void LaserDataMerger::endJob()
-	{
-	}
-
-	void LaserDataMerger::reconfigure(fhicl::ParameterSet const& parameterSet)
-	{
-		// Read parameters from the .fcl file. The names in the arguments
-		// to p.get<TYPE> must match names in the .fcl file.
-		fReadTimeMap = parameterSet.get< bool >("ReadTimeMap");
-		fGenerateTimeInfo = parameterSet.get< bool >("GenerateTimeInfo");
-		fTimemapFile = parameterSet.get< std::string >("TimemapFile");
-		//fLaserSystemFile        = parameterSet.get< bool        >("LaserSystemFile");
-	}
-
-	//-----------------------------------------------------------------------
-
-	void LaserDataMerger::produce(art::Event& event)
-	{
-        fEvent = (unsigned int) event.id().event();
-		if (fGenerateTimeInfo) {
-			time_s = (unsigned int) event.time().timeHigh();
-			time_ms = (unsigned int) event.time().timeLow();
-
-			if (fDebug) {
-				std::cout << "Event ID: " << fEvent << std::endl;
-				std::cout << "Event Time (low): " << time_s << std::endl;
-				std::cout << "Event Time (hig): " << time_ms << std::endl;
-			}
-			fTimeAnalysis->Fill();
-
-		} else if (fReadTimeMap) {
-            std::cout << "Event is" << timemap.at(fEvent) << std::endl;
-            
+            file.close();
         }
-	} // LaserDataMerger::analyze()
+        else
+        {
+            std::cerr << "Error: Unable to open file " << LaserFile << std::endl;
+        }
+    }
+    return;
+}
 
-	DEFINE_ART_MODULE(LaserDataMerger)
+void LaserDataMerger::endJob()
+{
+}
+
+void LaserDataMerger::reconfigure(fhicl::ParameterSet const& parameterSet)
+{
+    // Read parameters from the .fcl file. The names in the arguments
+    // to p.get<TYPE> must match names in the .fcl file.
+    fReadTimeMap = parameterSet.get< bool >("ReadTimeMap");
+    fGenerateTimeInfo = parameterSet.get< bool >("GenerateTimeInfo");
+    fTimemapFile = parameterSet.get< std::string >("TimemapFile");
+    //fLaserSystemFile        = parameterSet.get< bool        >("LaserSystemFile");
+}
+
+//-----------------------------------------------------------------------
+
+void LaserDataMerger::produce(art::Event& event)
+{
+    fEvent = (unsigned int) event.id().event();
+    if (fGenerateTimeInfo)
+    {
+        time_s = (unsigned int) event.time().timeHigh();
+        time_ms = (unsigned int) event.time().timeLow();
+
+        if (fDebug)
+        {
+            std::cout << "Event ID: " << fEvent << std::endl;
+            std::cout << "Event Time (low): " << time_s << std::endl;
+            std::cout << "Event Time (hig): " << time_ms << std::endl;
+        }
+        fTimeAnalysis->Fill();
+
+    }
+    else if (fReadTimeMap)
+    {
+        if (true) std::cout << "Event idx: " << fEvent << " Laser idx: " << timemap.at(fEvent) << std::endl;
+    }
+} // LaserDataMerger::analyze()
+
+DEFINE_ART_MODULE(LaserDataMerger)
 
 } // namespace LaserDataMerger
 
