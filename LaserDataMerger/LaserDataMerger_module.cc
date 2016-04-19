@@ -66,6 +66,7 @@
 // C++ Includes
 #include <map>
 #include <vector>
+#include <array>
 #include <string>
 #include <cmath>
 #include <typeinfo>
@@ -102,43 +103,58 @@ public:
 
 private:
 
+    bool DEBUG = false;
+
     // All this goes into the root tree
     TTree* fTimeAnalysis;
     unsigned int fEvent;
     unsigned int time_s;
     unsigned int time_ms;
 
-    bool fDebug = false;
-
-    std::map< Long64_t, unsigned int > timemap;         ///< Key value: index of event, corresponding index in laser data file
-
-    std::vector< std::vector<double> > laser_values;    ///< line by line csv container
+    std::map< Long64_t, unsigned int > timemap; ///< Key value: index of event, corresponding index in laser data file
+    std::vector< std::vector<float> > laser_values; ///< line by line csv container
 
     bool fReadTimeMap = false;
     bool fGenerateTimeInfo = false;
     std::string fTimemapFile; ///< File containing information about timing
 
-    unsigned int RunNumber = 0;
+    float fTickToAngle;     ///< Conversion constant from linear tick to angle (Heidenhain linear encoder)        
+    std::array<float, 2> fDirCalLCS1 = {{-999., 999.}};  ///< Position calibration for LCS1 and LCS2:
+                                                        ///< The first value stands for the offset of the horizontal
+                                                        ///< encoder reading with respect to a straight line along the 
+                                                        ///< z-axis int the x-z plane (top view).
+                                                        ///< The second value stands for the offset of the vertical 
+                                                        ///< encoder reading with respect to a line along the z-axis in the
+                                                        ///< y-z plane (side view).
+    TVector2 DirCalLCS1;
+    std::array<float, 2> fDirCalLCS2 = {{-999., 999.}};  ///< Same as above but for other laser system
+    TVector2 DirCalLCS2;
+    std::array<float, 3> fPositionLCS1 = {{-999., -999., -999}};   ///< Mirror Position of LCS1
+    TVector3 PositionLCS1;
+    std::array<float, 3> fPositionLCS2 = {{-999., -999., -999}};   ///< Mirror Position of LCS2
+    TVector3 PositionLCS2;
 
-    unsigned short fLCSNumber; ///< Laser Calibration System identifier ()
-    
-    enum DataStructure {
-        LaserSystem,                ///< which laser system: 1 or 2
-        Status,                     ///< not defined yet
-        RotaryPosition,             ///< Position Rotary Heidenhain Encoder
-        LinearPosition,             ///< Position Linear Heidenhain Encoder
-        AttenuatorPosition,         ///< Position Attenuator Watt Pilot
-        AperturePosition,           ///< Position Iris Standa            
-        TriggerTimeSec,             ///< Epoch time (in seconds) of Laser Server at receive of Encoder data
-        TriggerTimeUsec,            ///< Fraction to add to Epoch time in microseconds
-        TriggerCount,               ///< Trigger Counter by Heidenhain Encoder
-        RunControlStep,             ///< Run Counter of step in calibration run
-        LaserShotCounter,           ///< umber of pulses shot with UV laser (not yet read out)
-        MirrorBoxAxis1,             ///< Motorized Mirror Zaber T-OMG at box
-        MirrorBoxAxis2,             ///< Motorized Mirror Zaber T-OMG at box
-        MirrorFeedthroughAxis1,     ///< Motorized Mirror Zaber T-OMG at flange
-        MirrorFeedthroughAxis2      ///< Motorized Mirror Zaber T-OMG at flange
+
+    enum DataStructure
+    {
+        LaserSystem, ///< which laser system: 1 or 2
+        Status, ///< not defined yet
+        RotaryPosition, ///< Position Rotary Heidenhain Encoder
+        LinearPosition, ///< Position Linear Heidenhain Encoder
+        AttenuatorPosition, ///< Position Attenuator Watt Pilot
+        AperturePosition, ///< Position Iris Standa            
+        TriggerTimeSec, ///< Epoch time (in seconds) of Laser Server at receive of Encoder data
+        TriggerTimeUsec, ///< Fraction to add to Epoch time in microseconds
+        TriggerCount, ///< Trigger Counter by Heidenhain Encoder
+        RunControlStep, ///< Run Counter of step in calibration run
+        LaserShotCounter, ///< umber of pulses shot with UV laser (not yet read out)
+        MirrorBoxAxis1, ///< Motorized Mirror Zaber T-OMG at box
+        MirrorBoxAxis2, ///< Motorized Mirror Zaber T-OMG at box
+        MirrorFeedthroughAxis1, ///< Motorized Mirror Zaber T-OMG at flange
+        MirrorFeedthroughAxis2 ///< Motorized Mirror Zaber T-OMG at flange
     };
+    unsigned int LCS_ID = -1;
+    unsigned int RunNumber = 0;
 
 }; // class LaserDataMerger
 
@@ -199,8 +215,9 @@ void LaserDataMerger::beginRun(art::Run& run)
         {
             tree->GetEntry(idx);
             timemap.insert(std::pair< Long64_t, unsigned int >(idx, map_root));
-            
-            if (fDebug){
+
+            if (DEBUG)
+            {
                 std::cout << "idx: " << idx << " mapped to: " << timemap.at(idx) << std::endl;
             }
         }
@@ -220,25 +237,28 @@ void LaserDataMerger::beginRun(art::Run& run)
             while (getline(file, line))
             {
                 Tokenizer info(line, sep); // tokenize the line of data
-                std::vector<double> values;
+                std::vector<float> values;
 
                 for (Tokenizer::iterator it = info.begin(); it != info.end(); ++it)
                 {
                     // convert data into double value, and store
-                    values.push_back(std::strtod(it->c_str(), 0));
+                    values.push_back(std::strtof(it->c_str(), 0));
                 }
 
                 // store array of values
                 laser_values.push_back(values);
-                
-                if (fDebug) {
-                    for (unsigned int idx = 0; idx < 15; idx++){
+
+                if (DEBUG)
+                {
+                    for (unsigned int idx = 0; idx < 15; idx++)
+                    {
                         std::cout << laser_values.back().at(idx) << " ";
                     }
                     std::cout << std::endl;
                 }
-                
+
             }
+            LCS_ID = laser_values.back().at(DataStructure::LaserSystem);
             file.close();
         }
         else
@@ -260,6 +280,21 @@ void LaserDataMerger::reconfigure(fhicl::ParameterSet const& parameterSet)
     fReadTimeMap = parameterSet.get< bool >("ReadTimeMap");
     fGenerateTimeInfo = parameterSet.get< bool >("GenerateTimeInfo");
     fTimemapFile = parameterSet.get< std::string >("TimemapFile");
+    fTickToAngle = parameterSet.get< float >("TickToAngle");
+    fDirCalLCS1 = parameterSet.get< std::array<float, 2> >("DirCalLCS1");
+    fDirCalLCS2 = parameterSet.get< std::array<float, 2> >("DirCalLCS2");
+    fPositionLCS1 = parameterSet.get< std::array<float, 3> >("PositionLCS1");
+    fPositionLCS2 = parameterSet.get< std::array<float, 3> >("PositionLCS2");
+    
+    // Convert calibration angles to TVector2
+    DirCalLCS1.Set(fDirCalLCS1[0], fDirCalLCS1[1]);
+    DirCalLCS2.Set(fDirCalLCS2[0], fDirCalLCS2[1]);
+    
+    // Convert the Positions to a TVector3
+    PositionLCS1.SetXYZ(fPositionLCS1[0], fPositionLCS1[1], fPositionLCS1[2]);
+    PositionLCS2.SetXYZ(fPositionLCS2[0], fPositionLCS2[1], fPositionLCS2[2]);
+
+
     //fLaserSystemFile        = parameterSet.get< bool        >("LaserSystemFile");
 }
 
@@ -273,7 +308,7 @@ void LaserDataMerger::produce(art::Event& event)
         time_s = (unsigned int) event.time().timeHigh();
         time_ms = (unsigned int) event.time().timeLow();
 
-        if (fDebug)
+        if (DEBUG)
         {
             std::cout << "Event ID: " << fEvent << std::endl;
             std::cout << "Event Time (low): " << time_s << std::endl;
@@ -284,9 +319,31 @@ void LaserDataMerger::produce(art::Event& event)
     }
     else if (fReadTimeMap)
     {
-        if (true) std::cout << "Event idx: " << fEvent << " Laser idx: " << timemap.at(fEvent) << std::endl;
+        if (DEBUG) std::cout << "Event idx: " << fEvent << " Laser idx: " << timemap.at(fEvent) << std::endl;
+        TVector2 ReadAngles(laser_values.at(fEvent).at(DataStructure::RotaryPosition),
+                            laser_values.at(fEvent).at(DataStructure::LinearPosition));
+        TVector3 Position;
+        TVector2 CalibratedAngles;
+        // calculate the 
+        if (LCS_ID == 1){ // The downstream laser system
+            CalibratedAngles = (ReadAngles - DirCalLCS1);
+            Position = PositionLCS1;
+        }
+        else if (LCS_ID == 2) { // The upstram laser system
+            CalibratedAngles = (ReadAngles - DirCalLCS2);
+            Position = PositionLCS2;
+        }
+        else {
+            std::cerr << "Laser System not recognized " << std::endl;
+        }
+        
+        lasercal::LaserBeam Laser(Position, CalibratedAngles);
+        
+        //for (auto i : fPositionLCS1)
+        //    std::cout << i << std::endl;
+        
     }
-} 
+}
 
 DEFINE_ART_MODULE(LaserDataMerger)
 

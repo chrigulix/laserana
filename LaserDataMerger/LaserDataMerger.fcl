@@ -46,6 +46,13 @@ physics:
       ReadTimeMap:          true
       GenerateTimeInfo:     false
       TimemapFile:          "TimeMap-3165.root"
+      # These are all calibration values, only change them if you know whar you
+      # are doing!
+      TickToAngle:          1                   # conversion constant for linear encoder
+      DirCalLCS1:           [1. , 2.]           # Direction Calibration
+      DirCalLCS2:           [3. , 4.]           #
+      PositionLCS1:         [128. , 0., -20.]   # Position of Mirror
+      PositionLCS2:         [128. , 0., 1020.]  #
     }
   }
 
