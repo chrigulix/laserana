@@ -95,7 +95,7 @@ namespace lasercal
      * This constructor loads the start position and two angles given by the mirror angles
      * and calculates the direction vector
      */
-      LaserBeam(TVector3& LaserPosition, std::array<float,2>& LaserAngles); 
+      LaserBeam(TVector3& LaserPosition, TVector2& LaserAngles); 
       
      
      /**
