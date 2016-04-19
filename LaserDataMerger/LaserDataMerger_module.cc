@@ -286,7 +286,7 @@ void LaserDataMerger::produce(art::Event& event)
     {
         if (true) std::cout << "Event idx: " << fEvent << " Laser idx: " << timemap.at(fEvent) << std::endl;
     }
-} // LaserDataMerger::analyze()
+} 
 
 DEFINE_ART_MODULE(LaserDataMerger)
 
