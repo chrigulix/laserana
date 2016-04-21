@@ -15,11 +15,14 @@
 #include <utility>
 #include <string>
 #include <iomanip>
+#include <ctime>
 
 /// Root library
 #include <TH3.h>
 #include <TVector3.h>
 #include <TF1.h>
+
+#include "boost/date_time/posix_time/posix_time_types.hpp"
 
 #ifndef LASERBEAM_H
 #define LASERBEAM_H
@@ -48,8 +51,9 @@ namespace lasercal
       TVector3 fDirectionError;
       TVector3 fEntryPointError;
       TVector3 fExitPointError;
+            
+      boost::posix_time::ptime fTime;
       
-      float fTime;
       float fAperturePosition;
 
       // Power profile funtion (power along the beam)
@@ -87,15 +91,16 @@ namespace lasercal
       
      /**
      * @brief Constructor: sets laser position and laser direction
-     * @param LaserAngles start position of the laser 
-     * @param LaserDirection direction of the laser beam
+     * @param LaserPosition start position of the laser 
+     * @param azimuthal angle (x-axis along straight shot trough TPC)
+     * @param polar angle (z-axis pointing upward)
      * @see SetPosition
      * @see SetDirection
      
      * This constructor loads the start position and two angles given by the mirror angles
      * and calculates the direction vector
      */
-      LaserBeam(TVector3& LaserPosition, TVector2& LaserAngles); 
+      LaserBeam(TVector3& LaserPosition, float Phi, float Theta); 
       
      
      /**
@@ -114,15 +119,25 @@ namespace lasercal
      * @brief Sets laser direction
      * @param LaserAngles reads the angles of the laser beam and calculates the direction
      */
-      void SetDirection(std::array<float,2> LaserAngles);
+      void SetDirection(float Phi, float Theta);
+      
+      void SetTime(unsigned int sec, unsigned int usec);
       
       void SetErrors();//Error values
+      
+    /**
+     * @brief Sets the attenuator value of the laser beam
+     * @param Set value of the attenuator position in %
+     */    
+      void SetPower(float AttenuatorPercentage);
       
       TVector3 GetLaserPosition();
       TVector3 GetLaserDirection();
       
       TVector3 GetEntryPoint();
       TVector3 GetExitPoint();
+      
+      inline float GetPower() { return fPower; }
       //Anydatatype GetErrors();
       
   };

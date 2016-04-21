@@ -100,6 +100,10 @@ public:
 
     // The analysis routine, called once per event. 
     virtual void produce(art::Event& event) override;
+    
+    float LinearRawToAngle(float Angles);
+
+    float AttenuatorTickToPercentage(float Tick);
 
 private:
 
@@ -133,8 +137,10 @@ private:
     TVector3 PositionLCS1;
     std::array<float, 3> fPositionLCS2 = {{-999., -999., -999}};   ///< Mirror Position of LCS2
     TVector3 PositionLCS2;
-
-
+    
+    std::array<float, 2> fEnergyMinMaxLCS1 = {{-999., 999.}};
+    std::array<float, 2> fEnergyMinMaxLCS2 = {{-999., 999.}};
+    
     enum DataStructure
     {
         LaserSystem, ///< which laser system: 1 or 2
@@ -153,6 +159,7 @@ private:
         MirrorFeedthroughAxis1, ///< Motorized Mirror Zaber T-OMG at flange
         MirrorFeedthroughAxis2 ///< Motorized Mirror Zaber T-OMG at flange
     };
+
     unsigned int LCS_ID = -1;
     unsigned int RunNumber = 0;
 
@@ -286,9 +293,12 @@ void LaserDataMerger::reconfigure(fhicl::ParameterSet const& parameterSet)
     fPositionLCS1 = parameterSet.get< std::array<float, 3> >("PositionLCS1");
     fPositionLCS2 = parameterSet.get< std::array<float, 3> >("PositionLCS2");
     
+    fEnergyMinMaxLCS1 = parameterSet.get< std::array<float, 2> >("EnergyMinMaxLCS1");
+    fEnergyMinMaxLCS2 = parameterSet.get< std::array<float, 2> >("EnergyMinMaxLCS2");
+    
     // Convert calibration angles to TVector2
-    DirCalLCS1.Set(fDirCalLCS1[0], fDirCalLCS1[1]);
-    DirCalLCS2.Set(fDirCalLCS2[0], fDirCalLCS2[1]);
+    DirCalLCS1.Set(fDirCalLCS1[0], fDirCalLCS1[1]);     ///< LCS1 Calibration values for Rotary and Linear Values (in this order)
+    DirCalLCS2.Set(fDirCalLCS2[0], fDirCalLCS2[1]);     ///< LCS2 Calibration values for Rotary and Linear Values (in this order)
     
     // Convert the Positions to a TVector3
     PositionLCS1.SetXYZ(fPositionLCS1[0], fPositionLCS1[1], fPositionLCS1[2]);
@@ -320,30 +330,62 @@ void LaserDataMerger::produce(art::Event& event)
     else if (fReadTimeMap)
     {
         if (DEBUG) std::cout << "Event idx: " << fEvent << " Laser idx: " << timemap.at(fEvent) << std::endl;
-        TVector2 ReadAngles(laser_values.at(fEvent).at(DataStructure::RotaryPosition),
-                            laser_values.at(fEvent).at(DataStructure::LinearPosition));
-        TVector3 Position;
+        
+        // This is just for convinience, the TVector2 holds only the two angles
+        
+        float Theta;
+        float Phi;
+        
+        float Theta_raw =  laser_values.at(fEvent).at(DataStructure::LinearPosition);
+        float Phi_raw =     laser_values.at(fEvent).at(DataStructure::RotaryPosition); 
+        
+        
+        
+        TVector3 Position;        
         TVector2 CalibratedAngles;
-        // calculate the 
+
         if (LCS_ID == 1){ // The downstream laser system
-            CalibratedAngles = (ReadAngles - DirCalLCS1);
+            Theta = TMath::DegToRad() * (90 - LinearRawToAngle(Theta_raw - fDirCalLCS1[1]));
+            Phi = TMath::DegToRad() * Phi_raw - fDirCalLCS1[0];
             Position = PositionLCS1;
         }
-        else if (LCS_ID == 2) { // The upstram laser system
-            CalibratedAngles = (ReadAngles - DirCalLCS2);
+        else if (LCS_ID == 2) { // The upstream laser system
+            Theta = TMath::DegToRad() * (90 - LinearRawToAngle(Theta_raw - fDirCalLCS2[1]));
+            Phi = TMath::DegToRad() * (Phi_raw - fDirCalLCS2[0]);
             Position = PositionLCS2;
         }
         else {
             std::cerr << "Laser System not recognized " << std::endl;
         }
+        //CalibratedAngles.Set(TMath::DegToRad() * 45, TMath::DegToRad() * 190);
+        lasercal::LaserBeam Laser(Position, Phi, Theta);
+        Laser.SetPower(AttenuatorTickToPercentage(laser_values.at(fEvent).at(DataStructure::AttenuatorPosition)));
         
-        lasercal::LaserBeam Laser(Position, CalibratedAngles);
         
         //for (auto i : fPositionLCS1)
         //    std::cout << i << std::endl;
         
     }
 }
+
+float LaserDataMerger::AttenuatorTickToPercentage(float Tick){
+    if (LCS_ID == 1) {
+        return (Tick - fEnergyMinMaxLCS1[0]) / (fEnergyMinMaxLCS1[1] - fEnergyMinMaxLCS1[0]);
+    }
+    else if (LCS_ID == 2) {
+        return (Tick - fEnergyMinMaxLCS2[0]) / (fEnergyMinMaxLCS2[1] - fEnergyMinMaxLCS1[0]);
+    }
+    else return -999.;
+}
+
+float LaserDataMerger::LinearRawToAngle( float RawTicks ){
+            
+        float linear2angle = 0.3499;         ///< conversion constant of linear encoder to angle (mm/deg)
+        float TickLength = 0.00001;          ///< Tick length in mm
+        float err_linear2angle = 0.0002;     ///< error of conversion factor
+                
+        return RawTicks * TickLength / linear2angle;;
+    }
 
 DEFINE_ART_MODULE(LaserDataMerger)
 
