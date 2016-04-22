@@ -55,7 +55,8 @@ namespace lasercal
       TVector3 fExitPointError;
       
       Time fTime;                       ///< Trigger time recorded by laser server
-      unsigned int fLaserID;            ///< Laser event id (not daq)
+      unsigned int fLaserID;            ///< Laser System identifier (1 = upstream, 2 = downstream)
+      unsigned int fLaserEventID;       ///< Laser event id (not daq)
       unsigned int fAssosiateEventID;   ///< ID of the assosiate event id ()
       float fAperturePosition;          ///< Aperture position
       float fPower;                     ///< Attenuator setting (not measured pulse energy)
@@ -145,13 +146,22 @@ namespace lasercal
 
       inline void SetLaserID(float id) {fLaserID = (unsigned int) id;}
       
-      inline int GetLaserID() {return fLaserID;}      
+      inline unsigned int GetLaserID(float id) {return fLaserID;}
       
-      inline void SetAssID(float id) {fAssosiateEventID = (unsigned int) id;}
+      inline void SetLaserEventID(float id) {fLaserEventID = (unsigned int) id;}
+      
+      inline int GetLaserEventID() {return fLaserEventID;}      
+      
+      inline void SetAssID(unsigned int id) {fAssosiateEventID = id;}
       
       inline unsigned int GetAssID(float id) { return fAssosiateEventID; }
       
       void SetErrors();//Error values
+      
+      /*
+       * @brief Print all protected value to stdout
+       */
+      void Print();
       
       TVector3 GetLaserPosition();
       TVector3 GetLaserDirection();

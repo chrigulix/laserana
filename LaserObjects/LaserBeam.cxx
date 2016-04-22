@@ -11,8 +11,8 @@ LaserBeam::LaserBeam(TVector3& LaserPosition, TVector3& LaserDirection) : fLaser
 {
     //     SetEntryPoint();
     //     SetExitPoint();
-    LaserDirection.Print();
-    LaserPosition.Print();
+    //LaserDirection.Print();
+    //LaserPosition.Print();
 
 }
 
@@ -39,4 +39,16 @@ void LaserBeam::SetTime(float sec, float usec) {
     fTime.sec = (unsigned long) sec;
     fTime.usec = (unsigned long) usec;
 }
+
+void LaserBeam::Print(){
+    std::cout   << "Laser System        " << fLaserID << "\n"
+                << "Laser Event ID      " << fLaserEventID << "\n"
+                << "Associate Event ID  " << fAssosiateEventID << "\n"
+                << "Attenuator Position " << fPower * 100 << " %\n"
+                << "Aperture Position   " << fAperturePosition << "\n"
+                << "Mirror Position     ";// << std::endl; 
+    fLaserPosition.Print();
+    std::cout    << "Mirror Direction    ";// << std::endl;
+    fDirection.Print();
+}               
 }
