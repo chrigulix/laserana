@@ -11,8 +11,6 @@ LaserBeam::LaserBeam(TVector3& LaserPosition, TVector3& LaserDirection) : fLaser
 {
     //     SetEntryPoint();
     //     SetExitPoint();
-    //LaserDirection.Print();
-    //LaserPosition.Print();
 
 }
 
@@ -27,10 +25,18 @@ LaserBeam::LaserBeam(TVector3& LaserPosition, float Phi, float Theta)
     LaserDirection.SetY(LaserDir.Z());
     LaserDirection.SetZ(LaserDir.X());
     
+    SetPosition(LaserPosition);
+    SetDirection(LaserDirection);
     
-    LaserBeam(LaserPosition, LaserDirection);
 }
 
+void LaserBeam::SetPosition(TVector3& LaserPosition){
+    fLaserPosition = LaserPosition;
+}
+
+void LaserBeam::SetDirection(TVector3& LaserDirection){
+    fDirection = LaserDirection;
+}
 void LaserBeam::SetPower(float AttenuatorPercentage) {
     fPower = AttenuatorPercentage;
 }
@@ -50,5 +56,6 @@ void LaserBeam::Print(){
     fLaserPosition.Print();
     std::cout    << "Mirror Direction    ";// << std::endl;
     fDirection.Print();
+    std::cout << "\n" << std::endl;
 }               
 }

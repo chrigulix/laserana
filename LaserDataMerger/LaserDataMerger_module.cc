@@ -359,6 +359,7 @@ void LaserDataMerger::produce(art::Event& event)
         }
         //CalibratedAngles.Set(TMath::DegToRad() * 45, TMath::DegToRad() * 190);
         lasercal::LaserBeam Laser(Position, Phi, Theta);
+        Laser.SetLaserID(LCS_ID);
         Laser.SetLaserEventID(laser_values.at(fEvent).at(DataStructure::TriggerCount));
         Laser.SetAssID(fEvent);
         Laser.SetPower(AttenuatorTickToPercentage(laser_values.at(fEvent).at(DataStructure::AttenuatorPosition)));
