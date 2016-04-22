@@ -39,8 +39,4 @@ void LaserBeam::SetTime(float sec, float usec) {
     fTime.sec = (unsigned long) sec;
     fTime.usec = (unsigned long) usec;
 }
-
-Time LaserBeam::GetTime(){
-    return fTime;
-}
 }

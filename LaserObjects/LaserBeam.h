@@ -42,29 +42,23 @@ namespace lasercal
   class LaserBeam
   {
     protected:
-      // Laser start position (last mirror before the TPC)
-      TVector3 fLaserPosition;
-      // Direction of the Laser beam
-      TVector3 fDirection;
-      // First Point in TPC
-      TVector3 fEntryPoint;
-      // Last Point in TPC
-      TVector3 fExitPoint;
+      ///< Laser start position (last mirror before the TPC)
+      TVector3 fLaserPosition;        ///< Laser start position (last mirror before the TPC)
+      TVector3 fDirection;           ///< Direction of the Laser beam
+      TVector3 fEntryPoint;          ///< First Point in TPC
+      TVector3 fExitPoint;           ///< Last Point in TPC
       
-      // Errors
+      /// Errors
       TVector3 fLaserPositionError;
       TVector3 fDirectionError;
       TVector3 fEntryPointError;
       TVector3 fExitPointError;
       
-      Time fTime;
-      
-      float fAperturePosition;
-
-      // Power profile funtion (power along the beam)
-      TF1 fPowerProfile;
-      // Power of the beam (measured power of the laser e.g. by photodiod)
-      float fPower;
+      Time fTime;                       ///< Trigger time recorded by laser server
+      unsigned int fLaserID;            ///< Laser event id (not daq)
+      unsigned int fAssosiateEventID;   ///< ID of the assosiate event id ()
+      float fAperturePosition;          ///< Aperture position
+      float fPower;                     ///< Attenuator setting (not measured pulse energy)
 
 //       void SetEntryPoint();
 //       void SetExitPoint();
@@ -136,7 +130,7 @@ namespace lasercal
       /**
        * @brief Return laser trigger time as Time struct
        */
-      Time GetTime();
+      inline Time GetTime() {return fTime;}
       
      /**
      * @brief Sets the attenuator value of the laser beam
@@ -148,6 +142,14 @@ namespace lasercal
        * @brief Get power setting of laser (aperture)
        */
       inline float GetPower() { return fPower; }
+
+      inline void SetLaserID(float id) {fLaserID = (unsigned int) id;}
+      
+      inline int GetLaserID() {return fLaserID;}      
+      
+      inline void SetAssID(float id) {fAssosiateEventID = (unsigned int) id;}
+      
+      inline unsigned int GetAssID(float id) { return fAssosiateEventID; }
       
       void SetErrors();//Error values
       
