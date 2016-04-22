@@ -34,6 +34,11 @@ namespace lasercal
    * 
    * 
    */
+    
+    struct Time{
+        unsigned long sec;
+        unsigned long usec;
+    };
   class LaserBeam
   {
     protected:
@@ -51,8 +56,8 @@ namespace lasercal
       TVector3 fDirectionError;
       TVector3 fEntryPointError;
       TVector3 fExitPointError;
-            
-      boost::posix_time::ptime fTime;
+      
+      Time fTime;
       
       float fAperturePosition;
 
@@ -120,24 +125,37 @@ namespace lasercal
      * @param LaserAngles reads the angles of the laser beam and calculates the direction
      */
       void SetDirection(float Phi, float Theta);
-      
-      void SetTime(unsigned int sec, unsigned int usec);
-      
-      void SetErrors();//Error values
-      
+     
     /**
+     * @brief Sets laser trigger time
+     * @param trigger time sec (epoch time)
+     * @param trigger time fraction in usec
+     */
+      void SetTime(float sec, float usec);
+      
+      /**
+       * @brief Return laser trigger time as Time struct
+       */
+      Time GetTime();
+      
+     /**
      * @brief Sets the attenuator value of the laser beam
      * @param Set value of the attenuator position in %
      */    
       void SetPower(float AttenuatorPercentage);
+      
+      /*
+       * @brief Get power setting of laser (aperture)
+       */
+      inline float GetPower() { return fPower; }
+      
+      void SetErrors();//Error values
       
       TVector3 GetLaserPosition();
       TVector3 GetLaserDirection();
       
       TVector3 GetEntryPoint();
       TVector3 GetExitPoint();
-      
-      inline float GetPower() { return fPower; }
       //Anydatatype GetErrors();
       
   };

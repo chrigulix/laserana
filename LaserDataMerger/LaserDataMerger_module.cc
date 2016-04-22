@@ -360,8 +360,11 @@ void LaserDataMerger::produce(art::Event& event)
         //CalibratedAngles.Set(TMath::DegToRad() * 45, TMath::DegToRad() * 190);
         lasercal::LaserBeam Laser(Position, Phi, Theta);
         Laser.SetPower(AttenuatorTickToPercentage(laser_values.at(fEvent).at(DataStructure::AttenuatorPosition)));
+        Laser.SetTime(laser_values.at(fEvent).at(DataStructure::TriggerTimeSec), 
+                      laser_values.at(fEvent).at(DataStructure::TriggerTimeUsec));
         
         
+
         //for (auto i : fPositionLCS1)
         //    std::cout << i << std::endl;
         

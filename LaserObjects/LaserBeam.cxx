@@ -35,8 +35,12 @@ void LaserBeam::SetPower(float AttenuatorPercentage) {
     fPower = AttenuatorPercentage;
 }
 
-void LaserBeam::SetTime(unsigned int sec, unsigned int usec) {
-    //fTime.date(boost::posix_time::seconds(sec) + boost::posix_time::microseconds(usec));
+void LaserBeam::SetTime(float sec, float usec) {
+    fTime.sec = (unsigned long) sec;
+    fTime.usec = (unsigned long) usec;
 }
 
+Time LaserBeam::GetTime(){
+    return fTime;
+}
 }
