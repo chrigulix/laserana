@@ -179,7 +179,7 @@ LaserDataMerger::LaserDataMerger(fhicl::ParameterSet const& pset)
     // Read in the parameters from the .fcl file.
     this->reconfigure(pset);
 
-    //produces< std::vector<recob::Wire> >("blibla");
+    produces< lasercal::LaserBeam >("LaserBeam");
 }
 
 
@@ -207,7 +207,7 @@ void LaserDataMerger::beginRun(art::Run& run)
     else if (fReadTimeMap)
     {
         RunNumber = run.run();
-
+        
         // read the timemap root file (generated in python)
         std::string TimemapFile = "TimeMap-" + std::to_string(RunNumber) + ".root";
         std::cout << "READING TIMEMAP FILE: " << TimemapFile << std::endl;
@@ -331,6 +331,8 @@ void LaserDataMerger::produce(art::Event& event)
     {
         if (DEBUG) std::cout << "Event idx: " << fEvent << " Laser idx: " << timemap.at(fEvent) << std::endl;
         
+        //auto LaserAA = std::make_unique<lasercal::LaserBeam>;
+        std::unique_ptr < lasercal::LaserBeam > LaserAA(new lasercal::LaserBeam());
         // This is just for convinience, the TVector2 holds only the two angles
         
         float Theta;
@@ -366,7 +368,12 @@ void LaserDataMerger::produce(art::Event& event)
         Laser.SetTime(laser_values.at(fEvent).at(DataStructure::TriggerTimeSec), 
                       laser_values.at(fEvent).at(DataStructure::TriggerTimeUsec));
         if (DEBUG) Laser.Print();
-
+        
+        
+        *LaserAA = Laser;
+        
+        event.put(std::move(LaserAA), "LaserBeam");
+        
         //for (auto i : fPositionLCS1)
         //    std::cout << i << std::endl;
         

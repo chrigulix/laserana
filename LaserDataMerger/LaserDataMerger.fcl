@@ -63,7 +63,7 @@ physics:
  reco: [ LaserDataMerger ]
 
  #define the output stream, there could be more than one if using filters 
- #stream1:  [ out1 ]
+ stream1:  [ out1 ]
 
  #trigger_paths is a keyword and contains the paths that modify the art::event, 
  #ie filters and producers
@@ -81,14 +81,14 @@ physics:
 #entry in the output stream you want those to go to, where XXX is the label of the filter module(s)
 outputs:
 {
-# out1:
-# {
-#   module_type: RootOutput
-#   fileName:    "%ifb_%tc_wflash.root"
-#   #sam_ignore:  true
-#   dataTier:    "reconstructed-2d"
-#   compressionLevel: 1
-# }
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "%ifb_%tc_wflash.root"
+   #sam_ignore:  true
+   dataTier:    "reconstructed-2d"
+   compressionLevel: 1
+ }
 }
 
 ### Here we include the file giving us run/data dependent overrides
