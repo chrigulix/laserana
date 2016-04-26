@@ -27,6 +27,7 @@ LaserBeam::LaserBeam(TVector3& LaserPosition, float Phi, float Theta)
     
     SetPosition(LaserPosition);
     SetDirection(LaserDirection);
+    SetEntryPoint();
     
 }
 
@@ -44,6 +45,18 @@ void LaserBeam::SetPower(float AttenuatorPercentage) {
 void LaserBeam::SetTime(float sec, float usec) {
     fTime.sec = (unsigned long) sec;
     fTime.usec = (unsigned long) usec;
+}
+
+void LaserBeam::SetEntryPoint(){
+    geo::GeometryCore* Geometry = &*(art::ServiceHandle<geo::Geometry>());
+    const TVector3 Laser1(0,0,0);
+    const TVector3 Laser2(0,0,0);
+
+    auto aa = Geometry->TPC().ContainsPosition(Laser1);
+    //std::cout << aa << std::endl;
+    //aa.front().Print();
+    //aa.back().Print();
+    
 }
 
 void LaserBeam::Print(){

@@ -22,7 +22,20 @@
 #include <TVector3.h>
 #include <TF1.h>
 
-#include "boost/date_time/posix_time/posix_time_types.hpp"
+// Framework includes
+#include "art/Utilities/Exception.h"
+#include "art/Framework/Core/EDProducer.h"
+
+#include "art/Framework/Principal/Event.h"
+#include "art/Framework/Principal/Handle.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+
+#include "art/Persistency/Common/Ptr.h"
+
+
+#include "Geometry/GeometryCore.h"
+#include "Geometry/Geometry.h"
+
 
 #ifndef LASERBEAM_H
 #define LASERBEAM_H
@@ -166,6 +179,8 @@ namespace lasercal
       TVector3 GetLaserPosition();
       TVector3 GetLaserDirection();
       
+      void SetEntryPoint();
+      void SetExitPoint();
       TVector3 GetEntryPoint();
       TVector3 GetExitPoint();
       //Anydatatype GetErrors();
