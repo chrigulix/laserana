@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <code-assistance-data xmlns="http://www.netbeans.org/ns/make-project-private/1">
+        <code-model-enabled>true</code-model-enabled>
+    </code-assistance-data>
+    <data xmlns="http://www.netbeans.org/ns/make-project-private/1">
+        <activeConfTypeElem>0</activeConfTypeElem>
+        <activeConfIndexElem>0</activeConfIndexElem>
+    </data>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>rfs://maluethi@lheppc46.unibe.ch:22/data/larsoft/userdev/maluethi/laser/srcs/laserana/HitAna/HitAna%5F%6D%6F%64%75%6C%65%2E%63%63</file>
+            <file>rfs://maluethi@lheppc46.unibe.ch:22/data/larsoft/userdev/maluethi/laser/srcs/laserana/LaserObjects/LaserBeam.cxx</file>
+            <file>rfs://maluethi@lheppc46.unibe.ch:22/data/larsoft/userdev/maluethi/laser/srcs/laserana/LaserDataMerger/LaserDataMerger%5F%6D%6F%64%75%6C%65%2E%63%63</file>
+            <file>rfs://maluethi@lheppc46.unibe.ch:22/data/larsoft/userdev/maluethi/laser/srcs/laserana/LaserObjects/LaserBeam.h</file>
+            <file>rfs://maluethi@lheppc46.unibe.ch:22/data/larsoft/userdev/maluethi/laser/srcs/laserana/LaserReco/LaserReco%5F%6D%6F%64%75%6C%65%2E%63%63</file>
+            <file>rfs://maluethi@lheppc46.unibe.ch:22/data/larsoft/userdev/maluethi/laser/srcs/laserana/LaserDataMerger/LaserDataMerger.fcl</file>
+        </group>
+    </open-files>
+</project-private>
