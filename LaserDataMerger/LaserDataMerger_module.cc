@@ -344,12 +344,12 @@ void LaserDataMerger::produce(art::Event& event)
         TVector3 Position;        
         TVector2 CalibratedAngles;
 
-        if (LCS_ID == 1){ // The downstream laser system
+        if (LCS_ID == 1){ // The downstream laser system (sitting at z = -20)
             Theta = TMath::DegToRad() * (90 - LinearRawToAngle(Theta_raw - fDirCalLCS1[1]));
             Phi = TMath::DegToRad() * Phi_raw - fDirCalLCS1[0];
             Position = PositionLCS1;
         }
-        else if (LCS_ID == 2) { // The upstream laser system
+        else if (LCS_ID == 2) { // The upstream laser system (sitting at z = 1020)
             Theta = TMath::DegToRad() * (90 - LinearRawToAngle(Theta_raw - fDirCalLCS2[1]));
             Phi = TMath::DegToRad() * (Phi_raw - fDirCalLCS2[0]);
             Position = PositionLCS2;
@@ -365,7 +365,7 @@ void LaserDataMerger::produce(art::Event& event)
         Laser.SetPower(AttenuatorTickToPercentage(laser_values.at(fEvent).at(DataStructure::AttenuatorPosition)));
         Laser.SetTime(laser_values.at(fEvent).at(DataStructure::TriggerTimeSec), 
                       laser_values.at(fEvent).at(DataStructure::TriggerTimeUsec));
-        Laser.Print();
+        if (DEBUG) Laser.Print();
 
         //for (auto i : fPositionLCS1)
         //    std::cout << i << std::endl;
