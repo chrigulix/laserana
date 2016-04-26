@@ -11,7 +11,7 @@ LaserBeam::LaserBeam(TVector3& LaserPosition, TVector3& LaserDirection) : fLaser
 {
     //     SetEntryPoint();
     //     SetExitPoint();
-
+ 
 }
 
 LaserBeam::LaserBeam(TVector3& LaserPosition, float Phi, float Theta)
@@ -27,6 +27,7 @@ LaserBeam::LaserBeam(TVector3& LaserPosition, float Phi, float Theta)
     
     SetPosition(LaserPosition);
     SetDirection(LaserDirection);
+    
     SetEntryPoint();
     
 }
@@ -48,11 +49,12 @@ void LaserBeam::SetTime(float sec, float usec) {
 }
 
 void LaserBeam::SetEntryPoint(){
-    geo::GeometryCore* Geometry = &*(art::ServiceHandle<geo::Geometry>());
-    const TVector3 Laser1(0,0,0);
-    const TVector3 Laser2(0,0,0);
+    // TODO: Fix this, seems to be a problem with Qwwises GetIntersections
+    //geo::GeometryCore const* Geometry = &*(art::ServiceHandle<geo::Geometry>());
+    //const TVector3 Laser1(0,0,0);
+    //const TVector3 Laser2(0,0,0);
 
-    auto aa = Geometry->TPC().ContainsPosition(Laser1);
+    //auto aa = Geometry->TPC().GetIntersections(Laser1, Laser2);
     //std::cout << aa << std::endl;
     //aa.front().Print();
     //aa.back().Print();

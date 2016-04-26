@@ -24,6 +24,8 @@ art_make( BASENAME_ONLY
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
+  DICT_LIBRARIES
+    LaserObjects
 )
 
 install_headers()

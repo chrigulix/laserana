@@ -8,14 +8,7 @@
 /// C/C++ standard library
 #include <iostream>
 #include <vector>
-#include <array>
-#include <cmath>
-#include <cstdlib>
-#include <algorithm>
-#include <utility>
 #include <string>
-#include <iomanip>
-#include <ctime>
 
 /// Root library
 #include <TH3.h>
@@ -23,18 +16,8 @@
 #include <TF1.h>
 
 // Framework includes
-#include "art/Utilities/Exception.h"
-#include "art/Framework/Core/EDProducer.h"
-
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-
-#include "art/Persistency/Common/Ptr.h"
 
 
-#include "Geometry/GeometryCore.h"
-#include "Geometry/Geometry.h"
 
 
 #ifndef LASERBEAM_H
