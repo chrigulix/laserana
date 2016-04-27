@@ -19,6 +19,7 @@
         <in>Laser.cxx</in>
         <in>LaserBeam.cxx</in>
         <in>LaserTrack.cxx</in>
+        <in>classes.h</in>
       </df>
       <df name="LaserReco">
         <in>LaserReco_module.cc</in>
@@ -35,6 +36,9 @@
       <itemPath>Makefile</itemPath>
       <itemPath>nbproject/private/launcher.properties</itemPath>
     </logicalFolder>
+    <itemPath>LaserObjects/classes_def.xml</itemPath>
+    <itemPath>LaserObjects/classes_def.xml.xhtml</itemPath>
+    <itemPath>fcl/laser_hitana</itemPath>
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
@@ -89,9 +93,17 @@
       </item>
       <item path="LaserObjects/LaserTrack.cxx" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="LaserObjects/classes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="LaserObjects/classes_def.xml" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="LaserObjects/classes_def.xml.xhtml" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="LaserReco/LaserReco_module.cc" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SECAna/SECAna_module.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="fcl/laser_hitana" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

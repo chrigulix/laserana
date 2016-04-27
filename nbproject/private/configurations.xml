@@ -5,19 +5,7 @@
       <df name="ApplyField">
         <in>ApplyField_module.cc</in>
       </df>
-      <df name="CMakeFiles">
-        <df name="3.3.2">
-          <df name="CompilerIdC">
-            <in>CMakeCCompilerId.c</in>
-          </df>
-          <df name="CompilerIdCXX">
-            <in>CMakeCXXCompilerId.cpp</in>
-          </df>
-        </df>
-        <df name="CMakeTmp">
-        </df>
-        <in>feature_tests.c</in>
-        <in>feature_tests.cxx</in>
+      <df name="fcl">
       </df>
       <df name="HitAna">
         <in>HitAna_module.cc</in>
@@ -40,9 +28,13 @@
         <in>LaserHits.h</in>
         <in>LaserTrack.cxx</in>
         <in>LaserTrack.h</in>
+        <in>classes.h</in>
       </df>
       <df name="LaserReco">
         <in>LaserReco_module.cc</in>
+      </df>
+      <df name="PowerAna">
+        <in>PowerAna_module.cc</in>
       </df>
       <df name="python">
         <df name="data">
@@ -56,6 +48,9 @@
       <df name="ups">
       </df>
     </df>
+    <itemPath>LaserObjects/classes_def.xml</itemPath>
+    <itemPath>LaserObjects/classes_def.xml.xhtml</itemPath>
+    <itemPath>fcl/laser_hitana</itemPath>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>

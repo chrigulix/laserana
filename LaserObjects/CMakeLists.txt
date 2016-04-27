@@ -25,7 +25,7 @@ art_make( BASENAME_ONLY
 			${MF_UTILITIES}
 			${CETLIB}
   DICT_LIBRARIES
-    LaserObjects
+                        LaserObjects
 )
 
 install_headers()
