@@ -120,7 +120,6 @@ private:
 
     bool fReadTimeMap = false;
     bool fGenerateTimeInfo = false;
-    std::string fTimemapFile; ///< File containing information about timing
 
     float fTickToAngle;     ///< Conversion constant from linear tick to angle (Heidenhain linear encoder)        
     std::array<float, 2> fDirCalLCS1 = {{-999., 999.}};  ///< Position calibration for LCS1 and LCS2:
@@ -286,7 +285,6 @@ void LaserDataMerger::reconfigure(fhicl::ParameterSet const& parameterSet)
     // to p.get<TYPE> must match names in the .fcl file.
     fReadTimeMap = parameterSet.get< bool >("ReadTimeMap");
     fGenerateTimeInfo = parameterSet.get< bool >("GenerateTimeInfo");
-    fTimemapFile = parameterSet.get< std::string >("TimemapFile");
     fTickToAngle = parameterSet.get< float >("TickToAngle");
     fDirCalLCS1 = parameterSet.get< std::array<float, 2> >("DirCalLCS1");
     fDirCalLCS2 = parameterSet.get< std::array<float, 2> >("DirCalLCS2");

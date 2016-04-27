@@ -326,38 +326,11 @@ namespace HitAna {
   
   void  HitAna::endJob()
   {
-//     TFile* OFile = new TFile("HitHist.root", "RECREATE");
-//     CollectionHits->Write();
-    
-//     TCanvas* C2 = new TCanvas("Hits","You",1400,1000);
-//     CollectionHits->Draw();
-//     C2 -> Print("Hits.png","png");
-//     delete C2;
-//     delete CollectionHits;
   }
    
   //-----------------------------------------------------------------------
   void HitAna::beginRun(const art::Run& /*run*/)
   {
-    // art expects this function to have a art::Run argument;
-    // C++ expects us to use all the arguments we are given,
-    // or it will warn that we could have forgotten to use it
-    // (otherwise, why would be ever passing it around?).
-    // 
-    // But we don't actually need nor use it.
-    // 
-    // The trick to convince C++ that we know what we are doing is to omit
-    // (in this case, commenting out) the name of the parameter,
-    // still leaving it around. The argument will be still passed around,
-    // but we don't have any mean to use it, and the compiler will be satisfied
-    // with that.
-    
-    // How to convert from number of electrons to GeV.  The ultimate
-    // source of this conversion factor is
-    // ${LARCORE_INC}/SimpleTypesAndConstants/PhysicalConstants.h.
-    // But sim::LArG4Parameters might in principle ask a database for it.
-//     art::ServiceHandle<sim::LArG4Parameters> larParameters;
-//     fElectronsToGeV = 1./larParameters->GeVToElectrons();
   }
 
   //-----------------------------------------------------------------------
