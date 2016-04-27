@@ -60,6 +60,8 @@ add_subdirectory(LaserObjects)
 add_subdirectory(LaserReco)
 add_subdirectory(LaserDataMerger)
 add_subdirectory(HitAna)
+add_subdirectory(PowerAna)
+add_subdirectory(fcl)
 add_subdirectory(ApplyField)
 add_subdirectory(SECAna)
 
