@@ -127,7 +127,7 @@ namespace lasercal
       /**
        * @brief Return laser trigger time as Time struct
        */
-      inline Time GetTime() {return fTime;}
+      inline Time GetTime() const {return fTime;}
       
      /**
      * @brief Sets the attenuator value of the laser beam
@@ -138,34 +138,34 @@ namespace lasercal
       /*
        * @brief Get power setting of laser (aperture)
        */
-      inline float GetPower() { return fPower; }
+      inline float GetPower() const { return fPower; }
 
       inline void SetLaserID(float id) {fLaserID = (unsigned int) id;}
       
-      inline unsigned int GetLaserID(float id) {return fLaserID;}
+      inline unsigned int GetLaserID(float id) const {return fLaserID;}
       
       inline void SetLaserEventID(float id) {fLaserEventID = (unsigned int) id;}
       
-      inline int GetLaserEventID() {return fLaserEventID;}      
+      inline int GetLaserEventID() const {return fLaserEventID;}      
       
       inline void SetAssID(unsigned int id) {fAssosiateEventID = id;}
       
-      inline unsigned int GetAssID(float id) { return fAssosiateEventID; }
+      inline unsigned int GetAssID(float id) const { return fAssosiateEventID; }
       
       void SetErrors();//Error values
       
       /*
        * @brief Print all protected value to stdout
        */
-      void Print();
+      void Print() const;
       
-      TVector3 GetLaserPosition();
-      TVector3 GetLaserDirection();
+      TVector3 GetLaserPosition() const;
+      TVector3 GetLaserDirection() const;
       
       void SetEntryPoint();
       void SetExitPoint();
-      TVector3 GetEntryPoint();
-      TVector3 GetExitPoint();
+      TVector3 GetEntryPoint() const;
+      TVector3 GetExitPoint() const;
       //Anydatatype GetErrors();
       
   };

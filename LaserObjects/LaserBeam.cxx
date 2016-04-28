@@ -61,7 +61,7 @@ void LaserBeam::SetEntryPoint(){
     
 }
 
-void LaserBeam::Print(){
+void LaserBeam::Print() const {
     std::cout   << "Laser System        " << fLaserID << "\n"
                 << "Laser Event ID      " << fLaserEventID << "\n"
                 << "Associate Event ID  " << fAssosiateEventID << "\n"
