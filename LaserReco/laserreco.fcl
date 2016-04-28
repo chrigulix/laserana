@@ -1,0 +1,16 @@
+BEGIN_PROLOG
+
+laserreco:
+{
+    module_type:         "LaserReco"
+    GenerateWireMap:     false
+    UPlaneHitThreshold:  -10.0
+    VPlaneHitThreshold:  10.0
+    YPlaneHitThreshold:  10.0
+    CalDataModuleLabel:  "daq"
+    MinAllowedChannelStatus: 4
+}
+
+LaserReco: @local::laserreco
+
+END_PROLOG
