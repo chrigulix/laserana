@@ -90,7 +90,7 @@
 #include <iterator>
 
 // Laser Module Classes
-// #include "LaserObjects/LaserBeam.h"
+#include "LaserObjects/LaserBeam.h"
 
 
 namespace {
@@ -358,6 +358,11 @@ namespace HitAna {
     art::ValidHandle< std::vector<recob::Hit> > VPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fVPlaneTag);
     art::ValidHandle< std::vector<recob::Hit> > YPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fYPlaneTag);
     
+    
+    auto LaserTag = art::InputTag("LaserMerger","LaserBeam");
+    art::ValidHandle< lasercal::LaserBeam > LaserBeamHandle = event.getValidHandle< lasercal::LaserBeam >(LaserTag);
+    
+    LaserBeamHandle->Print();
     std::vector<float> HitWireNumber;
     std::vector<float> HitTimeBin;
     std::vector<float> LowerHitTimeErr;
