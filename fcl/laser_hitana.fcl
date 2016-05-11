@@ -13,7 +13,7 @@ services:
   @table::microboone_reco_minimal_services
 }
 
-services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
 
 #source is the swizzled laser files
 source:

@@ -1,12 +1,12 @@
 
 simple_plugin(ApplyField "module"
-			SpaceCharge_service
 			LaserObjects
-			Geometry_service
-                        Geometry
-			RecoBaseArt
-			RecoBase
-			RawData
+			larevt_SpaceCharge_SpaceCharge_service
+			larcore_Geometry_Geometry_service
+                        larcore_Geometry
+			lardata_RecoBaseArt
+			lardata_RecoBase
+			lardata_RawData
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
