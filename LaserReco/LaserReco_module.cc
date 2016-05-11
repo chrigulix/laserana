@@ -36,6 +36,7 @@
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcore/CoreUtils/ServiceUtil.h"
 
 // Framework includes
 #include "art/Utilities/Exception.h"
@@ -53,6 +54,8 @@
 
 // uBooNE includes
 #include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+
 // #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
@@ -221,6 +224,8 @@ namespace LaserReco {
     // Other variables that will be shared between different methods.
     geo::GeometryCore const* fGeometry;       ///< pointer to Geometry provider
     
+    detinfo::DetectorProperties const* fDetProperties;  ///< pointer to detector properties provider
+    
     std::string fFileName = "WireIndexMap.root";
     
     std::vector< std::map<unsigned int, unsigned int> > WireMaps;
@@ -242,6 +247,7 @@ namespace LaserReco {
   {
     // get a pointer to the geometry service provider
     fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+    fDetProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
     
     // Read in the parameters from the .fcl file.
     this->reconfigure(pset);
@@ -480,6 +486,10 @@ namespace LaserReco {
     UHitVec = AllLaserHits.GetPlaneHits(0);
     VHitVec = AllLaserHits.GetPlaneHits(1);
     YHitVec = AllLaserHits.GetPlaneHits(2);
+    
+    
+    
+    std::cout << fDetProperties->ConvertXToTicks(100,2,0,0) << std::endl;
     
     std::cout << UHitVec->size() << std::endl;
     std::cout << VHitVec->size() << std::endl;
