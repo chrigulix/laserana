@@ -34,7 +34,7 @@ flcdir  product_dir     fcl
 product          version
 larsoft		v05_08_00
 gcc		v4_9_3
-cetbuildtools   v4_17_03       -       only_for_build
+cetbuildtools   v4_18_04       -       only_for_build
 end_product_list
 
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.

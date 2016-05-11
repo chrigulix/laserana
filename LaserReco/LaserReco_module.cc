@@ -204,6 +204,8 @@ namespace LaserReco {
     
     // Wire crossing finder
     std::vector< std::pair<geo::WireID, geo::WireID> > CrossingWireRanges(geo::WireID WireID);
+    
+    void CutRegionOfInterest();
 
   private:
 
@@ -398,6 +400,15 @@ namespace LaserReco {
     // Loop over downstream laser system
     if(fLCSNumber == 2)
     {
+      TVector3 LaserPos(100,0,-25);
+      TVector3 LaserDir(0,0,1);
+      
+      auto aa = fGeometry->TPC().GetIntersections(LaserPos, LaserDir);
+      
+      aa.at(0).Print();
+      
+      aa.at(1).Print();
+      
       // Loop over N collection wires at the edge of the TPC based on the wire map
       for(unsigned int WireIndex = WireMaps.back().size()-1; WireIndex >= WireMaps.back().size() - 13; WireIndex--)
       {
