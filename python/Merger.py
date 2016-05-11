@@ -126,22 +126,36 @@ class Merger():
     def plot(self):
 
         # plot time deltas of laser vs daq triggers
-        laser1 = plt.plot(self.LaserArray[0, 1:], np.diff(self.LaserArray[1, :]), "r-*", label="laser")
-        event1 = plt.plot(self.EventArray[0 ,1:], np.diff(self.EventArray[1, :]), "b*-", label="event")
-        plt.xlabel("Event ID")
-        plt.ylabel("Delta-Time [s]")
+        size = 20
+        fig1, ax1 = plt.subplots()
+        plt.title("Time Difference Between Triggers", fontsize=size)
+        ax1.plot(self.LaserArray[0, 1:], np.diff(self.LaserArray[1, :]), "r-*", label="laser")
+        ax1.plot(self.EventArray[0 ,1:], np.diff(self.EventArray[1, :]), "b*-", label="daq")
+        plt.xlabel("Event ID", fontsize=size)
+        plt.xticks(fontsize=size)
+        plt.ylabel("Delta-Time [s]", fontsize=size)
+        plt.yticks(fontsize=size)
+        ax1.legend(loc='upper left', fontsize=size)
+        plt.grid()
         plt.show()
 
-        plt.plot(self.LaserArray[0, :], self.LaserArray[1, :] + self.LaserStartTime, "r-*")
-        plt.plot(self.EventArray[0, :], self.EventArray[1, :] + self.EventStartTime, "b*-")
-        plt.xlabel("Event ID")
-        plt.ylabel("Time [s]")
-        plt.show()
+        if False:
+            fig2, ax2 = plt.subplots()
+            plt.plot(self.LaserArray[0, :], self.LaserArray[1, :] + self.LaserStartTime, "r-*")
+            plt.plot(self.EventArray[0, :], self.EventArray[1, :] + self.EventStartTime, "b*-")
+            plt.xlabel("Event ID")
+            plt.ylabel("Time [s]")
+            plt.show()
 
         # plot time deltas of laser vs daq triggers
-        plt.plot(self.delta, "r-*")
-        plt.xlabel("Event ID")
-        plt.ylabel("Time-Difference [s]")
+        fig3, ax3 = plt.subplots()
+        plt.title("Time Difference: DAQ-Laser", fontsize=size)
+        plt.plot(1000*self.delta, "r-*")
+        plt.xlabel("Event ID", fontsize=size)
+        plt.xticks(fontsize=size)
+        plt.ylabel("Time-Difference [ms]", fontsize=size)
+        plt.yticks(fontsize=size)
+        plt.grid()
         plt.show()
 
 
@@ -149,8 +163,7 @@ class Merger():
 if __name__ == '__main__':
 
     merger = Merger(3300)
-
     merger.align()
-    #merger.plot()
+    merger.plot()
     merger.write()
 
