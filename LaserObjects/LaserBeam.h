@@ -8,18 +8,17 @@
 /// C/C++ standard library
 #include <iostream>
 #include <vector>
-#include <array>
-#include <cmath>
-#include <cstdlib>
-#include <algorithm>
-#include <utility>
 #include <string>
-#include <iomanip>
 
 /// Root library
 #include <TH3.h>
 #include <TVector3.h>
 #include <TF1.h>
+
+// Framework includes
+
+
+
 
 #ifndef LASERBEAM_H
 #define LASERBEAM_H
@@ -31,31 +30,32 @@ namespace lasercal
    * 
    * 
    */
+    
+    struct Time{
+        unsigned long sec;
+        unsigned long usec;
+    };
   class LaserBeam
   {
     protected:
-      // Laser start position (last mirror before the TPC)
-      TVector3 fLaserPosition;
-      // Direction of the Laser beam
-      TVector3 fDirection;
-      // First Point in TPC
-      TVector3 fEntryPoint;
-      // Last Point in TPC
-      TVector3 fExitPoint;
+      ///< Laser start position (last mirror before the TPC)
+      TVector3 fLaserPosition;        ///< Laser start position (last mirror before the TPC)
+      TVector3 fDirection;           ///< Direction of the Laser beam
+      TVector3 fEntryPoint;          ///< First Point in TPC
+      TVector3 fExitPoint;           ///< Last Point in TPC
       
-      // Errors
+      /// Errors
       TVector3 fLaserPositionError;
       TVector3 fDirectionError;
       TVector3 fEntryPointError;
       TVector3 fExitPointError;
       
-      float fTime;
-      float fAperturePosition;
-
-      // Power profile funtion (power along the beam)
-      TF1 fPowerProfile;
-      // Power of the beam (measured power of the laser e.g. by photodiod)
-      float fPower;
+      Time fTime;                       ///< Trigger time recorded by laser server
+      unsigned int fLaserID;            ///< Laser System identifier (1 = upstream, 2 = downstream)
+      unsigned int fLaserEventID;       ///< Laser event id (not daq)
+      unsigned int fAssosiateEventID;   ///< ID of the assosiate event id ()
+      float fAperturePosition;          ///< Aperture position
+      float fPower;                     ///< Attenuator setting (not measured pulse energy)
 
 //       void SetEntryPoint();
 //       void SetExitPoint();
@@ -87,15 +87,16 @@ namespace lasercal
       
      /**
      * @brief Constructor: sets laser position and laser direction
-     * @param LaserAngles start position of the laser 
-     * @param LaserDirection direction of the laser beam
+     * @param LaserPosition start position of the laser 
+     * @param azimuthal angle (x-axis along straight shot trough TPC)
+     * @param polar angle (z-axis pointing upward)
      * @see SetPosition
      * @see SetDirection
      
      * This constructor loads the start position and two angles given by the mirror angles
      * and calculates the direction vector
      */
-      LaserBeam(TVector3& LaserPosition, std::array<float,2>& LaserAngles); 
+      LaserBeam(TVector3& LaserPosition, float Phi, float Theta); 
       
      
      /**
@@ -114,15 +115,57 @@ namespace lasercal
      * @brief Sets laser direction
      * @param LaserAngles reads the angles of the laser beam and calculates the direction
      */
-      void SetDirection(std::array<float,2> LaserAngles);
+      void SetDirection(float Phi, float Theta);
+     
+    /**
+     * @brief Sets laser trigger time
+     * @param trigger time sec (epoch time)
+     * @param trigger time fraction in usec
+     */
+      void SetTime(float sec, float usec);
+      
+      /**
+       * @brief Return laser trigger time as Time struct
+       */
+      inline Time GetTime() const {return fTime;}
+      
+     /**
+     * @brief Sets the attenuator value of the laser beam
+     * @param Set value of the attenuator position in %
+     */    
+      void SetPower(float AttenuatorPercentage);
+      
+      /*
+       * @brief Get power setting of laser (aperture)
+       */
+      inline float GetPower() const { return fPower; }
+
+      inline void SetLaserID(float id) {fLaserID = (unsigned int) id;}
+      
+      inline unsigned int GetLaserID(float id) const {return fLaserID;}
+      
+      inline void SetLaserEventID(float id) {fLaserEventID = (unsigned int) id;}
+      
+      inline int GetLaserEventID() const {return fLaserEventID;}      
+      
+      inline void SetAssID(unsigned int id) {fAssosiateEventID = id;}
+      
+      inline unsigned int GetAssID(float id) const { return fAssosiateEventID; }
       
       void SetErrors();//Error values
       
-      TVector3 GetLaserPosition();
-      TVector3 GetLaserDirection();
+      /*
+       * @brief Print all protected value to stdout
+       */
+      void Print() const;
       
-      TVector3 GetEntryPoint();
-      TVector3 GetExitPoint();
+      TVector3 GetLaserPosition() const;
+      TVector3 GetLaserDirection() const;
+      
+      void SetEntryPoint();
+      void SetExitPoint();
+      TVector3 GetEntryPoint() const;
+      TVector3 GetExitPoint() const;
       //Anydatatype GetErrors();
       
   };

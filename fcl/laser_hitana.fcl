@@ -1,0 +1,51 @@
+#include "services_microboone.fcl"
+#include "reco_uboone_data_minimal.fcl"
+#include "merger.fcl"
+#include "laserreco.fcl"
+
+
+process_name: LaserHitAna
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService:            { fileName: "Hit_Analysis_Hist.root" }
+  @table::microboone_reco_minimal_services
+}
+
+services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+
+#source is the swizzled laser files
+source:
+{
+  module_type: RootInput
+}
+
+physics: { 
+    producers: {
+        LaserReco:      @local::LaserReco
+        LaserMerger:    @local::LaserDataMerger
+    }
+
+    p1: [ LaserReco, LaserMerger ]
+    trigger_paths: [ p1 ]
+
+    #e1: [  ]
+    #end_paths: [ e1 ]
+
+    stream1:  [ out1 ]
+}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "outs.root"
+   #sam_ignore:  true
+   dataTier:    "reconstructed-2d"
+   outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
+   compressionLevel: 1
+ }
+}
+

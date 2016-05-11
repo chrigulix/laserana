@@ -1,18 +1,12 @@
-# for classes_def.xml!!
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( $ENV{NUTOOLS_INC} )
 
-art_make( BASENAME_ONLY
-	  LIBRARY_NAME  LaserObjects
-          LIB_LIBRARIES 
+simple_plugin(PowerAna "module"
+			LaserObjects
 			Geometry_service
                         Geometry
 			RecoBaseArt
 			RecoBase
 			RawData
-                	${ROOT_BASIC_LIB_LIST}
-                        ${ROOT_EG}
-                        ${Boost_SYSTEM_LIBRARY}
+                        ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -24,10 +18,10 @@ art_make( BASENAME_ONLY
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
-  DICT_LIBRARIES
-                        LaserObjects
+			${ROOT_BASIC_LIB_LIST}
+              BASENAME_ONLY
 )
 
 install_headers()
 install_fhicl()
-install_source()
+install_scripts()

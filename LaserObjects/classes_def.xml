@@ -1,0 +1,5 @@
+<lcgdict>
+    <class name="lasercal::Time"/>
+    <class name="lasercal::LaserBeam"/>
+    <class name="art::Wrapper<lasercal::LaserBeam>"/>
+</lcgdict>
