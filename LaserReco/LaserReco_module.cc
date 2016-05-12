@@ -387,7 +387,7 @@ namespace LaserReco {
     RawROI.resize(DigitVecHandle->at(0).Samples());
     
     // Prepare laser hits object
-    LaserObjects::LaserHits YROIHits(fGeometry,fUVYThresholds);
+    lasercal::LaserHits YROIHits(fGeometry,fUVYThresholds);
     
     // Set region of interest limits for first hit scan
     unsigned int StartROI = 4500;
@@ -488,7 +488,7 @@ namespace LaserReco {
     } // end loop over raw digit entries
     
     // Create Laser Hits out of Wires
-    LaserObjects::LaserHits AllLaserHits(WireVec,fGeometry,fUVYThresholds);
+    lasercal::LaserHits AllLaserHits(WireVec,fGeometry,fUVYThresholds);
     
     // Filter for time matches of at least two planes
 //     AllLaserHits.TimeMatchFilter();

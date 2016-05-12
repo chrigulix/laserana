@@ -1,5 +1,5 @@
-#ifndef LaserObjects_LaserHits_H
-#define LaserObjects_LaserHits_H
+#ifndef lasercal_LaserHits_H
+#define lasercal_LaserHits_H
 
 #include "larcore/SimpleTypesAndConstants/RawTypes.h"
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
@@ -15,7 +15,7 @@
 #include <array>
 #include <memory>
 
-namespace LaserObjects
+namespace lasercal
 {
   class LaserHits
   {

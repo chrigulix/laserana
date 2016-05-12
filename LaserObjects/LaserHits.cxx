@@ -1,7 +1,7 @@
 #include "LaserObjects/LaserHits.h"
 
 
-LaserObjects::LaserHits::LaserHits(const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds)
+lasercal::LaserHits::LaserHits(const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds)
 {
   fGeometry = Geometry;
   fUVYThresholds = UVYThresholds;
@@ -9,7 +9,7 @@ LaserObjects::LaserHits::LaserHits(const geo::GeometryCore* Geometry, const std:
 
 //-------------------------------------------------------------------------------------------------------------------
 
-LaserObjects::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds)
+lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds)
 {
   fGeometry = Geometry;
   fUVYThresholds = UVYThresholds;
@@ -39,7 +39,7 @@ LaserObjects::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const 
 
 //-------------------------------------------------------------------------------------------------------------------
 
-void LaserObjects::LaserHits::AddHitsFromWire(const recob::Wire& Wire)
+void lasercal::LaserHits::AddHitsFromWire(const recob::Wire& Wire)
 {
   // Get channel information
   raw::ChannelID_t Channel = Wire.Channel();
@@ -54,7 +54,7 @@ void LaserObjects::LaserHits::AddHitsFromWire(const recob::Wire& Wire)
 
 //-------------------------------------------------------------------------------------------------------------------
 
-const std::array<size_t,3> LaserObjects::LaserHits::NumberOfWiresWithHits()
+const std::array<size_t,3> lasercal::LaserHits::NumberOfWiresWithHits()
 {
   // Initialize output array
   std::array<size_t,3> NumberOfWiresHit;
@@ -83,7 +83,7 @@ const std::array<size_t,3> LaserObjects::LaserHits::NumberOfWiresWithHits()
 
 //-------------------------------------------------------------------------------------------------------------------
 
-void LaserObjects::LaserHits::clear()
+void lasercal::LaserHits::clear()
 {
   for(auto& HitMaps : fHitMapsByPlane)
   {
@@ -93,7 +93,7 @@ void LaserObjects::LaserHits::clear()
 
 //-------------------------------------------------------------------------------------------------------------------
 
-std::unique_ptr< std::vector<recob::Hit> > LaserObjects::LaserHits::GetPlaneHits(size_t PlaneIndex)
+std::unique_ptr< std::vector<recob::Hit> > lasercal::LaserHits::GetPlaneHits(size_t PlaneIndex)
 {
   std::unique_ptr< std::vector<recob::Hit> > HitVector(new std::vector<recob::Hit>);
   
@@ -112,7 +112,7 @@ std::unique_ptr< std::vector<recob::Hit> > LaserObjects::LaserHits::GetPlaneHits
 
 //-------------------------------------------------------------------------------------------------------------------
 
-std::map<float, recob::Hit> LaserObjects::LaserHits::FindSingleWireHits(const recob::Wire& Wire, unsigned Plane)
+std::map<float, recob::Hit> lasercal::LaserHits::FindSingleWireHits(const recob::Wire& Wire, unsigned Plane)
 {
   // Initialize hit map
   std::map<float, recob::Hit> HitMap;
@@ -136,7 +136,7 @@ std::map<float, recob::Hit> LaserObjects::LaserHits::FindSingleWireHits(const re
 
 //-------------------------------------------------------------------------------------------------------------------
 
-void LaserObjects::LaserHits::TimeMatchFilter()
+void lasercal::LaserHits::TimeMatchFilter()
 {
   std::array< std::vector<std::map<float, recob::Hit>>, 3 > NewHitMapsByPlane;
   
@@ -190,7 +190,7 @@ void LaserObjects::LaserHits::TimeMatchFilter()
 
 //-------------------------------------------------------------------------------------------------------------------
 
-std::map<float, recob::Hit> LaserObjects::LaserHits::UPlaneHitFinder(const recob::Wire& SingleWire)
+std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wire& SingleWire)
 {
   std::map<float,recob::Hit> LaserHits;
   
@@ -270,7 +270,7 @@ std::map<float, recob::Hit> LaserObjects::LaserHits::UPlaneHitFinder(const recob
 
 //-------------------------------------------------------------------------------------------------------------------
 
-std::map<float, recob::Hit> LaserObjects::LaserHits::VPlaneHitFinder(const recob::Wire& SingleWire)
+std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wire& SingleWire)
 {
   std::map<float,recob::Hit> LaserHits;
   
@@ -381,7 +381,7 @@ std::map<float, recob::Hit> LaserObjects::LaserHits::VPlaneHitFinder(const recob
 
 //-------------------------------------------------------------------------------------------------------------------
 
-std::map<float,recob::Hit> LaserObjects::LaserHits::YPlaneHitFinder(const recob::Wire& SingleWire)
+std::map<float,recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wire& SingleWire)
 {
   std::map<float,recob::Hit> LaserHits;
   
