@@ -1,11 +1,12 @@
 
 simple_plugin(SECAna "module"
 			LaserObjects
-			Geometry_service
-                        Geometry
-			RecoBaseArt
-			RecoBase
-			RawData
+			larcore_Geometry_Geometry_service
+                        larcore_Geometry
+			lardata_RecoBaseArt
+			lardata_RecoBase
+			lardata_RawData
+			lardata_MCBase
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}

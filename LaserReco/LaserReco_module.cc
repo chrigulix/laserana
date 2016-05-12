@@ -26,20 +26,17 @@
 // on LArSoft headers too -- if they can't be loaded by their own, it's a bug!
 
 // LArSoft includes
-#include "Simulation/SimChannel.h"
-#include "Simulation/LArG4Parameters.h"
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
-#include "RecoBaseArt/WireCreator.h"
-#include "RecoBaseArt/HitCreator.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/Wire.h"
-#include "Geometry/Geometry.h"
-#include "Geometry/GeometryCore.h"
-#include "SimulationBase/MCParticle.h"
-#include "SimulationBase/MCTruth.h"
-#include "SimpleTypesAndConstants/geo_types.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RecoBaseArt/WireCreator.h"
+#include "lardata/RecoBaseArt/HitCreator.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/Wire.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/GeometryCore.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcore/CoreUtils/ServiceUtil.h"
 
 // Framework includes
 #include "art/Utilities/Exception.h"
@@ -56,12 +53,14 @@
 #include "art/Persistency/Common/Ptr.h"
 
 // uBooNE includes
-#include "Utilities/AssociationUtil.h"
+#include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+
 // #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
-#include "CalibrationDBI/Interface/IChannelStatusService.h"
-#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
 
 // ROOT includes. Note: To look up the properties of the ROOT classes,
 // use the ROOT web site; e.g.,
@@ -205,6 +204,8 @@ namespace LaserReco {
     
     // Wire crossing finder
     std::vector< std::pair<geo::WireID, geo::WireID> > CrossingWireRanges(geo::WireID WireID);
+    
+    void CutRegionOfInterest();
 
   private:
 
@@ -224,6 +225,8 @@ namespace LaserReco {
     
     // Other variables that will be shared between different methods.
     geo::GeometryCore const* fGeometry;       ///< pointer to Geometry provider
+    
+    detinfo::DetectorProperties const* fDetProperties;  ///< pointer to detector properties provider
     
     std::string fFileName = "WireIndexMap.root";
     
@@ -246,6 +249,7 @@ namespace LaserReco {
   {
     // get a pointer to the geometry service provider
     fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+    fDetProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
     
     // Read in the parameters from the .fcl file.
     this->reconfigure(pset);
@@ -373,8 +377,8 @@ namespace LaserReco {
     WireVec.reserve(DigitVecHandle->size());
     
     // Get Service providers
-    const lariov::IDetPedestalProvider& PedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
-    const lariov::IChannelStatusProvider& ChannelFilter = art::ServiceHandle<lariov::IChannelStatusService>()->GetProvider();
+    const lariov::DetPedestalProvider& PedestalRetrievalAlg = art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
+    const lariov::ChannelStatusProvider& ChannelFilter = art::ServiceHandle<lariov::ChannelStatusService>()->GetProvider();
     
     // Initialize raw time tick vectors
     std::vector<short> RawADC;
@@ -383,7 +387,7 @@ namespace LaserReco {
     RawROI.resize(DigitVecHandle->at(0).Samples());
     
     // Prepare laser hits object
-    LaserObjects::LaserHits YROIHits(fGeometry,fUVYThresholds);
+    lasercal::LaserHits YROIHits(fGeometry,fUVYThresholds);
     
     // Set region of interest limits for first hit scan
     unsigned int StartROI = 4500;
@@ -396,6 +400,15 @@ namespace LaserReco {
     // Loop over downstream laser system
     if(fLCSNumber == 2)
     {
+      TVector3 LaserPos(100,0,-25);
+      TVector3 LaserDir(0,0,1);
+      
+      auto aa = fGeometry->TPC().GetIntersections(LaserPos, LaserDir);
+      
+      aa.at(0).Print();
+      
+      aa.at(1).Print();
+      
       // Loop over N collection wires at the edge of the TPC based on the wire map
       for(unsigned int WireIndex = WireMaps.back().size()-1; WireIndex >= WireMaps.back().size() - 13; WireIndex--)
       {
@@ -475,7 +488,7 @@ namespace LaserReco {
     } // end loop over raw digit entries
     
     // Create Laser Hits out of Wires
-    LaserObjects::LaserHits AllLaserHits(WireVec,fGeometry,fUVYThresholds);
+    lasercal::LaserHits AllLaserHits(WireVec,fGeometry,fUVYThresholds);
     
     // Filter for time matches of at least two planes
 //     AllLaserHits.TimeMatchFilter();
@@ -484,6 +497,10 @@ namespace LaserReco {
     UHitVec = AllLaserHits.GetPlaneHits(0);
     VHitVec = AllLaserHits.GetPlaneHits(1);
     YHitVec = AllLaserHits.GetPlaneHits(2);
+    
+    
+    
+    std::cout << fDetProperties->ConvertXToTicks(100,2,0,0) << std::endl;
     
     std::cout << UHitVec->size() << std::endl;
     std::cout << VHitVec->size() << std::endl;

@@ -55,7 +55,7 @@ include(ArtMake)
 include(BuildPlugins)
 
 # source
-add_subdirectory(LaserCalibration)
+# add_subdirectory(LaserCalibration)
 add_subdirectory(LaserObjects)
 add_subdirectory(LaserReco)
 add_subdirectory(LaserDataMerger)

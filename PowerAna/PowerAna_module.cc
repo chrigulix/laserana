@@ -8,16 +8,16 @@
 // LArSoft includes
 // #include "Simulation/SimChannel.h"
 // #include "Simulation/LArG4Parameters.h"
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
-#include "RecoBaseArt/WireCreator.h"
-#include "RecoBaseArt/HitCreator.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/Wire.h"
-#include "Geometry/Geometry.h"
-#include "Geometry/GeometryCore.h"
-#include "SimpleTypesAndConstants/geo_types.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RecoBaseArt/WireCreator.h"
+#include "lardata/RecoBaseArt/HitCreator.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/Wire.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/GeometryCore.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
 
 // Framework includes
 #include "art/Utilities/Exception.h"
@@ -34,12 +34,12 @@
 #include "art/Persistency/Common/Ptr.h"
 
 // uBooNE includes
-#include "Utilities/AssociationUtil.h"
+#include "lardata/Utilities/AssociationUtil.h"
 // #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
-#include "CalibrationDBI/Interface/IChannelStatusService.h"
-#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
 
 // ROOT includes. Note: To look up the properties of the ROOT classes,
 // use the ROOT web site; e.g.,

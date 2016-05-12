@@ -15,9 +15,9 @@ services:
   @table::microboone_reco_minimal_services
   message: @local::standard_info
 }
-services.TimeService.InheritClockConfig: false
+services.DetectorClocksService.InheritClockConfig: false
 services.DatabaseUtil.ShouldConnect: false
-services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
 
 #source is now a root file
 source:

@@ -19,7 +19,7 @@ services:
   @table::microboone_reco_minimal_services
 }
 services.DatabaseUtil.ShouldConnect: false
-#services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+#services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
 
 #source is now a root file
 source:

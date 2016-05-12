@@ -4,12 +4,11 @@ include_directories( $ENV{NUTOOLS_INC} )
 
 art_make( BASENAME_ONLY
 	  LIBRARY_NAME  LaserObjects
-          LIB_LIBRARIES 
-			Geometry_service
-                        Geometry
-			RecoBaseArt
-			RecoBase
-			RawData
+          LIB_LIBRARIES larcore_Geometry_Geometry_service
+                        larcore_Geometry
+			lardata_RecoBaseArt
+			lardata_RecoBase
+			lardata_RawData
                 	${ROOT_BASIC_LIB_LIST}
                         ${ROOT_EG}
                         ${Boost_SYSTEM_LIBRARY}

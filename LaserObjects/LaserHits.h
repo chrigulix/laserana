@@ -1,12 +1,12 @@
-#ifndef LaserObjects_LaserHits_H
-#define LaserObjects_LaserHits_H
+#ifndef lasercal_LaserHits_H
+#define lasercal_LaserHits_H
 
-#include "SimpleTypesAndConstants/RawTypes.h"
-#include "SimpleTypesAndConstants/geo_types.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/Wire.h"
-#include "RecoBaseArt/HitCreator.h"
-#include "Geometry/GeometryCore.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/Wire.h"
+#include "lardata/RecoBaseArt/HitCreator.h"
+#include "larcore/Geometry/GeometryCore.h"
 
 #include <iostream>
 #include <utility>
@@ -15,7 +15,7 @@
 #include <array>
 #include <memory>
 
-namespace LaserObjects
+namespace lasercal
 {
   class LaserHits
   {
