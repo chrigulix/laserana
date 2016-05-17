@@ -7,25 +7,23 @@ from datadefs.recobhits import *
 
 import root_numpy as nr
 from root_numpy.testdata import get_filepath
-print get_filepath('vary1.root')
+import matplotlib.pyplot as plt
+import numpy as np
 
-aaa = nr.root2array(get_filepath('object1.root'), branches=["entry", "vect.fP.XYvector().Mod()"])
+filename = "/mnt/lheppc46/data/larsoft/userdev/maluethi/laser_v04_36_00/test/outs.root"
 
-for i in range(aaa.shape[0]):
-    print str(i) + "th line " + str(aaa[i])
 
-filename = "/mnt/lheppc46/data/larsoft/userdev/maluethi/laser/test/outs.root"
-
-recodef = RecobHits()
+recodef = RecobHits(plane="Y")
 branch = recodef.channel()
 
-print branch
-
-import ROOT
-rfile = ROOT.TFile(filename)
-intree = rfile.Get('Events')
-tree = "Events"
-branch = "recob::Hits_LaserReco_UPlaneLaserHits_LaserHitAna.obj.fChannel"
 
 
-print nr.root2array(filename,treename=tree, branches=branch)
+data = nr.root2array(filename,treename=recodef.get_tree(), branches=[recodef.peak_time() ,recodef.channel()])
+
+print len(data)
+print data[0][0]
+
+
+for i in range(len(data)):
+    plt.plot(data[i][1], data[i][0], "*")
+    plt.show()
