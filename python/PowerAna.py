@@ -1,36 +1,31 @@
 __author__ = 'matthias'
 
 import numpy as np
-import root_numpy as rn
 
 from datadefs.laserdef import *
 from datadefs.recobhits import *
 
+import root_numpy as nr
 from root_numpy.testdata import get_filepath
-#from ROOT import TLorentzVector  # load your class first!
+print get_filepath('vary1.root')
 
-print rn.root2array(get_filepath('object1.root'), branches=["vect.Vect().x()"])
+aaa = nr.root2array(get_filepath('object1.root'), branches=["entry", "vect.fP.XYvector().Mod()"])
+
+for i in range(aaa.shape[0]):
+    print str(i) + "th line " + str(aaa[i])
+
+filename = "/mnt/lheppc46/data/larsoft/userdev/maluethi/laser/test/outs.root"
+
+recodef = RecobHits()
+branch = recodef.channel()
+
+print branch
+
+import ROOT
+rfile = ROOT.TFile(filename)
+intree = rfile.Get('Events')
+tree = "Events"
+branch = "recob::Hits_LaserReco_UPlaneLaserHits_LaserHitAna.obj.fChannel"
 
 
-filename = '/home/matthias/data/uboone/laser/outs.root'
-
-# #df = rp.read_root('/home/matthias/data/uboone/laser/outs.root',key='Events')
-#
-# laserdef = Laseref()
-# recodef = RecobHits()
-#
-#
-branch = "recob::Hits_LaserReco_UPlaneLaserHits_LaserHitAna.obj.fStartTick"
-aa = rn.root2array(filename, treename="Events", branches=branch)
-#
-print aa
-#
-# # Get the TTree from the ROOT file
-# rfile = ROOT.TFile(filename)
-# intree = rfile.Get('Events')
-# mychain = ROOT.gDirectory.Get( 'Events' )
-#
-#
-# vec = ROOT.vector('double')()
-# ab = mychain.SetBranchAddress(branch, vec)
-
+print nr.root2array(filename,treename=tree, branches=branch)
