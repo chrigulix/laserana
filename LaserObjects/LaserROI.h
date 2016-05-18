@@ -30,18 +30,23 @@ namespace lasercal
       // It already runs the hit finder algorithms and fills the map data.
       LaserROI(const geo::GeometryCore* Geometry, const float& BoxSize, const lasercal::LaserBeam& LaserBeamInfo);
       
+      //
+      
     private:
       
       // Detector geometry object
       const geo::GeometryCore* fGeometry;
       const float fBoxSize;
+      float fWireBoxSize;
       lasercal::LaserBeam fLaserBeam;
       float fXScaleFactor;
       
     protected:
       
       // Calculates wire number range of the laser beam
-      std::pair<geo::WireID, geo::WireID> WireRanges(TVector3 StartPosition, TVector3 EndPosition, geo::PlaneID::PlaneID_t PlaneID);
+      std::vector< std::pair<geo::WireID, geo::WireID> > WireRanges(const TVector3& StartPosition, const TVector3& EndPosition);
+      
+      // Calculate
       
     
   }; // class LaserHits

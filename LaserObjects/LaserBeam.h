@@ -15,6 +15,14 @@
 #include <TVector3.h>
 #include <TF1.h>
 
+// TODO: Fix class compilation if including GeometryCore.h and others!!!
+
+/// LArSoft
+// #include "art/Framework/Services/Registry/ServiceHandle.h"
+// #include "larcore/Geometry/Geometry.h"
+// #include "larcore/Geometry/GeometryCore.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
+
 // Framework includes
 
 

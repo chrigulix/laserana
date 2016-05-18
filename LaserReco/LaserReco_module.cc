@@ -525,7 +525,7 @@ namespace LaserReco {
     fGeometry->WireEndPoints(WireID, Start, End);
     
     // Loop over target plane number
-    for(unsigned int plane_no = 0; plane_no < 3; plane_no++)
+    for(unsigned int plane_no = 0; plane_no < fGeometry->Nplanes(); plane_no++)
     {
       // Search for crossing wires only if the aren't on the same plane
       if(plane_no != WireID.Plane)
