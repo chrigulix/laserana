@@ -18,9 +18,12 @@
 // TODO: Fix class compilation if including GeometryCore.h and others!!!
 
 /// LArSoft
-// #include "art/Framework/Services/Registry/ServiceHandle.h"
-// #include "larcore/Geometry/Geometry.h"
-// #include "larcore/Geometry/GeometryCore.h"
+#ifndef __GCCXML__
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/GeometryCore.h"
+#endif
+
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
 
 // Framework includes
@@ -65,7 +68,9 @@ namespace lasercal
       float fAperturePosition;          ///< Aperture position
       float fPower;                     ///< Attenuator setting (not measured pulse energy)
       
+      #ifndef __GCCXML__
       void SetIntersectionPoints();
+      #endif
       
       
     public:
@@ -106,6 +111,7 @@ namespace lasercal
       LaserBeam(const TVector3& LaserPosition, const float& Phi, const float& Theta); 
       
      
+     #ifndef __GCCXML__
      /**
      * @brief Sets laser Position
      * @param LaserPosition start position of the laser 
@@ -171,6 +177,8 @@ namespace lasercal
       
       TVector3 GetEntryPoint() const;
       TVector3 GetExitPoint() const;
+      
+      #endif
       //Anydatatype GetErrors();
       
   };

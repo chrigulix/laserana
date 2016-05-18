@@ -54,22 +54,22 @@ void lasercal::LaserBeam::SetTime(const float& sec, const float& usec)
 void lasercal::LaserBeam::SetIntersectionPoints()
 {   
     // Load geometry core
-//     geo::GeometryCore const* Geometry = &*(art::ServiceHandle<geo::Geometry>());
+    geo::GeometryCore const* Geometry = &*(art::ServiceHandle<geo::Geometry>());
     
-//     // Get the TPCGeo volume and its intersection points
-//     auto IntersectionPoints = Geometry->TPC().GetIntersections(fLaserPosition, fDirection);
-// 
-//     // Check if there is only an exit point (if laser head is in TPC volume)
-//     if(IntersectionPoints.size() == 1)
-//     {
-// 	fEntryPoint = TVector3(-9999,-9999,-9999);
-// 	fExitPoint = IntersectionPoints.back();
-//     }
-//     else
-//     {
-// 	fEntryPoint = IntersectionPoints.front();
-// 	fExitPoint = IntersectionPoints.back();
-//     }
+    // Get the TPCGeo volume and its intersection points
+    auto IntersectionPoints = Geometry->TPC().GetIntersections(fLaserPosition, fDirection);
+
+    // Check if there is only an exit point (if laser head is in TPC volume)
+    if(IntersectionPoints.size() == 1)
+    {
+	fEntryPoint = TVector3(-9999,-9999,-9999);
+	fExitPoint = IntersectionPoints.back();
+    }
+    else
+    {
+	fEntryPoint = IntersectionPoints.front();
+	fExitPoint = IntersectionPoints.back();
+    }
 }
 
 void lasercal::LaserBeam::Print() const 
