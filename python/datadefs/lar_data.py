@@ -54,7 +54,4 @@ class LarData():
         if type(event) is not int:
             raise ValueError("only integers allowed as event number")
 
-        hit = np.vstack(self.hits[event]).astype(np.float64).view(np.ndarray)
-        print hit.dtype, hit.shape
-
-        return hit
+        return np.vstack(self.hits[event]).astype(np.float64).view(np.ndarray)

@@ -2,7 +2,7 @@ __author__ = 'matthias'
 
 import lar_data as ld
 
-filename = "/home/matthias/data/uboone/laser/outs.root"
+filename = "../data/testdata.root"
 
 
 data = ld.LarData(filename)
