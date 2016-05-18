@@ -7,18 +7,14 @@ import root_numpy as rn
 
 
 class LarData():
-    def __init__(self, file):
-        self.file = file
+    def __init__(self, filename):
+        self.file = filename
         self.datatypes = ["laser", "hits"]
 
         self.laser = None
         self.hits = None
 
         self.n_entries = None
-
-    def read(self, id):
-        if id not in self.datatypes:
-            raise ValueError("unknown datatype")
 
     def read_laser(self):
         laserdefs = Laseref()
@@ -31,13 +27,16 @@ class LarData():
             recodef = RecobHits(plane="Y")
         else:
             recodef = RecobHits(plane=planes)
-        hit_branches = [recodef.channel(), recodef.peak_time(), recodef.peak_amplitude(), recodef.start_tick(), recodef.end_tick()]
+        hit_branches = [recodef.channel(), recodef.peak_time(), recodef.peak_amplitude(), recodef.start_tick(),
+                        recodef.end_tick()]
         self.hits = self.read(recodef.tree, hit_branches)
 
         # hits.dtype.names = ["channel", "peak_tick", "peak_amp", "start_tick", "end_tick"]
 
     def read(self, tree, branches):
-        branch = [item for sublist in branches for item in sublist if isinstance(sublist, list)] + [item for item in branches if isinstance(item, str)]
+        branch = [item for sublist in branches for item in sublist if isinstance(sublist, list)] \
+                 + [item for item in branches if isinstance(item, str)]
+
         data = rn.root2array(self.file, treename=tree, branches=branch).view(np.recarray)
 
         if self.n_entries is None:

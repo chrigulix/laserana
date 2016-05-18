@@ -1,25 +1,23 @@
 __author__ = 'matthias'
 
-import root_numpy as rn
 
 class Base(object):
-
     def __init__(self):
         self.num = 1
         self.data_product = None
         self.tree = None
-        self.branches = None
+        self.branch = None
         self.filename = None
 
     def info(self):
         print self.num
 
-    def gen_string(self, argument , list=None):
-        if list is None:
-            list = []
+    def gen_string(self, argument, arguments=None):
+        if arguments is None:
+            arguments = []
         string = []
-        if len(list) != 0:
-            for entry in list:
+        if len(arguments) != 0:
+            for entry in arguments:
                 string.append(self.branch + argument + entry)
         else:
             string = self.branch + argument

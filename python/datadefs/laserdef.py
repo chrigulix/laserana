@@ -6,10 +6,11 @@ from base import Base
 class Laseref(Base):
 
     def __init__(self):
+        super(Laseref, self).__init__()
         self.data_product = "Laser Data"
         self.tree = "Events"
         self.branch = "lasercal::LaserBeam_LaserMerger_LaserBeam_LaserHitAna.obj."
-        self.XYZ = ["X","Y","Z"]
+        self.XYZ = ["X", "Y", "Z"]
 
     def pos(self):
         return self.gen_string("fLaserPosition.f", self.XYZ)
