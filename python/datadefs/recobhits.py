@@ -2,6 +2,7 @@ __author__ = 'matthias'
 
 from base import Base
 
+
 class RecobHits(Base):
 
     def __init__(self, plane):

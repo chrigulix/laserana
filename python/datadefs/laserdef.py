@@ -2,6 +2,7 @@ __author__ = 'matthias'
 
 from base import Base
 
+
 class Laseref(Base):
 
     def __init__(self):
