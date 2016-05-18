@@ -1,68 +1,46 @@
 #include "LaserObjects/LaserROI.h"
 
 
-lasercal::LaserROI::LaserROI(const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds)
+lasercal::LaserROI::LaserROI(const geo::GeometryCore* Geometry, const float& BoxSize) : fGeometry(Geometry), fBoxSize(BoxSize)
 {
-  fGeometry = Geometry;
+  
 } // Default constructor
 
 //-------------------------------------------------------------------------------------------------------------------
 
-lasercal::LaserROI::LaserROI(const std::vector<recob::Wire>& Wires, const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds)
+lasercal::LaserROI::LaserROI(const geo::GeometryCore* Geometry, const float& BoxSize, const lasercal::LaserBeam& LaserBeamInfo) : fGeometry(Geometry), fBoxSize(BoxSize), fLaserBeam(LaserBeamInfo)
 {
-  fGeometry = Geometry;
+  TVector3 DistanceVector = fLaserBeam.GetEntryPoint() - fLaserBeam.GetExitPoint();
+  
+  // Calculate the scale factor of the ROI box x-coordinate
+  fXScaleFactor = sqrt(DistanceVector.Mag2())*BoxSize/fabs(DistanceVector[2]);
+  
 } // Constructor using all wire signals and geometry purposes
 
 //----------------------------------------------------------------------------------------------------------------
 
-std::vector< std::pair<geo::WireID, geo::WireID> > lasercal::LaserROI::WireRanges(geo::WireID WireID)
+std::pair<geo::WireID, geo::WireID> lasercal::LaserROI::WireRanges(TVector3 StartPosition, TVector3 EndPosition, geo::PlaneID::PlaneID_t PlaneID)
 {
-  // Initialize the return pair vector
-  std::vector< std::pair<geo::WireID, geo::WireID> > CrossingWireRangeVec;
-
   // Initialize start and end point of wire
-  double Start[3], End[3];
+  double Start[] = {StartPosition[0],StartPosition[1],StartPosition[2]}; 
+  double End[] = {EndPosition[0],EndPosition[1],EndPosition[2]};
   
-  // Fill the wire End points
-  fGeometry->WireEndPoints(WireID, Start, End);
+  // Generate PlaneID for microboone (cryostatID = 0, TPCID = 0, plane number)
+  auto TargetPlaneID = geo::PlaneID(0,0,PlaneID);
   
-  // Loop over target plane number
-  for(unsigned int plane_no = 0; plane_no < 3; plane_no++)
+  // Get the closest wire on the target plane to the wire start position
+  auto FirstWireID = fGeometry->NearestWireID(Start, TargetPlaneID);
+  
+  // Get the closest wire on the target plane to the wire end postion
+  auto LastWireID = fGeometry->NearestWireID(End, TargetPlaneID);
+  
+  // Check if wires are in right order
+  if(FirstWireID.Wire > LastWireID.Wire)
   {
-    // Search for crossing wires only if the aren't on the same plane
-    if(plane_no != WireID.Plane)
-    {
-      // Generate PlaneID for microboone (cryostatID = 0, TPCID = 0, plane number)
-      auto TargetPlaneID = geo::PlaneID(0,0,plane_no);
-	
-      // Get the closest wire on the target plane to the wire start position
-      auto FirstWireID = fGeometry->NearestWireID(Start, TargetPlaneID);
-      
-      // Get the closest wire on the target plane to the wire end postion
-      auto LastWireID = fGeometry->NearestWireID(End, TargetPlaneID);
-	
-      // Check if wires are in right order
-      if(FirstWireID.Wire > LastWireID.Wire)
-      {
-	// Swap them if order is decending
-	std::swap(FirstWireID, LastWireID);
-      }
-      
-      // Generate a dummy intersection coordinate, because shit only works that way (eye roll)
-      geo::WireIDIntersection DummyMcDumbFace;
-	
-      // Check if first and last wires are crossing, if not take one next to them
-      if( !fGeometry->WireIDsIntersect(WireID, FirstWireID, DummyMcDumbFace) )
-      {
-	++(FirstWireID.Wire);
-      }
-      
-      if( !fGeometry->WireIDsIntersect(WireID, LastWireID, DummyMcDumbFace) )
-      {
-	--(LastWireID.Wire);
-      }
-      CrossingWireRangeVec.push_back( std::make_pair(FirstWireID,LastWireID) );
-    }
+    // Swap them if order is decending
+    std::swap(FirstWireID, LastWireID);
   }
-  return CrossingWireRangeVec;
+  
+  // Return the entr and exit wire IDs as a pair
+  return std::make_pair(FirstWireID,LastWireID);
 }
