@@ -1,17 +1,17 @@
 #include "LaserObjects/LaserHits.h"
 
 
-lasercal::LaserHits::LaserHits(const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds)
+lasercal::LaserHits::LaserHits(const std::array<float,3>& UVYThresholds)
 {
-  fGeometry = Geometry;
+  fGeometry = &*(art::ServiceHandle<geo::Geometry>());
   fUVYThresholds = UVYThresholds;
 } // Default constructor
 
 //-------------------------------------------------------------------------------------------------------------------
 
-lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds)
+lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const std::array<float,3>& UVYThresholds)
 {
-  fGeometry = Geometry;
+  fGeometry = &*(art::ServiceHandle<geo::Geometry>());
   fUVYThresholds = UVYThresholds;
   
   // Reserve space for hit container
@@ -238,28 +238,25 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
 	  &&(fabs(Peak)/(HitEnd - HitStart) > 1 || fabs(Peak) > 1000) 
 	  && HitEnd - HitStart > 10)
       {
+	  // Create hit
+	  auto RecoHit = recob::HitCreator( SingleWire, 
+					    fGeometry->ChannelToWire(Channel).front(), 
+					    HitStart, 
+					    HitEnd, 
+					    fabs(HitStart - HitEnd)/2, 
+					    (float) PeakTime, 
+					    fabs(HitStart - HitEnd)/2, 
+					    Peak, 
+					    sqrt(Peak), 
+					    0., 
+					    0., 
+					    1, 
+					    HitIdx, 
+					    1., 
+					    0 );
+	  
       // Create a new map entry with hit time as a key
-      LaserHits.emplace( std::make_pair(
-					(float) PeakTime,
-					recob::HitCreator(
-							   SingleWire, 
-							   fGeometry->ChannelToWire(Channel).front(), 
-							   HitStart, 
-							   HitEnd, 
-							   fabs(HitStart - HitEnd)/2, 
-							   (float) PeakTime, 
-							   fabs(HitStart - HitEnd)/2, 
-							   Peak, 
-							   sqrt(Peak), 
-							   0., 
-							   0., 
-							   1, 
-							   HitIdx, 
-							   1., 
-							   0
-							  ).move() 
-				       ) 
-			);
+      LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit.move()) );
       
       HitIdx++;
       }
@@ -350,28 +347,25 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
 	  &&(Peak/(DipTime-PeakTime > 2 || Peak-Dip > 1000))  
 	  && DipTime-PeakTime > 4 )
       {
+	  // Create hit
+	  auto RecoHit = recob::HitCreator( SingleWire, 
+					    fGeometry->ChannelToWire(Channel).front(), 
+					    HitStart, 
+					    HitEnd, 
+					    fabs(DipTime - PeakTime)/2, 
+					    HitTime, 
+					    fabs(DipTime - PeakTime)/2, 
+					    Peak-Dip, 
+					    sqrt(Peak-Dip), 
+					    0., 
+					    0., 
+					    1, 
+					    HitIdx, 
+					    1., 
+					    0 );
+					    
       // Create a new map entry with hit time as a key
-      LaserHits.emplace( std::make_pair(
-                                        (float) HitTime,
-                                         recob::HitCreator(
-                                                            SingleWire, 
-							    fGeometry->ChannelToWire(Channel).front(), 
-							    HitStart, 
-							    HitEnd, 
-							    fabs(DipTime - PeakTime)/2,  
-							    HitTime, 
-							    fabs(DipTime - PeakTime)/2, 
-							    Peak-Dip, 
-							    sqrt(Peak-Dip), 
-							    0., 
-							    0., 
-							    1, 
-							    HitIdx, 
-							    1., 
-							    0
-							  ).move() 
-			               ) 
-			);
+      LaserHits.emplace( std::make_pair((float) HitTime, RecoHit.move()) );
       HitIdx++;
       }
     }
@@ -427,29 +421,27 @@ std::map<float,recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wir
       if( (Peak/(HitEnd-HitStart) > 1.5 || Peak > 1000)
           && HitEnd-HitStart > 6 ) 
       {
+	  // Create hit
+	  auto RecoHit = recob::HitCreator( SingleWire, 
+					    fGeometry->ChannelToWire(Channel).front(), 
+					    HitStart, 
+					    HitEnd, 
+					    fabs(HitStart - HitEnd)/2, 
+					    (float) PeakTime, 
+					    fabs(HitStart - HitEnd)/2, 
+					    Peak, 
+					    sqrt(Peak), 
+					    0., 
+					    0., 
+					    1, 
+					    HitIdx, 
+					    1., 
+					    0 );
       
+					    
+//       if(RecoHit)
       // Create a new map entry with hit time as a key
-      LaserHits.emplace( std::make_pair(
-					(float) PeakTime,
-					recob::HitCreator(
-							   SingleWire, 
-							   fGeometry->ChannelToWire(Channel).front(), 
-							   HitStart, 
-							   HitEnd, 
-							   fabs(HitStart - HitEnd)/2, 
-							   (float) PeakTime, 
-							   fabs(HitStart - HitEnd)/2, 
-							   Peak, 
-							   sqrt(Peak), 
-							   0., 
-							   0., 
-							   1, 
-							   HitIdx, 
-							   1., 
-							   0
-							  ).move() 
-				       ) 
-			);
+      LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit.move()) );
       
       HitIdx++;
       }

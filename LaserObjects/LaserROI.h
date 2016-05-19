@@ -7,6 +7,9 @@
 #include "lardata/RecoBase/Wire.h"
 #include "lardata/RecoBaseArt/HitCreator.h"
 #include "larcore/Geometry/GeometryCore.h"
+#include "larcore/Geometry/Geometry.h"
+
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 
 #include "LaserObjects/LaserBeam.h"
 
@@ -24,22 +27,28 @@ namespace lasercal
     public:
       // Constructor with geometry and thresholds for the hit finder. 
       // It just initializes the object. There is no hit finding or filling of data.
-      LaserROI(const geo::GeometryCore* Geometry, const float& BoxSize);
+      LaserROI();
       
       // Constructor wire data, geometry and thresholds for the hit finder.
       // It already runs the hit finder algorithms and fills the map data.
       LaserROI(const geo::GeometryCore* Geometry, const float& BoxSize, const lasercal::LaserBeam& LaserBeamInfo);
       
-      //
+      // Check if Wire is in wire range
+      bool IsWireInRange(const recob::Wire& WireToCheck) const;
+      
+      bool IsHitInRange(const recob::Hit& HitToCheck) const;
       
     private:
       
       // Detector geometry object
       const geo::GeometryCore* fGeometry;
-      const float fBoxSize;
+      float fBoxSize;
       float fWireBoxSize;
       lasercal::LaserBeam fLaserBeam;
       float fXScaleFactor;
+      
+      // Time tick ranges of ROI for all planes(vector) and every individual wire (map)
+      std::vector< std::map< unsigned int, std::pair<float, float> > > fRanges;
       
     protected:
       
