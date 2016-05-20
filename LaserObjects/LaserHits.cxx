@@ -9,10 +9,14 @@ lasercal::LaserHits::LaserHits(const std::array<float,3>& UVYThresholds)
 
 //-------------------------------------------------------------------------------------------------------------------
 
-lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const std::array<float,3>& UVYThresholds)
+lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const std::array<float,3>& UVYThresholds, const lasercal::LaserBeam& LaserBeam)
 {
   fGeometry = &*(art::ServiceHandle<geo::Geometry>());
   fUVYThresholds = UVYThresholds;
+  
+  //Initialize LaserROI
+  float BoxSize = 10.0; //cm
+  fLaserROI = lasercal::LaserROI(BoxSize, LaserBeam);
   
   // Reserve space for hit container
   for(auto& MapVector : fHitMapsByPlane)
@@ -253,12 +257,14 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
 					    1, 
 					    HitIdx, 
 					    1., 
-					    0 );
+					    0 ).move();
 	  
-      // Create a new map entry with hit time as a key
-      LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit.move()) );
-      
-      HitIdx++;
+// 	  if(fLaserROI.IsHitInRange(RecoHit))
+// 	  {
+	      // Create a new map entry with hit time as a key
+	      LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
+// 	  }
+	  HitIdx++;
       }
     }
   }
@@ -362,11 +368,17 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
 					    1, 
 					    HitIdx, 
 					    1., 
-					    0 );
+					    0 ).move();
 					    
-      // Create a new map entry with hit time as a key
-      LaserHits.emplace( std::make_pair((float) HitTime, RecoHit.move()) );
-      HitIdx++;
+	   
+	   //TODO: Fix this, there are no v-hits found with this condition
+// 	   if(fLaserROI.IsHitInRange(RecoHit))
+// 	   {
+	       // Create a new map entry with hit time as a key
+	       LaserHits.emplace( std::make_pair((float) HitTime, RecoHit) );
+// 	   }
+	  
+	  HitIdx++;
       }
     }
   }
@@ -436,14 +448,17 @@ std::map<float,recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wir
 					    1, 
 					    HitIdx, 
 					    1., 
-					    0 );
-      
+					    0 ).move();
 					    
-//       if(RecoHit)
-      // Create a new map entry with hit time as a key
-      LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit.move()) );
       
-      HitIdx++;
+	  
+// 	  if(fLaserROI.IsHitInRange(RecoHit))
+// 	  {
+	      // Create a new map entry with hit time as a key
+	      LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
+// 	  }
+      
+	  HitIdx++;
       }
     }
   }

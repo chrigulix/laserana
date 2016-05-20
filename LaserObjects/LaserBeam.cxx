@@ -12,6 +12,40 @@ lasercal::LaserBeam::LaserBeam(const TVector3& LaserPosition, const TVector3& La
 
 lasercal::LaserBeam::LaserBeam(const TVector3& LaserPosition, const float& Phi, const float& Theta)
 {
+    
+    // Set position and direction
+    SetPosition(LaserPosition, false);
+    SetDirection(Phi,Theta);
+    
+    // Calculate the intersection points with the TPC. This has to be done after SetPosition and SetDirection!
+//     SetIntersectionPoints();
+    
+}
+
+void lasercal::LaserBeam::SetPosition(const TVector3& LaserPosition, const bool& ReCalcFlag)
+{
+    fLaserPosition = LaserPosition;
+    
+    if(ReCalcFlag)
+    {
+	// Re-calculate the intersection points with the TPC.
+	SetIntersectionPoints();
+    }
+}
+
+void lasercal::LaserBeam::SetDirection(const TVector3& LaserDirection, const bool& ReCalcFlag)
+{
+    fDirection = LaserDirection;
+    
+    if(ReCalcFlag)
+    {
+	// Re-calculate the intersection points with the TPC.
+	SetIntersectionPoints();
+    }
+}
+
+void lasercal::LaserBeam::SetDirection(const float& Phi, const float& Theta, const bool& ReCalcFlag)
+{
     TVector3 LaserDir;          // 3-Vector in laser coordinate system
     TVector3 LaserDirection;    // 3-Vector in uboone coordinate system 
     
@@ -21,24 +55,11 @@ lasercal::LaserBeam::LaserBeam(const TVector3& LaserPosition, const float& Phi, 
     LaserDirection.SetY(LaserDir.Z());
     LaserDirection.SetZ(LaserDir.X());
     
-    // Set position and direction
-    SetPosition(LaserPosition);
-    SetDirection(LaserDirection);
-    
-    // Calculate the intersection points with the TPC. This has to be done after SetPosition and SetDirection!
-    SetIntersectionPoints();
-    
+    // Set directions
+    SetDirection(LaserDirection,ReCalcFlag);
 }
 
-void lasercal::LaserBeam::SetPosition(const TVector3& LaserPosition)
-{
-    fLaserPosition = LaserPosition;
-}
 
-void lasercal::LaserBeam::SetDirection(const TVector3& LaserDirection)
-{
-    fDirection = LaserDirection;
-}
 void lasercal::LaserBeam::SetPower(const float& AttenuatorPercentage) 
 {
     fPower = AttenuatorPercentage;
@@ -56,8 +77,14 @@ void lasercal::LaserBeam::SetIntersectionPoints()
     // Load geometry core
     geo::GeometryCore const* Geometry = &*(art::ServiceHandle<geo::Geometry>());
     
-    // Get the TPCGeo volume and its intersection points
-    auto IntersectionPoints = Geometry->TPC().GetIntersections(fLaserPosition, fDirection);
+    // Create the active Volume
+    geo::BoxBoundedGeo ActiveVolume( 0,2*Geometry->TPC().ActiveHalfWidth(), // xmin, xmax
+				     -Geometry->TPC().ActiveHalfHeight(),Geometry->TPC().ActiveHalfHeight(), // ymin, ymax  
+				     0,Geometry->TPC().ActiveLength() // zmin, zmax 
+				    );
+    
+    // Get the active volume and its intersection points
+    auto IntersectionPoints = ActiveVolume.GetIntersections(fLaserPosition, fDirection);
 
     // Check if there is only an exit point (if laser head is in TPC volume)
     if(IntersectionPoints.size() == 1)

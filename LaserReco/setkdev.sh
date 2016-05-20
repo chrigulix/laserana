@@ -46,4 +46,4 @@ echo $ROOT_INC >> .kdev_include_paths
 echo $IFDH_ART_INC >> .kdev_include_paths
 echo $PYTHIA_INC >> .kdev_include_paths
 echo $PYTHON_INCLUDE >> .kdev_include_paths
-echo $MRB_SOURCE >> .kdev_include_paths
+echo $MRB_SOURCE/laserana >> .kdev_include_paths

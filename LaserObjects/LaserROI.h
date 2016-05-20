@@ -31,12 +31,18 @@ namespace lasercal
       
       // Constructor wire data, geometry and thresholds for the hit finder.
       // It already runs the hit finder algorithms and fills the map data.
-      LaserROI(const geo::GeometryCore* Geometry, const float& BoxSize, const lasercal::LaserBeam& LaserBeamInfo);
+      LaserROI(const float& BoxSize, const lasercal::LaserBeam& LaserBeamInfo);
       
       // Check if Wire is in wire range
       bool IsWireInRange(const recob::Wire& WireToCheck) const;
       
       bool IsHitInRange(const recob::Hit& HitToCheck) const;
+      
+      unsigned int GetEntryWire(const unsigned int& PlaneNo) const;
+      unsigned int GetExitWire(const unsigned int& PlaneNo) const;
+      
+      float GetEntryTimeTick(const unsigned int& PlaneNo) const;
+      float GetExitTimeTick(const unsigned int& PlaneNo) const;
       
     private:
       
@@ -46,6 +52,9 @@ namespace lasercal
       float fWireBoxSize;
       lasercal::LaserBeam fLaserBeam;
       float fXScaleFactor;
+      
+      std::vector<unsigned int> fEntryWire;
+      std::vector<unsigned int> fExitWire;
       
       // Time tick ranges of ROI for all planes(vector) and every individual wire (map)
       std::vector< std::map< unsigned int, std::pair<float, float> > > fRanges;

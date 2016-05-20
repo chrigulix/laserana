@@ -22,6 +22,7 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
+#include "larcore/Geometry/BoxBoundedGeo.h"
 #endif
 
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
@@ -116,19 +117,19 @@ namespace lasercal
      * @brief Sets laser Position
      * @param LaserPosition start position of the laser 
      */
-      void SetPosition(const TVector3& LaserPosition);
+      void SetPosition(const TVector3& LaserPosition, const bool& ReCalcFlag = true);
       
      /**
      * @brief Sets laser direction
      * @param LaserDirection direction of the laser beam
      */
-      void SetDirection(const TVector3& LaserDirection);
+      void SetDirection(const TVector3& LaserDirection, const bool& ReCalcFlag = true);
       
       /**
      * @brief Sets laser direction
      * @param LaserAngles reads the angles of the laser beam and calculates the direction
      */
-      void SetDirection(const float& Phi, const float& Theta);
+      void SetDirection(const float& Phi, const float& Theta, const bool& ReCalcFlag  = true);
      
     /**
      * @brief Sets laser trigger time

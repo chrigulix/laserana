@@ -18,6 +18,7 @@ services:
   #FileCatalogMetadata:     @local::art_file_catalog_data
   @table::microboone_reco_minimal_services
 }
+services.DetectorClocksService.InheritClockConfig: false
 services.DatabaseUtil.ShouldConnect: false
 #services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
 
@@ -50,8 +51,8 @@ physics:
       TickToAngle:          1                   # conversion constant for linear encoder
       DirCalLCS1:           [0. , 0.]           # Direction Calibration
       DirCalLCS2:           [-18.432 , 10500000.]       # Direction Calibration (161.568deg for straight -180deg to invert )
-      PositionLCS1:         [128. , 0., -20.]           # Position of Mirror
-      PositionLCS2:         [128. , 0., 1020.]  #
+      PositionLCS1:         [103. , 0., -20.]           # Position of Mirror
+      PositionLCS2:         [103. , 0., 1020.]  #
       EnergyMinMaxLCS1:     [8000, 12500]
       EnergyMinMaxLCS2:     [8000, 12500]     
     }

@@ -64,6 +64,7 @@
 
 // Laser Module Classes
 #include "LaserObjects/LaserHits.h"
+#include "LaserObjects/LaserBeam.h"
 
 
 namespace {
@@ -200,6 +201,9 @@ namespace LaserReco {
     // This is the handle to the raw data of this event (simply a pointer to std::vector<raw::RawDigit>)   
     art::ValidHandle< std::vector<raw::RawDigit> > DigitVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>(fCalDataModuleLabel);
     
+    auto LaserTag = art::InputTag("LaserDataMerger", "LaserBeam");
+    art::ValidHandle< lasercal::LaserBeam > LaserBeamHandle = event.getValidHandle< lasercal::LaserBeam >(LaserTag);
+    
     // Prepairing the wire signal vector. It will be just the raw signal with subtracted pedestial
     std::vector<recob::Wire> WireVec;
     
@@ -236,52 +240,52 @@ namespace LaserReco {
     recob::Wire::RegionsOfInterest_t RegionOfInterest;
     
     // Loop over downstream laser system
-    if(fLCSNumber == 2)
-    { 
-      // Loop over N collection wires at the edge of the TPC based on the wire map
-      for(unsigned int WireIndex = WireMaps.back().size()-1; WireIndex >= WireMaps.back().size() - 13; WireIndex--)
-      {
-        // Get the raw data for this particular wire
-        auto RawDigit = DigitVecHandle->at(WireMaps.back().at(WireIndex));
-	
-	// Get Channel number
-	raw::ChannelID_t channel = RawDigit.Channel();
-	
-	// Skip channel if dead or noisy
-	if( ChannelFilter.Status(channel) < fMinAllowedChanStatus || !ChannelFilter.IsPresent(channel) )
-	{
-	  continue;
-	}
-	
-	// Uncompress raw digits into RawADC vector
-	raw::Uncompress(RawDigit.ADCs(), RawADC, RawDigit.Compression());
-        
-        // copy only the region of interest into the the RawROI vector TODO Watch commented stuff
-	std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI, RawROI.begin());
-
-        // Subtract pedestal from samples in ROI
-	for(auto & RawSample : RawROI)
-	{
-	  RawSample -= PedestalRetrievalAlg.PedMean(channel);
-	}
-	
-        // Create a wire from the selected ROI (1. copy raw into ROI container, 2. copy the ROI vector into a wire container)
-        RegionOfInterestFirst.add_range(StartROI,RawROI.begin(),RawROI.end());
-	
-	// Search for hits with the created wire
-	YROIHits.AddHitsFromWire(recob::WireCreator( std::move(RegionOfInterestFirst), RawDigit ).move());
-	
-      }// end for over endge collection wires
-      
-      // Check if there are more than x hits in the selected area and jump event if there are less
-      if( YROIHits.NumberOfWiresWithHits().at(2) < 7 ) 
-      {
-	event.put(std::move(UHitVec), "UPlaneLaserHits");
-	event.put(std::move(VHitVec), "VPlaneLaserHits");
-	event.put(std::move(YHitVec), "YPlaneLaserHits");
-	return;
-      }
-    }// end if laser system number two
+//     if(fLCSNumber == 2)
+//     { 
+//       // Loop over N collection wires at the edge of the TPC based on the wire map
+//       for(unsigned int WireIndex = WireMaps.back().size()-1; WireIndex >= WireMaps.back().size() - 13; WireIndex--)
+//       {
+//         // Get the raw data for this particular wire
+//         auto RawDigit = DigitVecHandle->at(WireMaps.back().at(WireIndex));
+// 	
+// 	// Get Channel number
+// 	raw::ChannelID_t channel = RawDigit.Channel();
+// 	
+// 	// Skip channel if dead or noisy
+// 	if( ChannelFilter.Status(channel) < fMinAllowedChanStatus || !ChannelFilter.IsPresent(channel) )
+// 	{
+// 	  continue;
+// 	}
+// 	
+// 	// Uncompress raw digits into RawADC vector
+// 	raw::Uncompress(RawDigit.ADCs(), RawADC, RawDigit.Compression());
+//         
+//         // copy only the region of interest into the the RawROI vector TODO Watch commented stuff
+// 	std::copy(RawADC.begin()+StartROI, RawADC.begin()+EndROI, RawROI.begin());
+// 
+//         // Subtract pedestal from samples in ROI
+// 	for(auto & RawSample : RawROI)
+// 	{
+// 	  RawSample -= PedestalRetrievalAlg.PedMean(channel);
+// 	}
+// 	
+//         // Create a wire from the selected ROI (1. copy raw into ROI container, 2. copy the ROI vector into a wire container)
+//         RegionOfInterestFirst.add_range(StartROI,RawROI.begin(),RawROI.end());
+// 	
+// 	// Search for hits with the created wire
+// 	YROIHits.AddHitsFromWire(recob::WireCreator( std::move(RegionOfInterestFirst), RawDigit ).move());
+// 	
+//       }// end for over endge collection wires
+//       
+//       // Check if there are more than x hits in the selected area and jump event if there are less
+//       if( YROIHits.NumberOfWiresWithHits().at(2) < 7 ) 
+//       {
+// 	event.put(std::move(UHitVec), "UPlaneLaserHits");
+// 	event.put(std::move(VHitVec), "VPlaneLaserHits");
+// 	event.put(std::move(YHitVec), "YPlaneLaserHits");
+// 	return;
+//       }
+//     }// end if laser system number two
     
 
     // Loop over all raw digit entries
@@ -317,7 +321,7 @@ namespace LaserReco {
     } // end loop over raw digit entries
     
     // Create Laser Hits out of Wires
-    lasercal::LaserHits AllLaserHits(WireVec,fUVYThresholds);
+    lasercal::LaserHits AllLaserHits(WireVec,fUVYThresholds,*LaserBeamHandle);
     
     // Filter for time matches of at least two planes
 //     AllLaserHits.TimeMatchFilter();
@@ -327,11 +331,11 @@ namespace LaserReco {
     VHitVec = AllLaserHits.GetPlaneHits(1);
     YHitVec = AllLaserHits.GetPlaneHits(2);
     
-    std::cout << fDetProperties->ConvertXToTicks(100,2,0,0) << std::endl;
+//     std::cout << fDetProperties->ConvertXToTicks(100,2,0,0) << std::endl;
     
-    std::cout << UHitVec->size() << std::endl;
-    std::cout << VHitVec->size() << std::endl;
-    std::cout << YHitVec->size() << std::endl;
+//     std::cout << UHitVec->size() << std::endl;
+//     std::cout << VHitVec->size() << std::endl;
+//     std::cout << YHitVec->size() << std::endl;
     
     // Fill Hits of all planes into the new
     event.put(std::move(UHitVec), "UPlaneLaserHits");

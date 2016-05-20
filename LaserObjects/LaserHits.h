@@ -12,6 +12,7 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 
 #include "LaserObjects/LaserROI.h"
+#include "LaserObjects/LaserBeam.h"
 
 #include <iostream>
 #include <utility>
@@ -31,7 +32,7 @@ namespace lasercal
       
       // Constructor wire data, geometry and thresholds for the hit finder.
       // It already runs the hit finder algorithms and fills the map data.
-      LaserHits(const std::vector<recob::Wire>& Wires, const std::array<float,3>& UVYThresholds);
+      LaserHits(const std::vector<recob::Wire>& Wires, const std::array<float,3>& UVYThresholds, const lasercal::LaserBeam& LaserBeam);
       
       void AddHitsFromWire(const recob::Wire& Wire);
       

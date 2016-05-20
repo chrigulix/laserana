@@ -8,13 +8,18 @@ lasercal::LaserROI::LaserROI()
 
 //-------------------------------------------------------------------------------------------------------------------
 
-lasercal::LaserROI::LaserROI( const geo::GeometryCore* Geometry, const float& BoxSize, const lasercal::LaserBeam& LaserBeamInfo ) : fGeometry ( Geometry ), fBoxSize ( BoxSize ), fLaserBeam ( LaserBeamInfo )
+lasercal::LaserROI::LaserROI(const float& BoxSize, const lasercal::LaserBeam& LaserBeamInfo ) : fBoxSize ( BoxSize ), fLaserBeam ( LaserBeamInfo )
 {
+    fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+    
     // Get Detector properties
     detinfo::DetectorProperties const* DetProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
     
     TVector3 EntryPoint = fLaserBeam.GetEntryPoint();
     TVector3 ExitPoint = fLaserBeam.GetExitPoint();
+    
+//     EntryPoint.Print();
+//     ExitPoint.Print();
     
     TVector3 BeamVector = EntryPoint - ExitPoint;
     
@@ -22,7 +27,7 @@ lasercal::LaserROI::LaserROI( const geo::GeometryCore* Geometry, const float& Bo
     fWireBoxSize = BoxSize/fGeometry->WirePitch();
   
     // Calculate the scale factor of the ROI box x-coordinate
-    fXScaleFactor = sqrt ( BeamVector.Mag2() ) *BoxSize/fabs ( BeamVector[2] );
+    fXScaleFactor = sqrt ( BeamVector.Mag2() ) *BoxSize/ fabs ( BeamVector[2] );
     
     // Get wire ranges for all planes
     auto RawRanges = WireRanges ( fLaserBeam.GetEntryPoint(),fLaserBeam.GetExitPoint() );
@@ -39,13 +44,17 @@ lasercal::LaserROI::LaserROI( const geo::GeometryCore* Geometry, const float& Bo
 	// The following stuff is complicated because the authors wanted to make the code work
 	// without knowing where the laser is positioned, sorry but this is the way it is!
 	
+	// Initialize x-coordinate of exit and entry points
+	float XEntry = EntryPoint[0];
+	float XExit = ExitPoint[0];
+	
 	// If the wire number of the entry point is higher than the one of the exit point
 	if(RawRanges.at(plane_no).first.Wire > RawRanges.at(plane_no).second.Wire)
 	{
 	    // Swap them if order is decending
 	    std::swap(RawRanges.at(plane_no).first, RawRanges.at(plane_no).second);
-	    // Also swap entry and exit points
-	    std::swap(EntryPoint,ExitPoint);
+	    // Also swap entry and exit points for right sign
+	    std::swap(XEntry,XExit);
 	}
 	
 	// If the entry point - box is in the wire plane range fill the new range point
@@ -69,25 +78,54 @@ lasercal::LaserROI::LaserROI( const geo::GeometryCore* Geometry, const float& Bo
 	    BoxRanges.at(plane_no).second.Wire = fGeometry->Nwires(plane_no) - 1;
 	}
 	
+// 	std::cout << "-------------------------------------------------------------------- " << std::endl;
+	
+// 	std::cout << "Plane " << plane_no << " " << fGeometry->Nwires(plane_no) << " " <<  RawRanges.at(plane_no).first.Wire << " " << RawRanges.at(plane_no).second.Wire << std::endl;
+	
+	
+	// TODO: Find error in here:
 	// Slope of beam in X (drift coordinate)
-	float XSlope = (ExitPoint[0] - EntryPoint[0]) / (RawRanges.at(plane_no).second.Wire - RawRanges.at(plane_no).first.Wire);
+	float XSlope = (XExit - XEntry) / (RawRanges.at(plane_no).second.Wire - RawRanges.at(plane_no).first.Wire);
+	
+// 	std::cout << "Slope " << XSlope << std::endl;
 	
 	// Loop over wire range
 	for(unsigned int wire_no = BoxRanges.at(plane_no).first.Wire; wire_no <= BoxRanges.at(plane_no).second.Wire; wire_no++)
 	{
 	    // Linear function to calculate central x value in ROIBox 
-	    float CentralX = EntryPoint[0] + (wire_no - RawRanges.at(plane_no).first.Wire)*XSlope;
+	    float CentralX = XEntry + ((float)wire_no - (float)RawRanges.at(plane_no).first.Wire)*XSlope;
 	    
 	    // Fill x limits of this specific wire
-	    std::pair<float,float> TickLimitsOfWire = std::make_pair(CentralX-fBoxSize*fXScaleFactor,CentralX+fBoxSize*fXScaleFactor);
+	    std::pair<float,float> TickLimitsOfWire = std::make_pair(CentralX-fXScaleFactor,CentralX+fXScaleFactor);
 	    
+// 	    if( wire_no == BoxRanges.at(plane_no).first.Wire || wire_no == BoxRanges.at(plane_no).second.Wire)
+// 	    {
+// 		std::cout << "X Coord " << CentralX << " "  << TickLimitsOfWire.first << " " << TickLimitsOfWire.second << std::endl;
+// 	    }
+// 
 	    // Convert x coordinates to time ticks
-	    TickLimitsOfWire.first = DetProperties->ConvertXToTicks(TickLimitsOfWire.first,0,0,0);
-	    TickLimitsOfWire.second = DetProperties->ConvertXToTicks(TickLimitsOfWire.second,0,0,0);
+	    TickLimitsOfWire.first = DetProperties->ConvertXToTicks(TickLimitsOfWire.first,plane_no,0,0);
+	    TickLimitsOfWire.second = DetProperties->ConvertXToTicks(TickLimitsOfWire.second,plane_no,0,0);
 	    
 	    // Fill hit limit object
-	    fRanges.at(plane_no).emplace( std::make_pair(wire_no, std::move(TickLimitsOfWire)) );
+	    fRanges.at(plane_no).insert( std::make_pair(wire_no, std::move(TickLimitsOfWire)) );
+	    
+// 	    if(wire_no == BoxRanges.at(plane_no).first.Wire)
+// 	    {
+// 		std::cout << "Time tick " << DetProperties->ConvertXToTicks(CentralX,plane_no,0,0) << " "  << TickLimitsOfWire.first << " " << TickLimitsOfWire.second << std::endl;
+// 		std::cout << "Time tick " << DetProperties->ConvertXToTicks(CentralX,plane_no,0,0) << " "  << fRanges.at(plane_no).find(wire_no)->second.first << " " << fRanges.at(plane_no).find(wire_no)->second.second << std::endl;
+// 	    }
+
+	    
 	} // loop over wires
+	
+	
+	// Fill entry point and exit point in wire coordinate
+	fEntryWire.push_back(fRanges.at(plane_no).begin()->first);
+	fExitWire.push_back(fRanges.at(plane_no).rbegin()->first);
+
+// 	std::cout << "Wire Ranges " << plane_no << " " << BoxRanges.at(plane_no).first.Wire << " " << BoxRanges.at(plane_no).second.Wire << std::endl;
+// 	std::cout << "Wire Ranges " << plane_no << " " << fRanges.at(plane_no).begin()->first << " " << fRanges.at(plane_no).rbegin()->first << std::endl;
 	
     } // Loop over planes
 } // Constructor using all wire signals and geometry purposes
@@ -120,7 +158,7 @@ bool lasercal::LaserROI::IsHitInRange( const recob::Hit& HitToCheck ) const
     unsigned int PlaneNo = HitToCheck.WireID().Plane;
     
     // Check if wire number is in range for the given plane and if hit is inside of the interval of the given wire
-    if( fRanges.at(PlaneNo).begin()->first <= WireNo && fRanges.at(PlaneNo).end()->first >= WireNo &&
+    if( fRanges.at(PlaneNo).begin()->first <= WireNo && fRanges.at(PlaneNo).rbegin()->first >= WireNo &&
 	fRanges.at(PlaneNo).find(WireNo)->second.first <= HitToCheck.PeakTime() && fRanges.at(PlaneNo).find(WireNo)->second.second >= HitToCheck.PeakTime() )
     {
 	return true;
@@ -130,6 +168,33 @@ bool lasercal::LaserROI::IsHitInRange( const recob::Hit& HitToCheck ) const
 	return false;
     }
     
+}
+
+//-----------------------------------------------------------------------------------------------------------
+unsigned int lasercal::LaserROI::GetEntryWire(const unsigned int& PlaneNo) const
+{
+    return fEntryWire.at(PlaneNo);
+}
+
+//----------------------------------------------------------------------------------------------------------------
+
+unsigned int lasercal::LaserROI::GetExitWire(const unsigned int& PlaneNo) const
+{
+    return fExitWire.at(PlaneNo);
+}
+
+//----------------------------------------------------------------------------------------------------------------
+
+float lasercal::LaserROI::GetEntryTimeTick(const unsigned int& PlaneNo) const
+{
+    return 0.5*(fRanges.at(PlaneNo).find(fEntryWire.at(PlaneNo))->second.first + fRanges.at(PlaneNo).find(fExitWire.at(PlaneNo))->second.second);
+}
+
+//----------------------------------------------------------------------------------------------------------------
+
+float lasercal::LaserROI::GetExitTimeTick(const unsigned int& PlaneNo) const
+{
+    return 0.5*(fRanges.at(PlaneNo).find(fExitWire.at(PlaneNo))->second.first + fRanges.at(PlaneNo).find(fExitWire.at(PlaneNo))->second.second);
 }
 
 //----------------------------------------------------------------------------------------------------------------
