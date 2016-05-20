@@ -161,11 +161,6 @@ namespace HitAna {
     TLine* fVLaserBeam;
     TLine* fYLaserBeam;
     
-    // Hit Graphs for selected ROI of all planes
-    TMultiGraph* fUPlaneTot;
-    TMultiGraph* fVPlaneTot;
-    TMultiGraph* fYPlaneTot;
-    
     // Canvases for drawing hit graphs
     TCanvas* fUCanvas;
     TCanvas* fVCanvas;
@@ -201,10 +196,6 @@ namespace HitAna {
       fUCanvas = new TCanvas("U-Plane Hits","U-Plane Hits",1000,700);
       fVCanvas = new TCanvas("V-Plane Hits","V-Plane Hits",1000,700);
       fYCanvas = new TCanvas("Y-Plane Hits","Y-Plane Hits",1000,700);
-      
-      fUPlaneTot = new TMultiGraph();
-      fVPlaneTot = new TMultiGraph();
-      fYPlaneTot = new TMultiGraph();
     }
     else
     {
@@ -260,6 +251,11 @@ namespace HitAna {
   //-----------------------------------------------------------------------
   void HitAna::analyze(const art::Event& event) 
   {
+      // Hit Graphs for selected ROI of all planes
+      TMultiGraph* UPlaneTot = new TMultiGraph();
+      TMultiGraph* VPlaneTot = new TMultiGraph();
+      TMultiGraph* YPlaneTot = new TMultiGraph();
+      
     // This is the handle to the hit data of this event (simply a pointer to std::vector<recob::hit>)   
     art::ValidHandle< std::vector<recob::Hit> > UPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fUPlaneTag);
     art::ValidHandle< std::vector<recob::Hit> > VPlaneHitVecHandle = event.getValidHandle<std::vector<recob::Hit>>(fVPlaneTag);
@@ -322,13 +318,13 @@ namespace HitAna {
     {
 	fUCanvas->cd();
 	fUPlaneHits = FillGraph(HitWireNumber,HitTimeBin,LowerHitTimeErr,UpperHitTimeErr);
-	fUPlaneTot->Add(fUPlaneHits);
+	UPlaneTot->Add(fUPlaneHits);
     }
     if(HitWireNumberSel.size())
     {
 	fUPlaneHitsSelected = FillGraph(HitWireNumberSel,HitTimeBinSel,LowerHitTimeErrSel,UpperHitTimeErrSel);
 	fUPlaneHitsSelected->SetLineColor(2);
-	fUPlaneTot->Add(fUPlaneHitsSelected);
+	UPlaneTot->Add(fUPlaneHitsSelected);
 	
 	fULaserBeam = new TLine(ROI.GetEntryWire(0),ROI.GetEntryTimeTick(0),ROI.GetExitWire(0),ROI.GetExitTimeTick(0));
 	fULaserBeam->SetLineColor(3);
@@ -391,13 +387,13 @@ namespace HitAna {
     {
 	fVCanvas->cd();
 	fVPlaneHits = FillGraph(HitWireNumber,HitTimeBin,LowerHitTimeErr,UpperHitTimeErr);
-	fVPlaneTot->Add(fVPlaneHits);
+	VPlaneTot->Add(fVPlaneHits);
     }
     if(HitWireNumberSel.size())
     {
 	fVPlaneHitsSelected = FillGraph(HitWireNumberSel,HitTimeBinSel,LowerHitTimeErrSel,UpperHitTimeErrSel);
 	fVPlaneHitsSelected->SetLineColor(2);
-	fVPlaneTot->Add(fVPlaneHitsSelected);
+	VPlaneTot->Add(fVPlaneHitsSelected);
 	
 	fVLaserBeam = new TLine(ROI.GetEntryWire(1),ROI.GetEntryTimeTick(1),ROI.GetExitWire(1),ROI.GetExitTimeTick(1));
 	fVLaserBeam->SetLineColor(3);
@@ -454,14 +450,14 @@ namespace HitAna {
     {
 	fYCanvas->cd();
 	fYPlaneHits = FillGraph(HitWireNumber,HitTimeBin,LowerHitTimeErr,UpperHitTimeErr);
-	fYPlaneTot->Add(fYPlaneHits);
+	YPlaneTot->Add(fYPlaneHits);
 	
     }
     if(HitWireNumberSel.size())
     {
 	fYPlaneHitsSelected = FillGraph(HitWireNumberSel,HitTimeBinSel,LowerHitTimeErrSel,UpperHitTimeErrSel);
 	fYPlaneHitsSelected->SetLineColor(2);
-	fYPlaneTot->Add(fYPlaneHitsSelected);
+	YPlaneTot->Add(fYPlaneHitsSelected);
 	
 	fYLaserBeam = new TLine(ROI.GetEntryWire(2),ROI.GetEntryTimeTick(2),ROI.GetExitWire(2),ROI.GetExitTimeTick(2));
 	fYLaserBeam->SetLineColor(3);
@@ -474,7 +470,7 @@ namespace HitAna {
 	fUCanvas->cd();
 	if(HitWireNumber.size())
 	{
-	    fUPlaneTot->Draw("AP");
+	    UPlaneTot->Draw("AP");
 	    fULaserBeam->Draw("same");
 	}
 	fUCanvas->Modified();
@@ -483,7 +479,7 @@ namespace HitAna {
 	fVCanvas->cd();
 	if(HitWireNumber.size()) 
 	{
-	    fVPlaneTot->Draw("AP");
+	    VPlaneTot->Draw("AP");
 	    fVLaserBeam->Draw("same");
 	}
 	fVCanvas->Modified();
@@ -492,7 +488,7 @@ namespace HitAna {
 	fYCanvas->cd();
 	if(HitWireNumber.size()) 
 	{
-	    fYPlaneTot->Draw("AP");
+	    YPlaneTot->Draw("AP");
 	    fYLaserBeam->Draw("same");
 	}
 	fYCanvas->Modified();
@@ -509,6 +505,10 @@ namespace HitAna {
       gSystem->Sleep(500);
       if(gSystem->ProcessEvents()) break;
     }// end Draw loop
+    
+    delete UPlaneTot;
+    delete VPlaneTot;
+    delete YPlaneTot;
     
   } // HitAna::analyze()
   

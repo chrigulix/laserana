@@ -13,6 +13,7 @@
 
 #include "LaserObjects/LaserROI.h"
 #include "LaserObjects/LaserBeam.h"
+#include "LaserObjects/LaserParameters.h"
 
 #include <iostream>
 #include <utility>
@@ -28,11 +29,11 @@ namespace lasercal
     public:
       // Constructor with geometry and thresholds for the hit finder. 
       // It just initializes the object. There is no hit finding or filling of data.
-      LaserHits(const std::array<float,3>& UVYThresholds);
+      LaserHits(const lasercal::LaserRecoParameters& ParameterSet);
       
       // Constructor wire data, geometry and thresholds for the hit finder.
       // It already runs the hit finder algorithms and fills the map data.
-      LaserHits(const std::vector<recob::Wire>& Wires, const std::array<float,3>& UVYThresholds, const lasercal::LaserBeam& LaserBeam);
+      LaserHits(const std::vector<recob::Wire>& Wires, const lasercal::LaserRecoParameters& ParameterSet, const lasercal::LaserBeam& LaserBeam);
       
       void AddHitsFromWire(const recob::Wire& Wire);
       
@@ -50,9 +51,11 @@ namespace lasercal
     protected:
       
       // Hit data member, it is an array for all planes cantainig vectors with all wire entries
+      lasercal::LaserRecoParameters fParameters;
+      
       std::array< std::vector<std::map<float, recob::Hit>>, 3 > fHitMapsByPlane;
       const geo::GeometryCore* fGeometry;
-      std::array<float,3> fUVYThresholds;
+//       std::array<float,3> fUVYThresholds;
       lasercal::LaserROI fLaserROI;
       
       // Single wire hit finder which fills hits into a map with hit time as a key

@@ -16,10 +16,6 @@ lasercal::LaserBeam::LaserBeam(const TVector3& LaserPosition, const float& Phi, 
     // Set position and direction
     SetPosition(LaserPosition, false);
     SetDirection(Phi,Theta);
-    
-    // Calculate the intersection points with the TPC. This has to be done after SetPosition and SetDirection!
-//     SetIntersectionPoints();
-    
 }
 
 void lasercal::LaserBeam::SetPosition(const TVector3& LaserPosition, const bool& ReCalcFlag)
@@ -87,10 +83,10 @@ void lasercal::LaserBeam::SetIntersectionPoints()
     auto IntersectionPoints = ActiveVolume.GetIntersections(fLaserPosition, fDirection);
 
     // Check if there is only an exit point (if laser head is in TPC volume)
-    if(IntersectionPoints.size() == 1)
+    if(IntersectionPoints.size() == 0)
     {
-	fEntryPoint = TVector3(-9999,-9999,-9999);
-	fExitPoint = IntersectionPoints.back();
+	fEntryPoint = TVector3(0,0,0);
+	fEntryPoint = TVector3(0,0,0);
     }
     else
     {

@@ -65,7 +65,7 @@
 // Laser Module Classes
 #include "LaserObjects/LaserHits.h"
 #include "LaserObjects/LaserBeam.h"
-
+#include "LaserObjects/LaserParameters.h"
 
 namespace {
   
@@ -97,18 +97,10 @@ namespace LaserReco {
     void CutRegionOfInterest();
 
   private:
-
+      
     // The parameters we'll read from the .fcl file.
-    bool fWireMapGenerator;               ///< Decide if you want to produce a wire map (recomended if you don't have it)
-    float fUPlaneThreshold;		  ///< U-plane threshold in ADC counts for the laser hit finder
-    float fVPlaneThreshold;		  ///< V-plane threshold in ADC counts for the laser hit finder
-    float fYPlaneThreshold;		  ///< Y-plane threshold in ADC counts for the laser hit finder
-    art::InputTag fCalDataModuleLabel;    ///< CalData module label
-    int fMinAllowedChanStatus;		  ///< Channel status number
-    
-    // Coppy thresholds into array
-    std::array<float,3> fUVYThresholds;	  ///< U,V,Y-plane threshold in ADC counts for the laser hit finder
-    
+    lasercal::LaserRecoParameters fParameterSet; ///< ficl parameter structure
+        
     // Other variables that will be shared between different methods.
     geo::GeometryCore const* fGeometry;       ///< pointer to Geometry provider
     
@@ -144,7 +136,7 @@ namespace LaserReco {
   //-----------------------------------------------------------------------
   void LaserReco::beginJob()
   {
-    if(!fWireMapGenerator)
+    if(!fParameterSet.WireMapGenerator)
     {
       TFile* InputFile = new TFile(fFileName.c_str(), "READ");
       
@@ -168,8 +160,6 @@ namespace LaserReco {
     // TODO: Change later
     fLCSNumber = 2;
     
-    // Fill threshold
-    fUVYThresholds = {fUPlaneThreshold, fVPlaneThreshold, fYPlaneThreshold};
   }
   
   
@@ -183,26 +173,50 @@ namespace LaserReco {
   
   void LaserReco::reconfigure(fhicl::ParameterSet const& parameterSet)
   {
-    // Read parameters from the .fcl file. The names in the arguments
-    // to p.get<TYPE> must match names in the .fcl file.
-    fWireMapGenerator        = parameterSet.get< bool        	     >("GenerateWireMap");
-    fUPlaneThreshold	     = parameterSet.get< float        	     >("UPlaneHitThreshold");
-    fVPlaneThreshold	     = parameterSet.get< float        	     >("VPlaneHitThreshold");
-    fYPlaneThreshold	     = parameterSet.get< float        	     >("YPlaneHitThreshold");
-    fCalDataModuleLabel      = parameterSet.get< art::InputTag	     >("CalDataModuleLabel");
-    fMinAllowedChanStatus    = parameterSet.get< int 		     >("MinAllowedChannelStatus");
-    
-//     fUVYThresholds	     = parameterSet.get< std::array<float,3> >("UVYHitThresholds");
+      //Read ficl parameterSet
+      
+      // Switches
+      fParameterSet.WireMapGenerator = parameterSet.get<bool>("GenerateWireMap");
+      fParameterSet.LaserROIFlag = parameterSet.get<bool>("GenerateWireMap");
+      
+      // Tag for reading raw digit data
+      fParameterSet.RawDigitTag = parameterSet.get<art::InputTag>("LaserRecoModuleLabel");
+      
+      // Label for Laser beam data
+      fParameterSet.LaserDataMergerModuleLabel = parameterSet.get<std::string>("LaserDataMergerModuleLabel");
+      fParameterSet.LaserBeamInstanceLabel = parameterSet.get<std::string>("LaserBeamInstanceLabel");
+      
+      // Wire status tag
+      fParameterSet.MinAllowedChanStatus = parameterSet.get<int>("MinAllowedChannelStatus");
+
+      // Common hit finder threshold
+      fParameterSet.HighAmplitudeThreshold = parameterSet.get<float>("HighAmplThreshold");
+      
+      // U-Plane hit finder thresholds
+      fParameterSet.UHitThreshold = parameterSet.get<float>("UHitPeakThreshold");
+      fParameterSet.UAmplitudeToWidthRatio = parameterSet.get<float>("UAmplitudeToWidthRatio");
+      fParameterSet.UHitWidthThreshold = parameterSet.get<int>("UHitWidthThreshold");
+      
+      // V-Plane hit finder thresholds
+      fParameterSet.VHitThreshold = parameterSet.get<float>("VHitPeakThreshold");
+      fParameterSet.VAmplitudeToWidthRatio = parameterSet.get<float>("VAmplitudeToWidthRatio");
+      fParameterSet.VAmplitudeToRMSRatio = parameterSet.get<float>("VAmplitudeToRMSRatio");
+      fParameterSet.VHitWidthThreshold = parameterSet.get<int>("VHitWidthThreshold");
+      fParameterSet.VRMSThreshold = parameterSet.get<int>("VRMSThreshold");
+      
+      // Y-Plane hit finder thresholds
+      fParameterSet.YHitThreshold = parameterSet.get<float>("YHitPeakThreshold");
+      fParameterSet.YAmplitudeToWidthRatio = parameterSet.get<float>("YAmplitudeToWidthRatio");
+      fParameterSet.YHitWidthThreshold = parameterSet.get<int>("YHitWidthThreshold");
   }
 
   //-----------------------------------------------------------------------
   void LaserReco::produce(art::Event& event) 
   {
     // This is the handle to the raw data of this event (simply a pointer to std::vector<raw::RawDigit>)   
-    art::ValidHandle< std::vector<raw::RawDigit> > DigitVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>(fCalDataModuleLabel);
+    art::ValidHandle< std::vector<raw::RawDigit> > DigitVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>(fParameterSet.RawDigitTag);
     
-    auto LaserTag = art::InputTag("LaserDataMerger", "LaserBeam");
-    art::ValidHandle< lasercal::LaserBeam > LaserBeamHandle = event.getValidHandle< lasercal::LaserBeam >(LaserTag);
+    art::ValidHandle< lasercal::LaserBeam > LaserBeamHandle = event.getValidHandle< lasercal::LaserBeam >(fParameterSet.GetLaserBeamTag());
     
     // Prepairing the wire signal vector. It will be just the raw signal with subtracted pedestial
     std::vector<recob::Wire> WireVec;
@@ -229,7 +243,7 @@ namespace LaserReco {
     RawROI.resize(DigitVecHandle->at(0).Samples());
     
     // Prepare laser hits object
-    lasercal::LaserHits YROIHits(fUVYThresholds);
+//     lasercal::LaserHits YROIHits(fUVYThresholds);
     
     // Set region of interest limits for first hit scan
     unsigned int StartROI = 4500;
@@ -252,7 +266,7 @@ namespace LaserReco {
 // 	raw::ChannelID_t channel = RawDigit.Channel();
 // 	
 // 	// Skip channel if dead or noisy
-// 	if( ChannelFilter.Status(channel) < fMinAllowedChanStatus || !ChannelFilter.IsPresent(channel) )
+// 	if( ChannelFilter.Status(channel) < fParameterSet.MinAllowedChanStatus || !ChannelFilter.IsPresent(channel) )
 // 	{
 // 	  continue;
 // 	}
@@ -295,7 +309,7 @@ namespace LaserReco {
       raw::ChannelID_t channel = RawDigit.Channel();
       
       // Skip channel if dead or noisy
-      if( ChannelFilter.Status(channel) < fMinAllowedChanStatus || !ChannelFilter.IsPresent(channel) )
+      if( ChannelFilter.Status(channel) < fParameterSet.MinAllowedChanStatus || !ChannelFilter.IsPresent(channel) )
       {
 	continue;// jump to next iterator in RawDigit loop
       }
@@ -321,7 +335,7 @@ namespace LaserReco {
     } // end loop over raw digit entries
     
     // Create Laser Hits out of Wires
-    lasercal::LaserHits AllLaserHits(WireVec,fUVYThresholds,*LaserBeamHandle);
+    lasercal::LaserHits AllLaserHits(WireVec,fParameterSet,*LaserBeamHandle);
     
     // Filter for time matches of at least two planes
 //     AllLaserHits.TimeMatchFilter();
