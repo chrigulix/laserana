@@ -52,7 +52,7 @@ physics:
       DirCalLCS1:           [0. , 0.]           # Direction Calibration
       DirCalLCS2:           [-18.432 , 10500000.]       # Direction Calibration (161.568deg for straight -180deg to invert )
       PositionLCS1:         [103. , 0., -20.]           # Position of Mirror
-      PositionLCS2:         [103. , 0., 1020.]  #
+      PositionLCS2:         [103. , 0., 1056.8]  #
       EnergyMinMaxLCS1:     [8000, 12500]
       EnergyMinMaxLCS2:     [8000, 12500]     
     }

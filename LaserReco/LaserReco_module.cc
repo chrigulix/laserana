@@ -218,6 +218,12 @@ namespace LaserReco {
     
     art::ValidHandle< lasercal::LaserBeam > LaserBeamHandle = event.getValidHandle< lasercal::LaserBeam >(fParameterSet.GetLaserBeamTag());
     
+    LaserBeamHandle->GetEntryPoint().Print();
+    LaserBeamHandle->GetExitPoint().Print();
+    
+    LaserBeamHandle->GetLaserPosition().Print();
+    LaserBeamHandle->GetLaserDirection().Print();
+    
     // Prepairing the wire signal vector. It will be just the raw signal with subtracted pedestial
     std::vector<recob::Wire> WireVec;
     

@@ -111,10 +111,20 @@ void lasercal::LaserBeam::Print() const
 
 TVector3 lasercal::LaserBeam::GetEntryPoint() const
 {
-  return fEntryPoint;
+    return fEntryPoint;
 }
 
 TVector3 lasercal::LaserBeam::GetExitPoint() const
 {
-  return fExitPoint;
+    return fExitPoint;
+}
+
+TVector3 lasercal::LaserBeam::GetLaserDirection() const
+{
+    return fDirection;
+}
+
+TVector3 lasercal::LaserBeam::GetLaserPosition() const
+{
+    return fLaserPosition;
 }
