@@ -36,7 +36,6 @@ class LarData():
     def read(self, tree, branches):
         branch = [item for sublist in branches for item in sublist if isinstance(sublist, list)] \
                  + [item for item in branches if isinstance(item, str)]
-
         data = rn.root2array(self.file, treename=tree, branches=branch).view(np.recarray)
 
         if self.n_entries is None:
@@ -48,10 +47,16 @@ class LarData():
         if type(event) is not int:
             raise ValueError("only integers allowed as event number")
 
-        return np.vstack(self.laser[event]).astype(np.float64).view(np.ndarray)
+        data =  self.laser[event]
+        data.dtype.names= ("pos_x", "pos_y", "pos_z", "dir_x", "dir_y", "dir_z", "power", "id")
+
+        return data
 
     def get_hits(self, event):
         if type(event) is not int:
             raise ValueError("only integers allowed as event number")
 
-        return np.vstack(self.hits[event]).astype(np.float64).view(np.ndarray)
+        data = self.hits[event]
+        data.dtype.names = ("channel", "tick", "peak_amp", "start_tick", "end_tick")
+
+        return data
