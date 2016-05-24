@@ -41,7 +41,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "outs.root"
+   fileName:    "LaserHitAna-%R-%03s.root"
    #sam_ignore:  true
    dataTier:    "reconstructed-2d"
    outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
