@@ -86,7 +86,7 @@ void lasercal::LaserBeam::SetIntersectionPoints()
     if(IntersectionPoints.size() == 0)
     {
 	fEntryPoint = TVector3(0,0,0);
-	fEntryPoint = TVector3(0,0,0);
+	fExitPoint = TVector3(0,0,0);
     }
     else
     {
