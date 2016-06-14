@@ -1,5 +1,7 @@
 
-simple_plugin(LaserDataMerger "module"
+art_make( MODULE_LIBRARIES
+#simple_plugin(LaserDataMerger "module"
+                        #LaserDataMerger
 			LaserObjects
 			larcore_Geometry_Geometry_service
                         larcore_Geometry
