@@ -2,19 +2,24 @@ __author__ = 'matthias'
 
 from base import Base
 
+
 class Laseref(Base):
-    event_tree = "Events"
-    branch = "lasercal::LaserBeam_LaserMerger_LaserBeam_LaserHitAna.obj."
-    XYZ = ["X","Y","Z"]
+
+    def __init__(self):
+        super(Laseref, self).__init__()
+        self.data_product = "Laser Data"
+        self.tree = "Events"
+        self.branch = "lasercal::LaserBeam_LaserMerger_LaserBeam_LaserHitAna.obj."
+        self.XYZ = ["X", "Y", "Z"]
 
     def pos(self):
-        pos = "fLaserPosition.f"
-        return self.genString(pos,self.XYZ)
+        return self.gen_string("fLaserPosition.f", self.XYZ)
 
     def dir(self):
-        dir = "fDirection.f"
-        return self.genString(dir,self.XYZ)
+        return self.gen_string("fDirection.f", self.XYZ)
+
+    def power(self):
+        return self.gen_string("fPower")
 
     def id(self):
-        return self.genString("fLaserID")
-
+        return self.gen_string("fLaserID")

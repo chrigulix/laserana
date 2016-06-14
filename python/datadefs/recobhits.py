@@ -2,16 +2,33 @@ __author__ = 'matthias'
 
 from base import Base
 
+
 class RecobHits(Base):
-    event_tree = "Events"
-    branch = "recob::Hits_LaserReco_UPlaneLaserHits_LaserHitAna.obj."
+
+    def __init__(self, plane):
+        """ plane: Either U,V,Y for the different views """
+        super(RecobHits, self).__init__()
+        self.data_product = "recob::Hit"
+        self.tree = "Events"
+        if plane not in ["U", "V", "Y", "u", "v", "y"]:
+            raise ValueError("Only U, V or Y allowed as planes")
+        self.plane = plane
+        print "Plane: " + plane
+        self.branch = "recob::Hits_LaserReco_" \
+                      + str.capitalize(self.plane) \
+                      + "PlaneLaserHits_LaserHitAna.obj."
 
     def channel(self):
-        channel = "fChannel"
-        return self.genString(channel)
+        return self.gen_string("fChannel")
 
     def peak_time(self):
-        return self.genString("fPeakTime")
+        return self.gen_string("fPeakTime")
 
     def peak_amplitude(self):
-         return self.genString("fPeakAmplitude")
+        return self.gen_string("fPeakAmplitude")
+
+    def start_tick(self):
+        return self.gen_string("fStartTick")
+
+    def end_tick(self):
+        return self.gen_string("fEndTick")

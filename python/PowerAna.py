@@ -1,31 +1,35 @@
 __author__ = 'matthias'
 
-import numpy as np
+import matplotlib.pyplot as plt
 
-from datadefs.laserdef import *
-from datadefs.recobhits import *
+from datadefs.lar_data import *
 
-import root_numpy as nr
-from root_numpy.testdata import get_filepath
-print get_filepath('vary1.root')
 
-aaa = nr.root2array(get_filepath('object1.root'), branches=["entry", "vect.fP.XYvector().Mod()"])
+def crop_view(limits, hits):
+    cols = []
+    for idx in range(len(hits[1, :])):
+        if limits[0] < hits[1, idx] < limits[1]:
+            cols.append(idx)
 
-for i in range(aaa.shape[0]):
-    print str(i) + "th line " + str(aaa[i])
+    return hits[:, cols]
+
 
 filename = "/mnt/lheppc46/data/larsoft/userdev/maluethi/laser/test/outs.root"
 
-recodef = RecobHits()
-branch = recodef.channel()
+data = LarData(filename)
+data.read_laser()
+data.read_hits(planes="Y")
 
-print branch
+laser_tick_mean = 5065
+laser_tick_offset = 100
+laser_tick_limits = [laser_tick_mean - laser_tick_offset, laser_tick_mean + laser_tick_offset]
 
-import ROOT
-rfile = ROOT.TFile(filename)
-intree = rfile.Get('Events')
-tree = "Events"
-branch = "recob::Hits_LaserReco_UPlaneLaserHits_LaserHitAna.obj.fChannel"
+for i in range(data.n_entries):
+    hit = crop_view(laser_tick_limits, data.get_hits(i))
+
+    fig, axs = plt.subplots(nrows=1, ncols=1, sharex=True)
+    ax = axs
+    ax.errorbar(hit[0, :], hit[1, :], yerr=[hit[1, :] - hit[3, :], hit[4, :] - hit[1, :]], fmt='o')
+    plt.show()
 
 
-print nr.root2array(filename,treename=tree, branches=branch)
