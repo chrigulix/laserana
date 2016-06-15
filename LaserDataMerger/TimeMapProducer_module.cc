@@ -140,9 +140,9 @@ void TimeMapProducer::beginJob()
 
 void TimeMapProducer::beginRun(art::Run& run)
 {
-
+    
     art::ServiceHandle<art::TFileService> tfs;
-
+    
     std::cout << "GENERATING TIME OUTPUT" << std::endl;
     // Initialize time info root file
     fTimeAnalysis = tfs->make<TTree>("TimeAnalysis", "TimeAnalysis");

@@ -88,7 +88,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_%tc_LaserHitFinder.root"
+   fileName:    "%ifb_LaserHitFinder.root"
    #sam_ignore:  true
    dataTier:    "reconstructed-2d"
    outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
