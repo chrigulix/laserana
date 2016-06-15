@@ -1,6 +1,6 @@
 
-simple_plugin(LaserDataMerger "module"
-			LaserObjects
+art_make( MODULE_LIBRARIES
+                        LaserObjects
 			larcore_Geometry_Geometry_service
                         larcore_Geometry
 			lardata_RecoBaseArt
