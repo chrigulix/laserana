@@ -84,7 +84,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_%tc_wflash.root"
+   fileName:    "LaserRun-%r-%05s.root"
    #sam_ignore:  true
    dataTier:    "reconstructed-2d"
    compressionLevel: 1
