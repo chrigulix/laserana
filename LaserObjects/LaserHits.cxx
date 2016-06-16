@@ -33,10 +33,9 @@ lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const lase
     
     // Get Single wire hits
     std::map<float, recob::Hit> HitMap = FindSingleWireHits(SingleWire, Plane);
- 
+    
     // Fill map data by pushing back the wire vector
     fHitMapsByPlane.at(Plane).push_back(HitMap);
-  
   }// end loop over wires
   
 } // Constructor using all wire signals and geometry purposes

@@ -10,6 +10,8 @@ lasercal::LaserROI::LaserROI()
 
 lasercal::LaserROI::LaserROI(const float& BoxSize, const lasercal::LaserBeam& LaserBeamInfo ) : fBoxSize ( BoxSize ), fLaserBeam ( LaserBeamInfo )
 {
+    std::cout << "Preparing " << std::endl;
+    
     fGeometry = &*(art::ServiceHandle<geo::Geometry>());
     
     // Get Detector properties
@@ -58,7 +60,7 @@ lasercal::LaserROI::LaserROI(const float& BoxSize, const lasercal::LaserBeam& La
 	}
 	
 	// If the entry point - box is in the wire plane range fill the new range point
-	if(RawRanges.at(plane_no).first.Wire - (int)fWireBoxSize > 0)
+	if((int)RawRanges.at(plane_no).first.Wire - (int)fWireBoxSize > 0)
 	{
 	    BoxRanges.at(plane_no).first.Wire = RawRanges.at(plane_no).first.Wire - (int)fWireBoxSize;
 	}
@@ -68,7 +70,7 @@ lasercal::LaserROI::LaserROI(const float& BoxSize, const lasercal::LaserBeam& La
 	}
 	
 	// If the exit point + box is in the wire plane range fill the new range point
-	if(RawRanges.at(plane_no).second.Wire + (int)fWireBoxSize < fGeometry->Nwires(plane_no))
+	if((int)RawRanges.at(plane_no).second.Wire + (int)fWireBoxSize < fGeometry->Nwires(plane_no))
 	{
 	    BoxRanges.at(plane_no).second.Wire = RawRanges.at(plane_no).second.Wire + (int)fWireBoxSize;
 	}
@@ -78,16 +80,8 @@ lasercal::LaserROI::LaserROI(const float& BoxSize, const lasercal::LaserBeam& La
 	    BoxRanges.at(plane_no).second.Wire = fGeometry->Nwires(plane_no) - 1;
 	}
 	
-// 	std::cout << "-------------------------------------------------------------------- " << std::endl;
-	
-// 	std::cout << "Plane " << plane_no << " " << fGeometry->Nwires(plane_no) << " " <<  RawRanges.at(plane_no).first.Wire << " " << RawRanges.at(plane_no).second.Wire << std::endl;
-	
-	
-	// TODO: Find error in here:
 	// Slope of beam in X (drift coordinate)
 	float XSlope = (XExit - XEntry) / (RawRanges.at(plane_no).second.Wire - RawRanges.at(plane_no).first.Wire);
-	
-// 	std::cout << "Slope " << XSlope << std::endl;
 	
 	// Loop over wire range
 	for(unsigned int wire_no = BoxRanges.at(plane_no).first.Wire; wire_no <= BoxRanges.at(plane_no).second.Wire; wire_no++)
@@ -98,35 +92,17 @@ lasercal::LaserROI::LaserROI(const float& BoxSize, const lasercal::LaserBeam& La
 	    // Fill x limits of this specific wire
 	    std::pair<float,float> TickLimitsOfWire = std::make_pair(CentralX-fXScaleFactor,CentralX+fXScaleFactor);
 	    
-// 	    if( wire_no == BoxRanges.at(plane_no).first.Wire || wire_no == BoxRanges.at(plane_no).second.Wire)
-// 	    {
-// 		std::cout << "X Coord " << CentralX << " "  << TickLimitsOfWire.first << " " << TickLimitsOfWire.second << std::endl;
-// 	    }
-// 
 	    // Convert x coordinates to time ticks
 	    TickLimitsOfWire.first = DetProperties->ConvertXToTicks(TickLimitsOfWire.first,plane_no,0,0);
 	    TickLimitsOfWire.second = DetProperties->ConvertXToTicks(TickLimitsOfWire.second,plane_no,0,0);
 	    
 	    // Fill hit limit object
 	    fRanges.at(plane_no).insert( std::make_pair(wire_no, std::move(TickLimitsOfWire)) );
-	    
-// 	    if(wire_no == BoxRanges.at(plane_no).first.Wire)
-// 	    {
-// 		std::cout << "Time tick " << DetProperties->ConvertXToTicks(CentralX,plane_no,0,0) << " "  << TickLimitsOfWire.first << " " << TickLimitsOfWire.second << std::endl;
-// 		std::cout << "Time tick " << DetProperties->ConvertXToTicks(CentralX,plane_no,0,0) << " "  << fRanges.at(plane_no).find(wire_no)->second.first << " " << fRanges.at(plane_no).find(wire_no)->second.second << std::endl;
-// 	    }
-
-	    
 	} // loop over wires
-	
 	
 	// Fill entry point and exit point in wire coordinate
 	fEntryWire.push_back(fRanges.at(plane_no).begin()->first);
 	fExitWire.push_back(fRanges.at(plane_no).rbegin()->first);
-
-// 	std::cout << "Wire Ranges " << plane_no << " " << BoxRanges.at(plane_no).first.Wire << " " << BoxRanges.at(plane_no).second.Wire << std::endl;
-// 	std::cout << "Wire Ranges " << plane_no << " " << fRanges.at(plane_no).begin()->first << " " << fRanges.at(plane_no).rbegin()->first << std::endl;
-	
     } // Loop over planes
 } // Constructor using all wire signals and geometry purposes
 
