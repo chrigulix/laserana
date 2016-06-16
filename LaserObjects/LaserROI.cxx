@@ -10,8 +10,6 @@ lasercal::LaserROI::LaserROI()
 
 lasercal::LaserROI::LaserROI(const float& BoxSize, const lasercal::LaserBeam& LaserBeamInfo ) : fBoxSize ( BoxSize ), fLaserBeam ( LaserBeamInfo )
 {
-    std::cout << "Preparing " << std::endl;
-    
     fGeometry = &*(art::ServiceHandle<geo::Geometry>());
     
     // Get Detector properties
