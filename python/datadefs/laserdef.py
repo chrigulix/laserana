@@ -9,7 +9,9 @@ class Laseref(Base):
         super(Laseref, self).__init__()
         self.data_product = "Laser Data"
         self.tree = "Events"
-        self.branch = "lasercal::LaserBeam_LaserMerger_LaserBeam_LaserHitAna.obj."
+        self.product = "LaserBeam"
+        self.producer = "RecoDataMinimal"
+        self.branch = "lasercal::LaserBeam_LaserDataMerger_LaserBeam_" + self.producer + ".obj."
         self.XYZ = ["X", "Y", "Z"]
 
     def pos(self):

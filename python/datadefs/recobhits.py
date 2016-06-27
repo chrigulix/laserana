@@ -14,9 +14,12 @@ class RecobHits(Base):
             raise ValueError("Only U, V or Y allowed as planes")
         self.plane = plane
         print "Plane: " + plane
+
+        self.producer = "LaserHitReco"
+
         self.branch = "recob::Hits_LaserReco_" \
                       + str.capitalize(self.plane) \
-                      + "PlaneLaserHits_LaserHitAna.obj."
+                      + "PlaneLaserHits_" + self.producer + ".obj."
 
     def channel(self):
         return self.gen_string("fChannel")
