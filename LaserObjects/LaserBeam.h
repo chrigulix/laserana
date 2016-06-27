@@ -15,6 +15,18 @@
 #include <TVector3.h>
 #include <TF1.h>
 
+// TODO: Fix class compilation if including GeometryCore.h and others!!!
+
+/// LArSoft
+#ifndef __GCCXML__
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/GeometryCore.h"
+#include "larcore/Geometry/BoxBoundedGeo.h"
+#endif
+
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
+
 // Framework includes
 
 
@@ -56,9 +68,10 @@ namespace lasercal
       unsigned int fAssosiateEventID;   ///< ID of the assosiate event id ()
       float fAperturePosition;          ///< Aperture position
       float fPower;                     ///< Attenuator setting (not measured pulse energy)
-
-//       void SetEntryPoint();
-//       void SetExitPoint();
+      
+      #ifndef __GCCXML__
+      void SetIntersectionPoints();
+      #endif
       
       
     public:
@@ -83,7 +96,7 @@ namespace lasercal
      
      * This constructor loads the start position and direction of the laser beam
      */
-      LaserBeam(TVector3& LaserPosition, TVector3& LaserDirection);
+      LaserBeam(const TVector3& LaserPosition, const TVector3& LaserDirection);
       
      /**
      * @brief Constructor: sets laser position and laser direction
@@ -96,33 +109,34 @@ namespace lasercal
      * This constructor loads the start position and two angles given by the mirror angles
      * and calculates the direction vector
      */
-      LaserBeam(TVector3& LaserPosition, float Phi, float Theta); 
+      LaserBeam(const TVector3& LaserPosition, const float& Phi, const float& Theta); 
       
      
+     #ifndef __GCCXML__
      /**
      * @brief Sets laser Position
      * @param LaserPosition start position of the laser 
      */
-      void SetPosition(TVector3& LaserPosition);
+      void SetPosition(const TVector3& LaserPosition, const bool& ReCalcFlag = true);
       
      /**
      * @brief Sets laser direction
      * @param LaserDirection direction of the laser beam
      */
-      void SetDirection(TVector3& LaserDirection);
+      void SetDirection(const TVector3& LaserDirection, const bool& ReCalcFlag = true);
       
       /**
      * @brief Sets laser direction
      * @param LaserAngles reads the angles of the laser beam and calculates the direction
      */
-      void SetDirection(float Phi, float Theta);
+      void SetDirection(const float& Phi, const float& Theta, const bool& ReCalcFlag  = true);
      
     /**
      * @brief Sets laser trigger time
      * @param trigger time sec (epoch time)
      * @param trigger time fraction in usec
      */
-      void SetTime(float sec, float usec);
+      void SetTime(const float& sec, const float& usec);
       
       /**
        * @brief Return laser trigger time as Time struct
@@ -133,7 +147,7 @@ namespace lasercal
      * @brief Sets the attenuator value of the laser beam
      * @param Set value of the attenuator position in %
      */    
-      void SetPower(float AttenuatorPercentage);
+      void SetPower(const float& AttenuatorPercentage);
       
       /*
        * @brief Get power setting of laser (aperture)
@@ -162,10 +176,10 @@ namespace lasercal
       TVector3 GetLaserPosition() const;
       TVector3 GetLaserDirection() const;
       
-      void SetEntryPoint();
-      void SetExitPoint();
       TVector3 GetEntryPoint() const;
       TVector3 GetExitPoint() const;
+      
+      #endif
       //Anydatatype GetErrors();
       
   };

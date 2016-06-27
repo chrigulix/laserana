@@ -23,7 +23,7 @@ services:
 
 #services.DatabaseUtil.ShouldConnect: false
 #services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB: true
-services.TimeService.InheritClockConfig: false
+services.DetectorClocksService.InheritClockConfig: false
 
 #source is now a root file
 source:
@@ -47,7 +47,7 @@ physics:
       VPlaneInstanceLabel: "VPlaneLaserHits"
       YPlaneInstanceLabel: "YPlaneLaserHits"
       CalDataModuleLabel:  "daq"
-      DrawHits: true
+      DrawHits: 	   true
     }
   }
  #define the output stream, there could be more than one if using filters 
@@ -72,7 +72,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_%tc_HitAna.root"
+   fileName:    "%ifb_HitAna.root"
    #sam_ignore:  true
    dataTier:    "reconstructed-2d"
    #outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]

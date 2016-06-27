@@ -36,12 +36,35 @@ physics:
     LaserReco: 
     {
       module_type:         "LaserReco"
-      GenerateWireMap:     false
-      UPlaneHitThreshold:  -10.0
-      VPlaneHitThreshold:  10.0
-      YPlaneHitThreshold:  10.0
-      CalDataModuleLabel:  "daq"
+
+      GenerateWireMap:         false
+      LaserROIFlag:            false
+
+      LaserRecoModuleLabel:       "daq"
+      LaserDataMergerModuleLabel: "LaserDataMerger"
+      LaserBeamInstanceLabel:     "LaserBeam"
+
       MinAllowedChannelStatus: 4
+
+      # High amplitude threshold for high signal exceptions for all planes
+      HighAmplThreshold:       1000
+
+      # U-Plane hit thresholds
+      UHitPeakThreshold:      -25.0
+      UAmplitudeToWidthRatio:  1
+      UHitWidthThreshold:      10
+
+      # V-Plane hit thresholds
+      VHitPeakThreshold:       10.0
+      VAmplitudeToWidthRatio:  1.0
+      VAmplitudeToRMSRatio:    2.0
+      VHitWidthThreshold:      12
+      VRMSThreshold:           4
+
+      # Y-Plane hit thresholds
+      YHitPeakThreshold:       10.0
+      YAmplitudeToWidthRatio:  1.5
+      YHitWidthThreshold:      6
     }
   }
 
@@ -65,7 +88,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_%tc_LaserHitFinder.root"
+   fileName:    "%ifb_LaserHitFinder.root"
    #sam_ignore:  true
    dataTier:    "reconstructed-2d"
    outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]

@@ -11,8 +11,11 @@ services:
   # Load the service that manages root files for histograms.
   TFileService:            { fileName: "Hit_Analysis_Hist.root" }
   @table::microboone_reco_minimal_services
+  message: @local::standard_info
 }
 
+services.DetectorClocksService.InheritClockConfig: false
+services.DatabaseUtil.ShouldConnect: false
 services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
 
 #source is the swizzled laser files
@@ -23,17 +26,18 @@ source:
 
 physics: { 
     producers: {
+	LaserMerger:    @local::LaserDataMerger
         LaserReco:      @local::LaserReco
-        LaserMerger:    @local::LaserDataMerger
     }
 
-    p1: [ LaserReco, LaserMerger ]
+    p1: [ LaserMerger, LaserReco ]
+    
+    stream1:  [ out1 ]
+    
     trigger_paths: [ p1 ]
 
     #e1: [  ]
     #end_paths: [ e1 ]
-
-    stream1:  [ out1 ]
 }
 
 outputs:

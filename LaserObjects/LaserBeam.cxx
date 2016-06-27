@@ -1,20 +1,46 @@
 #include "LaserBeam.h"
 
-namespace lasercal
-{
-
-LaserBeam::LaserBeam()
+lasercal::LaserBeam::LaserBeam()
 {
 }
 
-LaserBeam::LaserBeam(TVector3& LaserPosition, TVector3& LaserDirection) : fLaserPosition(LaserPosition), fDirection(LaserDirection)
+lasercal::LaserBeam::LaserBeam(const TVector3& LaserPosition, const TVector3& LaserDirection) : fLaserPosition(LaserPosition), fDirection(LaserDirection)
 {
-    //     SetEntryPoint();
-    //     SetExitPoint();
- 
+     // Calculate the intersection points with the TPC. This has to be done after SetPosition and SetDirection!
+    SetIntersectionPoints();
 }
 
-LaserBeam::LaserBeam(TVector3& LaserPosition, float Phi, float Theta)
+lasercal::LaserBeam::LaserBeam(const TVector3& LaserPosition, const float& Phi, const float& Theta)
+{
+    
+    // Set position and direction
+    SetPosition(LaserPosition, false);
+    SetDirection(Phi,Theta);
+}
+
+void lasercal::LaserBeam::SetPosition(const TVector3& LaserPosition, const bool& ReCalcFlag)
+{
+    fLaserPosition = LaserPosition;
+    
+    if(ReCalcFlag)
+    {
+	// Re-calculate the intersection points with the TPC.
+	SetIntersectionPoints();
+    }
+}
+
+void lasercal::LaserBeam::SetDirection(const TVector3& LaserDirection, const bool& ReCalcFlag)
+{
+    fDirection = LaserDirection;
+    
+    if(ReCalcFlag)
+    {
+	// Re-calculate the intersection points with the TPC.
+	SetIntersectionPoints();
+    }
+}
+
+void lasercal::LaserBeam::SetDirection(const float& Phi, const float& Theta, const bool& ReCalcFlag)
 {
     TVector3 LaserDir;          // 3-Vector in laser coordinate system
     TVector3 LaserDirection;    // 3-Vector in uboone coordinate system 
@@ -25,43 +51,52 @@ LaserBeam::LaserBeam(TVector3& LaserPosition, float Phi, float Theta)
     LaserDirection.SetY(LaserDir.Z());
     LaserDirection.SetZ(LaserDir.X());
     
-    SetPosition(LaserPosition);
-    SetDirection(LaserDirection);
-    
-    SetEntryPoint();
-    
+    // Set directions
+    SetDirection(LaserDirection,ReCalcFlag);
 }
 
-void LaserBeam::SetPosition(TVector3& LaserPosition){
-    fLaserPosition = LaserPosition;
-}
 
-void LaserBeam::SetDirection(TVector3& LaserDirection){
-    fDirection = LaserDirection;
-}
-void LaserBeam::SetPower(float AttenuatorPercentage) {
+void lasercal::LaserBeam::SetPower(const float& AttenuatorPercentage) 
+{
     fPower = AttenuatorPercentage;
 }
 
-void LaserBeam::SetTime(float sec, float usec) {
+void lasercal::LaserBeam::SetTime(const float& sec, const float& usec) 
+{
     fTime.sec = (unsigned long) sec;
     fTime.usec = (unsigned long) usec;
 }
 
-void LaserBeam::SetEntryPoint(){
-    // TODO: Fix this, seems to be a problem with Qwwises GetIntersections
-    //geo::GeometryCore const* Geometry = &*(art::ServiceHandle<geo::Geometry>());
-    //const TVector3 Laser1(0,0,0);
-    //const TVector3 Laser2(0,0,0);
-
-    //auto aa = Geometry->TPC().GetIntersections(Laser1, Laser2);
-    //std::cout << aa << std::endl;
-    //aa.front().Print();
-    //aa.back().Print();
+// TODO: Fix class compilation if including GeometryCore.h and others!!!
+void lasercal::LaserBeam::SetIntersectionPoints()
+{   
+    // Load geometry core
+    geo::GeometryCore const* Geometry = &*(art::ServiceHandle<geo::Geometry>());
     
+    // Create the active Volume
+    geo::BoxBoundedGeo ActiveVolume( 0,2*Geometry->TPC().ActiveHalfWidth(), // xmin, xmax
+				     -Geometry->TPC().ActiveHalfHeight(),Geometry->TPC().ActiveHalfHeight(), // ymin, ymax  
+				     0,Geometry->TPC().ActiveLength() // zmin, zmax 
+				    );
+    
+    // Get the active volume and its intersection points
+    auto IntersectionPoints = ActiveVolume.GetIntersections(fLaserPosition, fDirection);
+
+    // Check if there is only an exit point (if laser head is in TPC volume)
+    if(IntersectionPoints.size() == 0)
+    {
+	fEntryPoint = TVector3(0,0,0);
+	fExitPoint = TVector3(0,0,0);
+    }
+    else
+    {
+	fEntryPoint = IntersectionPoints.front();
+	fExitPoint = IntersectionPoints.back();
+    }
 }
 
-void LaserBeam::Print() const {
+void lasercal::LaserBeam::Print() const 
+{
     std::cout   << "Laser System        " << fLaserID << "\n"
                 << "Laser Event ID      " << fLaserEventID << "\n"
                 << "Associate Event ID  " << fAssosiateEventID << "\n"
@@ -72,5 +107,24 @@ void LaserBeam::Print() const {
     std::cout    << "Mirror Direction    ";// << std::endl;
     fDirection.Print();
     std::cout << "\n" << std::endl;
-}               
+}
+
+TVector3 lasercal::LaserBeam::GetEntryPoint() const
+{
+    return fEntryPoint;
+}
+
+TVector3 lasercal::LaserBeam::GetExitPoint() const
+{
+    return fExitPoint;
+}
+
+TVector3 lasercal::LaserBeam::GetLaserDirection() const
+{
+    return fDirection;
+}
+
+TVector3 lasercal::LaserBeam::GetLaserPosition() const
+{
+    return fLaserPosition;
 }

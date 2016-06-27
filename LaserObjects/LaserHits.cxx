@@ -1,18 +1,22 @@
 #include "LaserObjects/LaserHits.h"
 
 
-lasercal::LaserHits::LaserHits(const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds)
+lasercal::LaserHits::LaserHits(const lasercal::LaserRecoParameters& ParameterSet)
 {
-  fGeometry = Geometry;
-  fUVYThresholds = UVYThresholds;
+  fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+  fParameters = ParameterSet;
 } // Default constructor
 
 //-------------------------------------------------------------------------------------------------------------------
 
-lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds)
+lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const lasercal::LaserRecoParameters& ParameterSet, const lasercal::LaserBeam& LaserBeam)
 {
-  fGeometry = Geometry;
-  fUVYThresholds = UVYThresholds;
+  fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+  fParameters = ParameterSet;
+  
+  //Initialize LaserROI
+  float BoxSize = 10.0; //cm
+  fLaserROI = lasercal::LaserROI(BoxSize, LaserBeam);
   
   // Reserve space for hit container
   for(auto& MapVector : fHitMapsByPlane)
@@ -29,10 +33,9 @@ lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const geo:
     
     // Get Single wire hits
     std::map<float, recob::Hit> HitMap = FindSingleWireHits(SingleWire, Plane);
- 
+    
     // Fill map data by pushing back the wire vector
     fHitMapsByPlane.at(Plane).push_back(HitMap);
-  
   }// end loop over wires
   
 } // Constructor using all wire signals and geometry purposes
@@ -213,7 +216,7 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
   // loop over wire
   for(unsigned int sample = 0; sample < Signal.size(); sample++ )
   {
-    if( Signal.at(sample) <= fUVYThresholds.at(0))
+    if( Signal.at(sample) <= fParameters.UHitThreshold )
     {
       // If we go over the threshold the first time, save the time tick
       if (!BelowThreshold)
@@ -229,39 +232,37 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
 	PeakTime = sample;
       }
     }
-    else if( BelowThreshold && (Signal.at(sample) > fUVYThresholds.at(0) || Signal.size()-1 == sample) )
+    else if( BelowThreshold && (Signal.at(sample) > fParameters.UHitThreshold || Signal.size()-1 == sample) )
     {
       HitEnd = sample;
       BelowThreshold = false;
       
-      if( fabs(Peak) > 25 
-	  &&(fabs(Peak)/(HitEnd - HitStart) > 1 || fabs(Peak) > 1000) 
-	  && HitEnd - HitStart > 10)
+      if( (fabs(Peak)/(float)(HitEnd - HitStart) > fParameters.UAmplitudeToWidthRatio || fabs(Peak) > fParameters.HighAmplitudeThreshold) 
+	  && HitEnd - HitStart > fParameters.UHitWidthThreshold )
       {
-      // Create a new map entry with hit time as a key
-      LaserHits.emplace( std::make_pair(
-					(float) PeakTime,
-					recob::HitCreator(
-							   SingleWire, 
-							   fGeometry->ChannelToWire(Channel).front(), 
-							   HitStart, 
-							   HitEnd, 
-							   fabs(HitStart - HitEnd)/2, 
-							   (float) PeakTime, 
-							   fabs(HitStart - HitEnd)/2, 
-							   Peak, 
-							   sqrt(Peak), 
-							   0., 
-							   0., 
-							   1, 
-							   HitIdx, 
-							   1., 
-							   0
-							  ).move() 
-				       ) 
-			);
-      
-      HitIdx++;
+	  // Create hit
+	  auto RecoHit = recob::HitCreator( SingleWire, 
+					    fGeometry->ChannelToWire(Channel).front(), 
+					    HitStart, 
+					    HitEnd, 
+					    fabs(HitStart - HitEnd)/2, 
+					    (float) PeakTime, 
+					    fabs(HitStart - HitEnd)/2, 
+					    Peak, 
+					    sqrt(Peak), 
+					    0., 
+					    0., 
+					    1, 
+					    HitIdx, 
+					    1., 
+					    0 ).move();
+	  
+	  if(fLaserROI.IsHitInRange(RecoHit) || !fParameters.LaserROIFlag)
+	  {
+	      // Create a new map entry with hit time as a key
+	      LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
+	  }
+	  HitIdx++;
       }
     }
   }
@@ -297,7 +298,7 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
   // loop over wire
   for(unsigned int sample = 0; sample < Signal.size(); sample++ )
   {
-    if(!BelowThreshold && Signal.at(sample) >= fUVYThresholds.at(1))
+    if(!BelowThreshold && Signal.at(sample) >= fParameters.VHitThreshold)
     {
       // If we go over the threshold the first time, save the time tick
       if(!AboveThreshold)
@@ -314,12 +315,12 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
 	PeakTime = sample;
       }
     }
-    else if(AboveThreshold && Signal.at(sample) < fUVYThresholds.at(1))
+    else if(AboveThreshold && Signal.at(sample) < fParameters.VHitThreshold)
     {
       AboveThreshold = false;
       Handover_flag = true;
     }
-    if(Handover_flag && !AboveThreshold && Signal.at(sample) <= -fUVYThresholds.at(1))
+    if(Handover_flag && !AboveThreshold && Signal.at(sample) <= -fParameters.VHitThreshold)
     {
       if (!BelowThreshold)
       {
@@ -333,46 +334,44 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
 	DipTime = sample;
       }
     }
-    else if( Handover_flag && BelowThreshold && (Signal.at(sample) > -fUVYThresholds.at(1) || Signal.size()-1 == sample) )
+    else if( Handover_flag && BelowThreshold && (Signal.at(sample) > -fParameters.VHitThreshold || Signal.size()-1 == sample) )
     {
       HitEnd = sample;
       HitTime = (float)PeakTime + ((float)DipTime-(float)PeakTime)/2;
       BelowThreshold = false;
       Handover_flag = false;
       
-//       std::cout << ((Peak-Dip)/(HitEnd-HitStart) << " "
-// 		<< Peak-Dip << " "
-// 		<< (Peak/(PeakTime-DipTime > 2 << " "
-// 		<< PeakTime-DipTime
-      
-      if( ((Peak-Dip)/(HitEnd-HitStart) > 1 || Peak-Dip > 1000)
-	  && HitEnd-HitStart > 12
-	  &&(Peak/(DipTime-PeakTime > 2 || Peak-Dip > 1000))  
-	  && DipTime-PeakTime > 4 )
+      if( ((Peak-Dip)/(float)(HitEnd-HitStart) > fParameters.VAmplitudeToWidthRatio || Peak-Dip > fParameters.HighAmplitudeThreshold)
+	  && HitEnd-HitStart > fParameters.VHitWidthThreshold
+	  &&(Peak/(float)(DipTime-PeakTime) > fParameters.VAmplitudeToRMSRatio || Peak-Dip > fParameters.HighAmplitudeThreshold)  
+	  && DipTime-PeakTime > fParameters.VRMSThreshold )
       {
-      // Create a new map entry with hit time as a key
-      LaserHits.emplace( std::make_pair(
-                                        (float) HitTime,
-                                         recob::HitCreator(
-                                                            SingleWire, 
-							    fGeometry->ChannelToWire(Channel).front(), 
-							    HitStart, 
-							    HitEnd, 
-							    fabs(DipTime - PeakTime)/2,  
-							    HitTime, 
-							    fabs(DipTime - PeakTime)/2, 
-							    Peak-Dip, 
-							    sqrt(Peak-Dip), 
-							    0., 
-							    0., 
-							    1, 
-							    HitIdx, 
-							    1., 
-							    0
-							  ).move() 
-			               ) 
-			);
-      HitIdx++;
+	  // Create hit
+	  auto RecoHit = recob::HitCreator( SingleWire, 
+					    fGeometry->ChannelToWire(Channel).front(), 
+					    HitStart, 
+					    HitEnd, 
+					    fabs(DipTime - PeakTime)/2, 
+					    HitTime, 
+					    fabs(DipTime - PeakTime)/2, 
+					    Peak-Dip, 
+					    sqrt(Peak-Dip), 
+					    0., 
+					    0., 
+					    1, 
+					    HitIdx, 
+					    1., 
+					    0 ).move();
+					    
+	   
+	   //TODO: Fix this, there are no v-hits found with this condition
+	   if(fLaserROI.IsHitInRange(RecoHit) || !fParameters.LaserROIFlag)
+	   {
+	       // Create a new map entry with hit time as a key
+	       LaserHits.emplace( std::make_pair((float) HitTime, RecoHit) );
+	   }
+	  
+	  HitIdx++;
       }
     }
   }
@@ -403,7 +402,7 @@ std::map<float,recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wir
   // loop over wire
   for(unsigned int sample = 0; sample < Signal.size(); sample++ )
   {
-    if( Signal.at(sample) >= fUVYThresholds.at(2))
+    if( Signal.at(sample) >= fParameters.YHitThreshold)
     {
       // If we go over the threshold the first time, save the time tick
       if (!AboveThreshold)
@@ -419,39 +418,40 @@ std::map<float,recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wir
 	PeakTime = sample;
       }
     }
-    else if( AboveThreshold && (Signal.at(sample) < fUVYThresholds.at(2) || Signal.size()-1 == sample) )
+    else if( AboveThreshold && (Signal.at(sample) < fParameters.YHitThreshold || Signal.size()-1 == sample) )
     {
       HitEnd = sample;
       AboveThreshold = false;
       
-      if( (Peak/(HitEnd-HitStart) > 1.5 || Peak > 1000)
-          && HitEnd-HitStart > 6 ) 
+      if( (Peak/(float)(HitEnd-HitStart) > fParameters.YAmplitudeToWidthRatio || Peak > fParameters.HighAmplitudeThreshold)
+          && HitEnd-HitStart > fParameters.YHitWidthThreshold ) 
       {
+	  // Create hit
+	  auto RecoHit = recob::HitCreator( SingleWire, 
+					    fGeometry->ChannelToWire(Channel).front(), 
+					    HitStart, 
+					    HitEnd, 
+					    fabs(HitStart - HitEnd)/2, 
+					    (float) PeakTime, 
+					    fabs(HitStart - HitEnd)/2, 
+					    Peak, 
+					    sqrt(Peak), 
+					    0., 
+					    0., 
+					    1, 
+					    HitIdx, 
+					    1., 
+					    0 ).move();
+					    
       
-      // Create a new map entry with hit time as a key
-      LaserHits.emplace( std::make_pair(
-					(float) PeakTime,
-					recob::HitCreator(
-							   SingleWire, 
-							   fGeometry->ChannelToWire(Channel).front(), 
-							   HitStart, 
-							   HitEnd, 
-							   fabs(HitStart - HitEnd)/2, 
-							   (float) PeakTime, 
-							   fabs(HitStart - HitEnd)/2, 
-							   Peak, 
-							   sqrt(Peak), 
-							   0., 
-							   0., 
-							   1, 
-							   HitIdx, 
-							   1., 
-							   0
-							  ).move() 
-				       ) 
-			);
+	  
+	  if(fLaserROI.IsHitInRange(RecoHit) || !fParameters.LaserROIFlag)
+	  {
+	      // Create a new map entry with hit time as a key
+	      LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
+	  }
       
-      HitIdx++;
+	  HitIdx++;
       }
     }
   }

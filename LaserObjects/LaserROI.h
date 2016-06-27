@@ -7,6 +7,11 @@
 #include "lardata/RecoBase/Wire.h"
 #include "lardata/RecoBaseArt/HitCreator.h"
 #include "larcore/Geometry/GeometryCore.h"
+#include "larcore/Geometry/Geometry.h"
+
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+
+#include "LaserObjects/LaserBeam.h"
 
 #include <iostream>
 #include <utility>
@@ -22,19 +27,44 @@ namespace lasercal
     public:
       // Constructor with geometry and thresholds for the hit finder. 
       // It just initializes the object. There is no hit finding or filling of data.
-      LaserROI(const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds);
+      LaserROI();
       
       // Constructor wire data, geometry and thresholds for the hit finder.
       // It already runs the hit finder algorithms and fills the map data.
-      LaserROI(const std::vector<recob::Wire>& Wires, const geo::GeometryCore* Geometry, const std::array<float,3>& UVYThresholds);
+      LaserROI(const float& BoxSize, const lasercal::LaserBeam& LaserBeamInfo);
+      
+      // Check if Wire is in wire range
+      bool IsWireInRange(const recob::Wire& WireToCheck) const;
+      
+      bool IsHitInRange(const recob::Hit& HitToCheck) const;
+      
+      unsigned int GetEntryWire(const unsigned int& PlaneNo) const;
+      unsigned int GetExitWire(const unsigned int& PlaneNo) const;
+      
+      float GetEntryTimeTick(const unsigned int& PlaneNo) const;
+      float GetExitTimeTick(const unsigned int& PlaneNo) const;
       
     private:
       
       // Detector geometry object
       const geo::GeometryCore* fGeometry;
+      float fBoxSize;
+      float fWireBoxSize;
+      lasercal::LaserBeam fLaserBeam;
+      float fXScaleFactor;
+      
+      std::vector<unsigned int> fEntryWire;
+      std::vector<unsigned int> fExitWire;
+      
+      // Time tick ranges of ROI for all planes(vector) and every individual wire (map)
+      std::vector< std::map< unsigned int, std::pair<float, float> > > fRanges;
+      
+    protected:
       
       // Calculates wire number range of the laser beam
-      std::vector< std::pair<geo::WireID, geo::WireID> > WireRanges(geo::WireID WireID);
+      std::vector< std::pair<geo::WireID, geo::WireID> > WireRanges(const TVector3& StartPosition, const TVector3& EndPosition);
+      
+      // Calculate
       
     
   }; // class LaserHits
