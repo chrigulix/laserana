@@ -11,6 +11,8 @@ class LarData():
         self.file = filename
         self.datatypes = ["laser", "hits"]
 
+        self.id = None
+
         self.laser = None
         self.hits = None
 
@@ -35,7 +37,8 @@ class LarData():
 
     def read(self, tree, branches):
         branch = [item for sublist in branches for item in sublist if isinstance(sublist, list)] \
-                 + [item for item in branches if isinstance(item, str)]
+                 + [item for item in branches if isinstance(item, str)] # handling lists and strings only
+
         data = rn.root2array(self.file, treename=tree, branches=branch).view(np.recarray)
 
         if self.n_entries is None:
@@ -60,3 +63,9 @@ class LarData():
         data.dtype.names = ("channel", "tick", "peak_amp", "start_tick", "end_tick")
 
         return data
+
+    def get_info(self):
+        trees = rn.list_trees(self.file)
+        for tree in trees:
+            print str.capitalize(tree) + ":"
+            print rn.list_branches(self.file, treename=tree)
