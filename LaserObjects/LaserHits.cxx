@@ -15,7 +15,7 @@ lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const lase
   fParameters = ParameterSet;
   
   //Initialize LaserROI
-  float BoxSize = 10.0; //cm
+  float BoxSize = 10.0; //cm //TODO: Read this value as a fhicl parameter
   fLaserROI = lasercal::LaserROI(BoxSize, LaserBeam);
   
   // Reserve space for hit container
