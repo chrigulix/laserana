@@ -156,7 +156,7 @@ namespace lasercal
 
       inline void SetLaserID(float id) {fLaserID = (unsigned int) id;}
       
-      inline unsigned int GetLaserID(float id) const {return fLaserID;}
+      inline unsigned int GetLaserID() const {return fLaserID;}
       
       inline void SetLaserEventID(float id) {fLaserEventID = (unsigned int) id;}
       
