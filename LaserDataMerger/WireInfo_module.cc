@@ -29,106 +29,99 @@ namespace {
 
 namespace WireInfo {
 
-  class WireInfo : public art::EDAnalyzer
-  {
-  public:
- 
-    explicit WireInfo(fhicl::ParameterSet const& parameterSet);
+    class WireInfo : public art::EDAnalyzer {
+    public:
 
-    virtual void beginJob() override;
-    
-    virtual void endJob() override;
+        explicit WireInfo(fhicl::ParameterSet const &parameterSet);
 
-    virtual void beginRun(const art::Run& run) override;
+        virtual void beginJob() override;
 
-    virtual void reconfigure(fhicl::ParameterSet const& parameterSet) override;
+        virtual void endJob() override;
 
-    virtual void analyze(const art::Event& event) override;
-    
-    void printArray(double[], int);
-        
+        virtual void beginRun(const art::Run &run) override;
 
-  private:
-      geo::GeometryCore const* fGeometry;       ///< pointer to Geometry provider
-      
-      std::vector< std::pair<unsigned int, unsigned int> > fWires;
-    
-  }; // class WireInfo
-  
-  DEFINE_ART_MODULE(WireInfo)
+        virtual void reconfigure(fhicl::ParameterSet const &parameterSet) override;
+
+        virtual void analyze(const art::Event &event) override;
+
+        void printArray(double[], int);
 
 
-  //-----------------------------------------------------------------------
-  //-----------------------------------------------------------------------
-  // class implementation
+    private:
+        geo::GeometryCore const *fGeometry;       ///< pointer to Geometry provider
 
-  //-----------------------------------------------------------------------
-  // Constructor
-  WireInfo::WireInfo(fhicl::ParameterSet const& pset) : EDAnalyzer(pset)
-  {    
-      fGeometry = &*(art::ServiceHandle<geo::Geometry>());
-    // Read in the parameters from the .fcl file.
-    this->reconfigure(pset);
-  }
+        std::vector<std::pair<unsigned int, unsigned int> > fWires;
 
-  
-  //-----------------------------------------------------------------------
-  void WireInfo::beginJob()
-  {
+    }; // class WireInfo
 
-  }
-  
-  void  WireInfo::endJob()
-  {
-  }
-   
-  //-----------------------------------------------------------------------
-  void WireInfo::beginRun(const art::Run& /*run*/)
-  {
 
-  }
 
-  //-----------------------------------------------------------------------
-  void WireInfo::reconfigure(fhicl::ParameterSet const& parameterSet)
-  {
-      fWires = parameterSet.get< std::vector< std::pair<unsigned int, unsigned int> > >("Wires");
-  }
+    //-----------------------------------------------------------------------
+    //-----------------------------------------------------------------------
+    // class implementation
 
-  //-----------------------------------------------------------------------
-  void WireInfo::analyze(const art::Event& event)
-  {
-      geo::TPCID::TPCID_t tpc = 0;
-      geo::CryostatID::CryostatID_t cryostat = 0;
-      
-      for (auto wire : fWires){
-        std::cout << "Plane: " << wire.first << " Wire: " << wire.second << std::endl;
-         
-        auto planeid = geo::PlaneID(cryostat, tpc, wire.first);
-        auto wireid = geo::WireID(planeid, wire.second);
-        
-        int size = 3;
-        double Start[size], End[size];
-        
-        fGeometry->WireEndPoints(wireid, Start, End);
-        std::cout << " Start: ";
-        printArray(Start, size);
-        std::cout << " End:   ";
-        printArray(End, size);
-      }
-      std::cout << "\n\n";
-  } // WireInfo::analyze()
-
-  
-  void WireInfo::printArray(double arr[], int size) {
-    std::cout << "[";
-    for ( int i = 0; i < size; i++ ) {
-        
-        std::cout << arr[i] << ' ';
+    //-----------------------------------------------------------------------
+    // Constructor
+    WireInfo::WireInfo(fhicl::ParameterSet const &pset) : EDAnalyzer(pset) {
+        fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+        // Read in the parameters from the .fcl file.
+        this->reconfigure(pset);
     }
-    std::cout << "]" << std::endl;
-}
 
 
+    //-----------------------------------------------------------------------
+    void WireInfo::beginJob() {
+
+    }
+
+    void  WireInfo::endJob() {
+    }
+
+    //-----------------------------------------------------------------------
+    void WireInfo::beginRun(const art::Run & /*run*/) {
+
+    }
+
+    //-----------------------------------------------------------------------
+    void WireInfo::reconfigure(fhicl::ParameterSet const &parameterSet) {
+        fWires = parameterSet.get<std::vector<std::pair<unsigned int, unsigned int> > >("Wires");
+    }
+
+    //-----------------------------------------------------------------------
+    void WireInfo::analyze(const art::Event &event) {
+        geo::TPCID::TPCID_t tpc = 0;
+        geo::CryostatID::CryostatID_t cryostat = 0;
+
+        for (auto wire : fWires) {
+
+            auto planeid = geo::PlaneID(cryostat, tpc, wire.first);
+            auto wireid = geo::WireID(planeid, wire.second);
+
+            int size = 3;
+            double Start[size], End[size];
+            auto channelid = fGeometry->PlaneWireToChannel(wireid);
+            fGeometry->WireEndPoints(wireid, Start, End);
+
+            std::cout << "Plane: " << wire.first << " Wire: " << wire.second << " channel: " << channelid << std::endl;
+            std::cout << " Start: ";
+            printArray(Start, size);
+            std::cout << " End:   ";
+            printArray(End, size);
+        }
+        std::cout << "\n\n";
+    } // WireInfo::analyze()
+
+
+    void WireInfo::printArray(double arr[], int size) {
+        std::cout << "[";
+        for (int i = 0; i < size; i++) {
+
+            std::cout << arr[i] << ' ';
+        }
+        std::cout << "]" << std::endl;
+    }
+
+    DEFINE_ART_MODULE(WireInfo)
 } // namespace WireInfo
 
 #endif // WireInfor_Module
