@@ -39,6 +39,7 @@ physics:
 
       GenerateWireMap:         false
       LaserROIFlag:            false
+      HitBoxSize:              10       #cm
 
       LaserRecoModuleLabel:       "daq"
       LaserDataMergerModuleLabel: "LaserDataMerger"
