@@ -42,6 +42,37 @@ lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const lase
 
 //-------------------------------------------------------------------------------------------------------------------
 
+lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const lasercal::LaserRecoParameters& ParameterSet, lasercal::LaserROI& LaserROI)
+{
+    fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+    fParameters = ParameterSet;
+
+    fLaserROI = LaserROI;
+
+    // Reserve space for hit container
+    for(auto& MapVector : fHitMapsByPlane)
+    {
+        MapVector.reserve(Wires.size());
+    }
+
+    // Loop over all wires
+    for(const auto& SingleWire : Wires)
+    {
+        // Get channel information
+        raw::ChannelID_t Channel = SingleWire.Channel();
+        unsigned Plane = fGeometry->ChannelToWire(Channel).front().Plane;
+
+        // Get Single wire hits
+        std::map<float, recob::Hit> HitMap = FindSingleWireHits(SingleWire, Plane);
+
+        // Fill map data by pushing back the wire vector
+        fHitMapsByPlane.at(Plane).push_back(HitMap);
+    }// end loop over wires
+
+} // Constructor using all wire signals and geometry purposes
+
+//-------------------------------------------------------------------------------------------------------------------
+
 void lasercal::LaserHits::AddHitsFromWire(const recob::Wire& Wire)
 {
   // Get channel information
@@ -383,7 +414,12 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
 std::map<float,recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wire& SingleWire)
 {
   std::map<float,recob::Hit> LaserHits;
-  
+
+    // Abort the hit search if wire is not in the defined range
+    if(fLaserROI.IsWireInRange(SingleWire) || !fParameters.LaserROIFlag)   {
+        return LaserHits;
+    }
+
   // Set Numbers (-9999 for debugging purposes)
   int HitEnd = -9999;
   int HitStart = - 9999;
