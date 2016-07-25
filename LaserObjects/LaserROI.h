@@ -37,7 +37,10 @@ namespace lasercal
       bool IsWireInRange(const recob::Wire& WireToCheck) const;
       
       bool IsHitInRange(const recob::Hit& HitToCheck) const;
-      
+
+      /// Sets Range range to check directely.
+      void setRanges(int BoxTickCenter, int BoxTickWidth, unsigned int Plane, std::pair<unsigned int, unsigned int> Wires);
+
       unsigned int GetEntryWire(const unsigned int& PlaneNo) const;
       unsigned int GetExitWire(const unsigned int& PlaneNo) const;
       

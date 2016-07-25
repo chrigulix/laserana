@@ -4,6 +4,7 @@
 lasercal::LaserROI::LaserROI()
 {
     fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+    fRanges.resize(fGeometry->Nplanes());
 } // Default constructor
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -106,6 +107,16 @@ lasercal::LaserROI::LaserROI(const float& BoxSize, const lasercal::LaserBeam& La
 
 //----------------------------------------------------------------------------------------------------------------
 
+void lasercal::LaserROI::setRanges(int BoxTickCenter, int BoxTickWidth, unsigned int Plane, std::pair<unsigned int, unsigned int> Wires){
+
+    std::pair<float,float> TickLimitsOfWire = std::make_pair(BoxTickCenter-BoxTickWidth/2,BoxTickCenter+BoxTickWidth/2);
+
+    for (unsigned int wire = Wires.first; wire <= Wires.second; wire++){
+        fRanges.at(Plane).insert( std::make_pair(wire, std::move(TickLimitsOfWire)) );
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------
 bool lasercal::LaserROI::IsWireInRange( const recob::Wire& WireToCheck ) const
 {
     // Fetch WireID
