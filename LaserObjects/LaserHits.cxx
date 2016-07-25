@@ -13,10 +13,8 @@ lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const lase
 {
   fGeometry = &*(art::ServiceHandle<geo::Geometry>());
   fParameters = ParameterSet;
-  
-  //Initialize LaserROI
-  float BoxSize = 10.0; //cm //TODO: Read this value as a fhicl parameter
-  fLaserROI = lasercal::LaserROI(BoxSize, LaserBeam);
+
+  fLaserROI = lasercal::LaserROI(fParameters.HitBoxSize, LaserBeam);
   
   // Reserve space for hit container
   for(auto& MapVector : fHitMapsByPlane)
