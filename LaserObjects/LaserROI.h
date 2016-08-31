@@ -41,6 +41,9 @@ namespace lasercal
       /// Sets Range range to check directely.
       void setRanges(int BoxTickCenter, int BoxTickWidth, unsigned int Plane, std::pair<unsigned int, unsigned int> Wires);
 
+      /// Sets Range range to check directely.
+      std::vector< std::map< unsigned int, std::pair<float, float> > > GetRanges();
+
       unsigned int GetEntryWire(const unsigned int& PlaneNo) const;
       unsigned int GetExitWire(const unsigned int& PlaneNo) const;
       

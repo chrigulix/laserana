@@ -109,12 +109,17 @@ lasercal::LaserROI::LaserROI(const float& BoxSize, const lasercal::LaserBeam& La
 
 void lasercal::LaserROI::setRanges(int BoxTickCenter, int BoxTickWidth, unsigned int Plane, std::pair<unsigned int, unsigned int> Wires){
 
-    std::pair<float,float> TickLimitsOfWire = std::make_pair(BoxTickCenter-BoxTickWidth/2,BoxTickCenter+BoxTickWidth/2);
+    std::pair<float,float> TickLimitsOfWire = std::make_pair((BoxTickCenter-BoxTickWidth/2), BoxTickCenter+BoxTickWidth/2);
 
     for (unsigned int wire = Wires.first; wire <= Wires.second; wire++){
         fRanges.at(Plane).insert( std::make_pair(wire, std::move(TickLimitsOfWire)) );
     }
 }
+
+std::vector<std::map<unsigned int, std::pair<float, float> > > lasercal::LaserROI::GetRanges() {
+    return fRanges;
+}
+
 
 //----------------------------------------------------------------------------------------------------------------
 bool lasercal::LaserROI::IsWireInRange( const recob::Wire& WireToCheck ) const
@@ -141,7 +146,8 @@ bool lasercal::LaserROI::IsHitInRange( const recob::Hit& HitToCheck ) const
     // Get wire information first
     unsigned int WireNo = HitToCheck.WireID().Wire;
     unsigned int PlaneNo = HitToCheck.WireID().Plane;
-    
+
+    std::cout << "w: " << WireNo << " p: " << PlaneNo << std::endl;
     // Check if wire number is in range for the given plane and if hit is inside of the interval of the given wire
     if( fRanges.at(PlaneNo).begin()->first <= WireNo && fRanges.at(PlaneNo).rbegin()->first >= WireNo &&
 	fRanges.at(PlaneNo).find(WireNo)->second.first <= HitToCheck.PeakTime() && fRanges.at(PlaneNo).find(WireNo)->second.second >= HitToCheck.PeakTime() )
