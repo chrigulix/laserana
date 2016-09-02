@@ -16,7 +16,7 @@ namespace lasercal
 	bool WireMapGenerator;
 	
 	// Activate/deactivate ROI in LaserHits
-	bool LaserROIFlag;
+	bool UseROI;
 	
 	// Minimum channel status number (DetectorProperties)
 	int MinAllowedChanStatus;

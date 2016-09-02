@@ -38,7 +38,7 @@ physics:
       module_type:         "LaserReco"
 
       GenerateWireMap:         false
-      LaserROIFlag:            false
+      UseROI:            false
       HitBoxSize:              10       #cm
 
       LaserRecoModuleLabel:       "daq"
