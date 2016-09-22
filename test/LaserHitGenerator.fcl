@@ -33,7 +33,6 @@ physics:
     {
       LaserHitGenerator: { module_type: "LaserHitGenerator"
             HitFile: "Hits.txt"
-
        }
     }
 

@@ -51,7 +51,7 @@ namespace LaserHitGenerator {
             Multiplicity
         };
 
-        bool DEBUG = true;
+        bool DEBUG = false;
 
     protected:
     };
@@ -127,30 +127,26 @@ namespace LaserHitGenerator {
 
     void LaserHitGenerator::produce(art::Event& event)  {
 
-        //
         std::unique_ptr<std::vector<recob::Hit> > TestHits(new std::vector<recob::Hit>);
-
         auto id = event.id().event();
+        unsigned int HitIdx = 0;
+
         if (id > HitValues.size() - 1 ) {
             event.put(std::move(TestHits), "TestHits");
             return;
         };
 
-        unsigned int HitIdx = 0;
-
         auto HitsInThisEvent = HitValues.at(id);
 
         // create all hits in this event
-        for (unsigned int sample = 0; sample < HitsInThisEvent.size(); sample++) {
-            auto HitValue =  HitsInThisEvent.at(sample);
+        for (auto SingleHit : HitsInThisEvent) {
 
-            unsigned int Wire_id = HitValue.at(HitDataStructure::Wire);
-            unsigned int Plane = HitValue.at(HitDataStructure::Plane);
-            float TickStart1 = HitValue.at(HitDataStructure::TickStart);
-            float TickEnd = HitValue.at(HitDataStructure::TickEnd);
-            float PeakAmplitude = HitValue.at(HitDataStructure::PeakAmplitude);
-            float Multiplicity = HitValue.at(HitDataStructure::Multiplicity);
-
+            unsigned int Wire_id = SingleHit.at(HitDataStructure::Wire);
+            unsigned int Plane = SingleHit.at(HitDataStructure::Plane);
+            float TickStart1 = SingleHit.at(HitDataStructure::TickStart);
+            float TickEnd = SingleHit.at(HitDataStructure::TickEnd);
+            float PeakAmplitude = SingleHit.at(HitDataStructure::PeakAmplitude);
+            float Multiplicity = SingleHit.at(HitDataStructure::Multiplicity);
 
             std::vector<float> DummyROI = {0,1,2};
             const geo::WireID WireID = geo::WireID(1,1,Plane, Wire_id);
@@ -178,11 +174,11 @@ namespace LaserHitGenerator {
                                              (size_t) 0).move();
 
             TestHits->push_back(RecoHit);
+            HitIdx++;
         }
         event.put(std::move(TestHits), "TestHits");
 
     }
-
     DEFINE_ART_MODULE(LaserHitGenerator)
 }
 
