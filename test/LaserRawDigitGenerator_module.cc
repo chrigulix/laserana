@@ -28,7 +28,7 @@
 #include <fstream>
 #include <boost/tokenizer.hpp>
 #include <boost/math/distributions/normal.hpp>
-using boost::math::normal;
+    using boost::math::normal;
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
@@ -78,6 +78,7 @@ private:
     // External Hit generator definitions
     std::string fRawDigitFile;
     uint fNoiseAmplitude;
+    int fNumberTimeSamples;
 
     unsigned int NumberTimeSamples;
     // inner most vector is configuration for hit
@@ -106,50 +107,62 @@ LaserRawDigitGenerator::LaserRawDigitGenerator(fhicl::ParameterSet const &pset)
     fGeometry = &*(art::ServiceHandle<geo::Geometry>());
     fDetProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
     // Call appropriate produces<>() functions here.
+    produces<std::vector<raw::RawDigit> >("GeneratedRaw");
+
     this->reconfigure(pset);
 }
 
 // ==================================== PRODUCE ======================================
 void LaserRawDigitGenerator::produce(art::Event &event) {
     auto id = event.id().event();
+    std::unique_ptr<std::vector<raw::RawDigit> > RawWires(new std::vector<raw::RawDigit>);
 
-    // Handle
+    // Handle config vs events
     if (id > RawDigitValues.size() - 1) {
-        //event.put(std::move(TestHits), "TestHits");
+        event.put(std::move(RawWires), "GeneratedRaw");
         return;
     };
 
     boost::random::mt19937 gen;
-
     auto RawDigitsInThisEvent = RawDigitValues.at(id);
-    std::vector<raw::RawDigit> RawWire;
-    RawWire.reserve(NumberTimeSamples);
+    //std::vector<raw::RawDigit> RawWires;
 
     // create all hits in this event
     for (auto SingleHit : RawDigitsInThisEvent) {
 
         raw::RawDigit::ADCvector_t WireADCSignal(NumberTimeSamples, 0);
 
-        boost::random::uniform_int_distribution<> Noise(-fNoiseAmplitude, fNoiseAmplitude);
-        for (auto& Digit : WireADCSignal) {
-            Digit += Noise(gen);
+        uint multiplicity = (uint) SingleHit.at(RawDigitDataStructure::Multiplicity);
+        if (multiplicity == 1) {
+            // Fill the vector with some random values
+            boost::random::uniform_int_distribution<> Noise(-fNoiseAmplitude, fNoiseAmplitude);
+            for (auto& Digit : WireADCSignal) {
+                Digit += Noise(gen);
+            }
+        }
+        else {
+            // just copy the previous generated signal into the current vector
+            // and forget about the one we already stored.
+            WireADCSignal = RawWires->back().ADCs();
+            RawWires->pop_back();
         }
 
-        // Construct a standard normal distribution s
+        // Construct the appropriate channel for this hit
+        uint plane = (uint) SingleHit.at(RawDigitDataStructure::Plane);
+        uint wire = (uint) SingleHit.at(RawDigitDataStructure::Wire);
+
+        auto channel = fGeometry->PlaneWireToChannel(plane, wire);
+
         uint mean = (uint) SingleHit.at(RawDigitDataStructure::CenterTick);
         uint width = (uint) SingleHit.at(RawDigitDataStructure::Width);
         ushort amplitude = (ushort) SingleHit.at(RawDigitDataStructure::Amplitude);
 
         int range = 3 * width; // min and max z = -range to +range.
         int start_range = mean - range;
-        int end_range = mean + range;
-
+        uint end_range = mean + range;
         // Handle boundary conditions
         if (start_range < 0) start_range = 0;
         if (end_range > NumberTimeSamples) end_range = NumberTimeSamples;
-
-
-        int precision = 17; // traditional tables are only computed to much lower precision.
 
         normal HitFunction( (double) mean, width ); // (default mean = zero, and standard deviation = unity)
 
@@ -161,21 +174,31 @@ void LaserRawDigitGenerator::produce(art::Event &event) {
 
 
 
-        for (uint TimeTick = (uint) start_range ; TimeTick < end_range; ++TimeTick)
+        for (int TimeTick = (uint) start_range ; TimeTick < (int) end_range; ++TimeTick)
         {
             WireADCSignal.at(TimeTick) += amplitude * 2.5066282746310002 * width * pdf(HitFunction, TimeTick);
             std::cout << std::left << std::setprecision(3) << std::setw(6) << TimeTick << " "
-                 << std::setprecision(precision) << std::setw(12) << WireADCSignal.at(TimeTick) << std::endl;
+                 << std::setw(12) << WireADCSignal.at(TimeTick) << std::endl;
         }
 
-        if (DEBUG) {
-            for (auto Digit : WireADCSignal) std::cout << Digit << " ";
-        }
+        //if (DEBUG) {
+        //    for (auto Digit : WireADCSignal) std::cout << Digit << " ";
+        //}
 
+        auto RawDigit = raw::RawDigit(channel, WireADCSignal.size(), WireADCSignal);
+        RawWires->emplace_back(std::move(RawDigit));
         WireADCSignal.clear();
-        RawWire.clear();
-
     }
+
+    for (auto Wire : *RawWires){
+        std::cout << "channel: " << Wire.Channel() << std::endl;
+        for (auto ADC : Wire.ADCs()){
+            std::cout << ADC << " ";
+        }
+    }
+
+    event.put(std::move(RawWires), "GeneratedRaw");
+
 }
 // ==================================== PRODUCE ======================================
 
@@ -227,7 +250,8 @@ void LaserRawDigitGenerator::beginJob() {
     }
 
     // Config TPC properties
-    NumberTimeSamples = fDetProperties->NumberTimeSamples();
+    if (fNumberTimeSamples == -1) NumberTimeSamples = fDetProperties->NumberTimeSamples();
+    else NumberTimeSamples = (uint) fNumberTimeSamples;// fDetProperties->NumberTimeSamples();
 }
 
 void LaserRawDigitGenerator::beginRun(art::Run &r) {
@@ -246,6 +270,7 @@ void LaserRawDigitGenerator::reconfigure(fhicl::ParameterSet const &pset) {
     // Implementation of optional member function here.
     fRawDigitFile = pset.get<std::string>("RawDigitFile");
     fNoiseAmplitude = pset.get<uint>("NoiseAmplitude");
+    fNumberTimeSamples = pset.get<int>("NumberTimeSamples", -1);
 }
 
 
