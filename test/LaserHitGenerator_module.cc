@@ -57,6 +57,8 @@ namespace LaserHitGenerator {
     };
 
     LaserHitGenerator::LaserHitGenerator(fhicl::ParameterSet const& pset) {
+
+        produces<std::vector<recob::Hit> >("TestHits");
         this->reconfigure(pset);
     }
 
@@ -125,52 +127,59 @@ namespace LaserHitGenerator {
 
     void LaserHitGenerator::produce(art::Event& event)  {
 
-        // Its going to wrap around the hit config if you specify too many events
+        //
+        std::unique_ptr<std::vector<recob::Hit> > TestHits(new std::vector<recob::Hit>);
+
         auto id = event.id().event();
+        if (id > HitValues.size() - 1 ) {
+            event.put(std::move(TestHits), "TestHits");
+            return;
+        };
 
-        if (id > HitValues.size() - 1 ) return;
+        unsigned int HitIdx = 0;
 
-        for (auto& HitValue : HitValues.at(id)) {
+        auto HitsInThisEvent = HitValues.at(id);
 
-            std::cout
-                      << HitValue.at(HitDataStructure::Wire) << " "
-                      << HitValue.at(HitDataStructure::Plane) << " "
-                      << HitValue.at(HitDataStructure::TickStart) << " "
-                      << HitValue.at(HitDataStructure::TickEnd) << " "
-                      << HitValue.at(HitDataStructure::PeakAmplitude) << " "
-                      << HitValue.at(HitDataStructure::Multiplicity) << std::endl;
+        // create all hits in this event
+        for (unsigned int sample = 0; sample < HitsInThisEvent.size(); sample++) {
+            auto HitValue =  HitsInThisEvent.at(sample);
 
-            //auto Wire = recob::Wire(i,i,geo::_plane_proj::kW);
-
-/*
- *
- * auto channel = i;
+            unsigned int Wire_id = HitValue.at(HitDataStructure::Wire);
+            unsigned int Plane = HitValue.at(HitDataStructure::Plane);
+            float TickStart1 = HitValue.at(HitDataStructure::TickStart);
+            float TickEnd = HitValue.at(HitDataStructure::TickEnd);
+            float PeakAmplitude = HitValue.at(HitDataStructure::PeakAmplitude);
+            float Multiplicity = HitValue.at(HitDataStructure::Multiplicity);
 
 
-            auto Wire = recob::Wire(1,channel,geo::_plane_proj::kW);
+            std::vector<float> DummyROI = {0,1,2};
+            const geo::WireID WireID = geo::WireID(1,1,Plane, Wire_id);
 
+            recob::Wire::RegionsOfInterest_t RegionOfInterest;
+            RegionOfInterest.add_range(0,DummyROI.begin(), DummyROI.end());
+
+            const auto Wire = recob::Wire(RegionOfInterest, HitIdx, geo::_plane_proj::kW);
 
 
             auto RecoHit = recob::HitCreator(Wire,
-                                             i,
-                                             HitStart,
-                                             HitEnd,
-                                             fabs(HitStart - HitEnd) / 2,
-                                             (float) PeakTime,
-                                             fabs(HitStart - HitEnd) / 2,
-                                             Peak,
-                                             sqrt(Peak),
+                                             WireID,
+                                             TickStart1,
+                                             TickEnd,
+                                             fabs(TickStart - TickEnd) / 2,
+                                             (float) PeakAmplitude,
+                                             fabs(TickStart - TickEnd) / 2,
+                                             PeakAmplitude,
+                                             sqrt(PeakAmplitude),
                                              0.,
-                                             0.,
+                                             0,
                                              1,
-                                             HitIdx,
-                                             1.,
-                                             0).move();*/
-        }
+                                             Multiplicity,
+                                             1,
+                                             (size_t) 0).move();
 
-        //for (auto wire: wires){
-        //    std::cout << "bibi: " << wire.Signal().at(0) << std::endl;
-        //}
+            TestHits->push_back(RecoHit);
+        }
+        event.put(std::move(TestHits), "TestHits");
 
     }
 
