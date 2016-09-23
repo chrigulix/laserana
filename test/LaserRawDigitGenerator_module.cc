@@ -68,6 +68,7 @@ public:
 
     void reconfigure(fhicl::ParameterSet const &p) override;
 
+    std::string PrintConfig(std::vector<float> Config);
 private:
 
     // Declare member data here.
@@ -77,6 +78,7 @@ private:
 
     // External Hit generator definitions
     std::string fRawDigitFile;
+    std::string fRawDigitLabel;
     uint fNoiseAmplitude;
     int fNumberTimeSamples;
 
@@ -92,6 +94,7 @@ private:
         CenterTick,
         Width,
         Amplitude,
+        Offset,
         Multiplicity
     };
 
@@ -107,9 +110,10 @@ LaserRawDigitGenerator::LaserRawDigitGenerator(fhicl::ParameterSet const &pset)
     fGeometry = &*(art::ServiceHandle<geo::Geometry>());
     fDetProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
     // Call appropriate produces<>() functions here.
-    produces<std::vector<raw::RawDigit> >("GeneratedRaw");
-
     this->reconfigure(pset);
+
+    produces<std::vector<raw::RawDigit> >(fRawDigitLabel);
+
 }
 
 // ==================================== PRODUCE ======================================
@@ -119,7 +123,7 @@ void LaserRawDigitGenerator::produce(art::Event &event) {
 
     // Handle config vs events
     if (id > RawDigitValues.size() - 1) {
-        event.put(std::move(RawWires), "GeneratedRaw");
+        event.put(std::move(RawWires), fRawDigitLabel);
         return;
     };
 
@@ -129,23 +133,9 @@ void LaserRawDigitGenerator::produce(art::Event &event) {
 
     // create all hits in this event
     for (auto SingleHit : RawDigitsInThisEvent) {
+        if (DEBUG) std::cout << PrintConfig(SingleHit) << std::endl;
 
         raw::RawDigit::ADCvector_t WireADCSignal(NumberTimeSamples, 0);
-
-        uint multiplicity = (uint) SingleHit.at(RawDigitDataStructure::Multiplicity);
-        if (multiplicity == 1) {
-            // Fill the vector with some random values
-            boost::random::uniform_int_distribution<> Noise(-fNoiseAmplitude, fNoiseAmplitude);
-            for (auto& Digit : WireADCSignal) {
-                Digit += Noise(gen);
-            }
-        }
-        else {
-            // just copy the previous generated signal into the current vector
-            // and forget about the one we already stored.
-            WireADCSignal = RawWires->back().ADCs();
-            RawWires->pop_back();
-        }
 
         // Construct the appropriate channel for this hit
         uint plane = (uint) SingleHit.at(RawDigitDataStructure::Plane);
@@ -153,9 +143,31 @@ void LaserRawDigitGenerator::produce(art::Event &event) {
 
         auto channel = fGeometry->PlaneWireToChannel(plane, wire);
 
+        uint multiplicity = (uint) SingleHit.at(RawDigitDataStructure::Multiplicity);
+        if (multiplicity == 1) {
+            // Fill the vector with some random values
+            boost::random::uniform_int_distribution<> Noise(-fNoiseAmplitude, fNoiseAmplitude);
+            for (auto& Digit : WireADCSignal) {
+                Digit += Noise(gen) + SingleHit.at(RawDigitDataStructure::Offset);
+            }
+        }
+        else {
+            // just copy the previous generated signal into the current vector
+            // and forget about the one we already stored.
+            if (RawWires->empty() || RawWires->back().Channel() != channel){
+                throw art::Exception(art::errors::LogicError)
+                        << "Multiplicity error @ " << id << "\n"
+                        << "previous raw wire was either empty or not identical to current wire"
+                        <<  PrintConfig(SingleHit)
+                        << std::endl;
+            }
+            WireADCSignal = RawWires->back().ADCs();
+            RawWires->pop_back();
+        }
+
         uint mean = (uint) SingleHit.at(RawDigitDataStructure::CenterTick);
         uint width = (uint) SingleHit.at(RawDigitDataStructure::Width);
-        ushort amplitude = (ushort) SingleHit.at(RawDigitDataStructure::Amplitude);
+        int amplitude = SingleHit.at(RawDigitDataStructure::Amplitude);
 
         int range = 3 * width; // min and max z = -range to +range.
         int start_range = mean - range;
@@ -166,19 +178,10 @@ void LaserRawDigitGenerator::produce(art::Event &event) {
 
         normal HitFunction( (double) mean, width ); // (default mean = zero, and standard deviation = unity)
 
-        std::cout << "Probability distribution function values" << std::endl;
-        std::cout << " mean / width: " << mean << "/" <<  width << std::endl;
-        std::cout << " ampl: " << amplitude << std::endl;
-        std::cout << " range: " << start_range << ":" <<  end_range << std::endl;
-        std::cout.precision(5);
-
-
-
+        // Generate the hit and place them in the right spot
         for (int TimeTick = (uint) start_range ; TimeTick < (int) end_range; ++TimeTick)
         {
             WireADCSignal.at(TimeTick) += amplitude * 2.5066282746310002 * width * pdf(HitFunction, TimeTick);
-            std::cout << std::left << std::setprecision(3) << std::setw(6) << TimeTick << " "
-                 << std::setw(12) << WireADCSignal.at(TimeTick) << std::endl;
         }
 
         //if (DEBUG) {
@@ -189,15 +192,16 @@ void LaserRawDigitGenerator::produce(art::Event &event) {
         RawWires->emplace_back(std::move(RawDigit));
         WireADCSignal.clear();
     }
-
-    for (auto Wire : *RawWires){
-        std::cout << "channel: " << Wire.Channel() << std::endl;
-        for (auto ADC : Wire.ADCs()){
-            std::cout << ADC << " ";
+    if (DEBUG) {
+        for (auto Wire : *RawWires) {
+            std::cout << "channel: " << Wire.Channel() << std::endl;
+            for (auto ADC : Wire.ADCs()) {
+                std::cout << ADC << " ";
+            }
         }
     }
 
-    event.put(std::move(RawWires), "GeneratedRaw");
+    event.put(std::move(RawWires), fRawDigitLabel);
 
 }
 // ==================================== PRODUCE ======================================
@@ -246,6 +250,7 @@ void LaserRawDigitGenerator::beginJob() {
         }
         stream.close();
     } else {
+        stream.close();
         throw art::Exception(art::errors::FileOpenError) << " File does not exist: " << FileName << std::endl;
     }
 
@@ -271,7 +276,23 @@ void LaserRawDigitGenerator::reconfigure(fhicl::ParameterSet const &pset) {
     fRawDigitFile = pset.get<std::string>("RawDigitFile");
     fNoiseAmplitude = pset.get<uint>("NoiseAmplitude");
     fNumberTimeSamples = pset.get<int>("NumberTimeSamples", -1);
+
+    // Tag for producing raw digit data
+    fRawDigitLabel = pset.get<std::string>("RawDigitLabel", "GeneratedRaw");
 }
 
+std::string LaserRawDigitGenerator::PrintConfig(std::vector<float> Config) {
+    std::stringstream ss;
+    ss << "\n"
+       << "Plane:        " << Config.at(RawDigitDataStructure::Plane) << "\n"
+       << "Wire:         " << Config.at(RawDigitDataStructure::Wire) << "\n"
+       << "CenterTick:   " << Config.at(RawDigitDataStructure::CenterTick) << "\n"
+       << "Width:        " << Config.at(RawDigitDataStructure::Width) << "\n"
+       << "Amplitude:    " << Config.at(RawDigitDataStructure::Amplitude) << "\n"
+       << "Offset:       " << Config.at(RawDigitDataStructure::Offset) << "\n"
+       << "Multiplicity: " << Config.at(RawDigitDataStructure::Multiplicity) << "\n";
+
+    return ss.str();
+}
 
 DEFINE_ART_MODULE(LaserRawDigitGenerator)
