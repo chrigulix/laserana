@@ -1,0 +1,69 @@
+#include "geometry.fcl"
+#include "reco_uboone_data_minimal.fcl"
+
+process_name: LaserRawDigitGeneratorTest3
+
+services.DetectorClocksService.InheritClockConfig: false
+services.DatabaseUtil.ShouldConnect: false
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+
+services:
+{
+  ExptGeoHelperInterface:    @local::standard_geometry_helper
+  Geometry:                  @local::standard_geo
+  @table::microboone_reco_minimal_services
+}
+
+source:
+{
+  module_type: EmptyEvent
+  timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
+  maxEvents:   1           # Number of events to create
+  firstRun:    1           # Run number to use for this file
+  firstEvent:  0           # number of first event in the file
+}
+
+outputs:
+{
+}
+
+physics:
+{
+    producers:
+    {
+      LaserRawDigitGenerator: {
+            module_type: "LaserRawDigitGenerator"
+            RawDigitFile: "RawDigits_Test_MultiplicityError.txt"
+            NoiseAmplitude: 0
+            NumberTimeSamples: 20 # just for testing purposes
+            RawDigitLabel: "RawDigitTest"
+       }
+    }
+    analyzers:
+    {
+        LaserRawDigitTest: {
+            module_type: "LaserRawDigitGenTest"
+
+            RawDigitModul: "LaserRawDigitGenerator"
+            RawDigitLabel: "RawDigitTest"
+
+            TestConfigFile: "RawDigits_Test_MultiplicityError.txt"
+        }
+    }
+
+    #define the path for analyzer modules, order does not matter.
+    #see lines starting physics.analyzers below
+    ana:  [ LaserRawDigitGenerator ]
+
+
+    #trigger_paths is a keyword and contains the paths that modify the art::event,
+    #ie filters and producers
+    trigger_paths: [ ana ]
+
+    hmm: [LaserRawDigitTest]
+
+    #end_paths is a keyword and contains the paths that do not modify the art::Event,
+    #ie analyzers and output streams.  these all run simultaneously
+    end_paths:     [ana, hmm]
+}
+
