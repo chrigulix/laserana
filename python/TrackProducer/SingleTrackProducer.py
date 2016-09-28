@@ -20,13 +20,10 @@ def Track(Plane, StartPosition, EndPosition, RawHitDef):
     StartTick = StartPosition[1]
     EndTick = EndPosition[1]
 
-    wire_range = abs(EndWire - StartWire) + 1
+    wire_range = abs(EndWire - StartWire)
 
-    print wire_range
-
-    gradient = (EndTick - StartTick) / float(abs(EndWire - StartWire))
-
-    hits = -1 * np.ones((abs(wire_range),7), dtype=int)
+    gradient = (EndTick - StartTick) / float(wire_range)
+    hits = -1 * np.ones((abs(wire_range+1),7), dtype=int)
 
     # handle inverted case
     if (EndWire < StartWire):
@@ -34,7 +31,6 @@ def Track(Plane, StartPosition, EndPosition, RawHitDef):
 
     for wire in range(StartWire, EndWire+1):
         tick = int(np.around(wire * gradient + StartTick))
-        print wire - StartWire
         hits[wire - StartWire, :] = [Plane, wire, tick, RawHitDef[0], RawHitDef[1], RawHitDef[2], 1]
 
     return hits
@@ -55,4 +51,4 @@ def Run(Events):
     pass
 
 
-Track(0, (5,5), (0,5), [5,10,20])
+print Track(0, (0,3500), (50,4000), [5,10,20])
