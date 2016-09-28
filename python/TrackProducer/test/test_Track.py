@@ -39,7 +39,15 @@ def test_Inclination():
                                         [0, 10, 10, 5, 10, 20, 1],
                                         ]))
 
-def test_invertedTrack():
+def test_HighInclination():
+    a = sn.Track(0, (0, 0), (1, 100), [5, 10, 20])
+    # [plane, wire, tick, width, amplitude, offset, multipicity]
+    npt.assert_almost_equal(a, np.array([
+                                        [0, 0,  0, 5, 10, 20, 1],
+                                        [0, 1,  100, 5, 10, 20, 1],
+                                        ]))
+
+def test_InvertedTrack():
     a = sn.Track(0, (1,5), (0,5), [5,10,10])
     # [plane, wire, tick, width, amplitude, offset, multipicity]
     npt.assert_almost_equal(a,np.array([[0, 0, 5, 5, 10, 10, 1],
