@@ -4,6 +4,7 @@
 lasercal::LaserROI::LaserROI()
 {
     fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+    fRanges.resize(fGeometry->Nplanes());
 } // Default constructor
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -106,22 +107,37 @@ lasercal::LaserROI::LaserROI(const float& BoxSize, const lasercal::LaserBeam& La
 
 //----------------------------------------------------------------------------------------------------------------
 
+void lasercal::LaserROI::setRanges(int BoxTickCenter, int BoxTickWidth, unsigned int Plane, std::pair<unsigned int, unsigned int> Wires){
+
+    std::pair<float,float> TickLimitsOfWire = std::make_pair(float(BoxTickCenter-BoxTickWidth/2), float(BoxTickCenter+BoxTickWidth/2));
+
+    for (unsigned int wire = Wires.first; wire <= Wires.second; wire++){
+        fRanges.at(Plane).insert( std::make_pair(wire, std::move(TickLimitsOfWire)) );
+    }
+}
+
+std::vector<std::map<unsigned int, std::pair<float, float> > > lasercal::LaserROI::GetRanges() {
+    return fRanges;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------
 bool lasercal::LaserROI::IsWireInRange( const recob::Wire& WireToCheck ) const
 {
-    // Fetch WireID
     std::vector<geo::WireID> WireIDs = fGeometry->ChannelToWire(WireToCheck.Channel());
     
     unsigned int WireNo = WireIDs.front().Wire;
     unsigned int PlaneNo = WireIDs.front().Plane;
-    
-    // Check if wire number is in range for the given plane
-    if( fRanges.at(PlaneNo).begin()->first <= WireNo && fRanges.at(PlaneNo).end()->first >= WireNo )
-    {
-	return true;
+    auto WireRange = fRanges.at(PlaneNo);
+
+    if (WireRange.empty()) return false;
+
+    if( WireRange.begin()->first <= WireNo && WireRange.rbegin()->first >= WireNo ) {
+        return true;
     }
     else // if not in inverval
     {
-	return false;
+	    return false;
     }
 }
 
@@ -130,12 +146,13 @@ bool lasercal::LaserROI::IsHitInRange( const recob::Hit& HitToCheck ) const
     // Get wire information first
     unsigned int WireNo = HitToCheck.WireID().Wire;
     unsigned int PlaneNo = HitToCheck.WireID().Plane;
-    
-    // Check if wire number is in range for the given plane and if hit is inside of the interval of the given wire
-    if( fRanges.at(PlaneNo).begin()->first <= WireNo && fRanges.at(PlaneNo).rbegin()->first >= WireNo &&
-	fRanges.at(PlaneNo).find(WireNo)->second.first <= HitToCheck.PeakTime() && fRanges.at(PlaneNo).find(WireNo)->second.second >= HitToCheck.PeakTime() )
-    {
-	return true;
+
+    if (fRanges.at(PlaneNo).empty() ) return false;
+
+    auto TickLimits = fRanges.at(PlaneNo).find(WireNo)->second;
+
+    if( TickLimits.first <= HitToCheck.PeakTime() && TickLimits.second >= HitToCheck.PeakTime() ){
+        return true;
     }
     else // if wire or time tick of hit is not in inverval
     {

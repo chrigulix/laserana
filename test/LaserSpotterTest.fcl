@@ -1,7 +1,9 @@
 ## 
 ##  A "minimal" Reconstruction for uboone data
 ##
+#include "geometry.fcl"
 #include "reco_uboone_data_minimal.fcl"
+#include "laserreco.fcl"
 
 process_name: LaserHitReco
 
@@ -23,7 +25,7 @@ services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
 source:
 {
   module_type: RootInput
-  maxEvents:  1        # Number of events to create
+  maxEvents:  -1        # Number of events to create
 }
 
 # Define and configure some modules to do work on each event.
@@ -31,12 +33,21 @@ source:
 # Modules are grouped by type.
 physics:
 {
- producers:
+ filters:
   {
-    LaserReco: 
+    LaserSpotter:
     {
-      module_type:         "LaserReco"
+      module_type:         "LaserSpotterTest"
 
+      # Box definitions for both laser systems
+      CenterTicks:           [5130, 5063]
+      TickWidths:            [200, 200]
+      WireBoxes:             [[0,100],[3400,3500]]
+
+      # Filter criterias:
+      MinHits:               10 # minimal amout of Wires with hit
+
+      # Hit Finder Definitons (only Y Hit Finder is used)
       GenerateWireMap:         false
       UseROI:            false
       HitBoxSize:              10       #cm
@@ -71,7 +82,7 @@ physics:
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- reco: [ LaserReco ]
+ reco: [ LaserSpotter ]
 
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -96,40 +107,3 @@ outputs:
    compressionLevel: 1
  }
 }
-
-### Here we include the file giving us run/data dependent overrides
-#include "uboone_data_runSettings.fcl"
-
-### Here we try to suppress known and pointless messages
-#services.message.destinations :
-#{
-  #STDCOUT: 
-  #{
-  #   type:      "cout"      #tells the message service to output this destination to cout
-  #   threshold: "WARNING"   #tells the message service that this destination applies to WARNING and higher level messages
-  #   append:     true       #says to append all messages to the output
-  #   categories:
-  #   {
-  #     ChannelFilter:
-  #     {
-  #       limit: 0
-  #       reportEvery: 0
-  #     }
-  #     TrackStitcher:
-  #     {
-  #       limit: 0
-  #       reportEvery: 0
-  #     }
-  #     CRHitRemoval:
-  #     {
-  #       limit: 0
-  #       reportEvery: 0
-  #     }
-  #     default:
-  #     {
-  #       limit: -1  #don't print anything at the infomsg level except the explicitly named categories
-  #       reportEvery: 1
-  #     }
-  #   }
-  #}
-#}

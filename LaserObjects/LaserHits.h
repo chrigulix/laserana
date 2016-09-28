@@ -34,7 +34,10 @@ namespace lasercal
       // Constructor wire data, geometry and thresholds for the hit finder.
       // It already runs the hit finder algorithms and fills the map data.
       LaserHits(const std::vector<recob::Wire>& Wires, const lasercal::LaserRecoParameters& ParameterSet, const lasercal::LaserBeam& LaserBeam);
-      
+
+      /// Alternative constructor where the user can supply a predefined ROI.
+      LaserHits(const std::vector<recob::Wire>& Wires, const lasercal::LaserRecoParameters& ParameterSet, lasercal::LaserROI& LaserROI);
+
       void AddHitsFromWire(const recob::Wire& Wire);
       
       const std::array<size_t,3> NumberOfWiresWithHits();

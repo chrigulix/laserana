@@ -13,10 +13,8 @@ lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const lase
 {
   fGeometry = &*(art::ServiceHandle<geo::Geometry>());
   fParameters = ParameterSet;
-  
-  //Initialize LaserROI
-  float BoxSize = 10.0; //cm
-  fLaserROI = lasercal::LaserROI(BoxSize, LaserBeam);
+
+  fLaserROI = lasercal::LaserROI(fParameters.HitBoxSize, LaserBeam);
   
   // Reserve space for hit container
   for(auto& MapVector : fHitMapsByPlane)
@@ -38,6 +36,36 @@ lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const lase
     fHitMapsByPlane.at(Plane).push_back(HitMap);
   }// end loop over wires
   
+} // Constructor using all wire signals and geometry purposes
+
+//-------------------------------------------------------------------------------------------------------------------
+
+lasercal::LaserHits::LaserHits(const std::vector<recob::Wire>& Wires, const lasercal::LaserRecoParameters& ParameterSet, lasercal::LaserROI& LaserROI)
+{
+    fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+    fParameters = ParameterSet;
+
+    fLaserROI = LaserROI;
+
+    // Reserve space for hit container
+    for(auto& MapVector : fHitMapsByPlane)
+    {
+        MapVector.reserve(Wires.size());
+    }
+
+    // Loop over all wires
+    for(const auto& SingleWire : Wires)
+    {
+        // Get channel information
+        raw::ChannelID_t Channel = SingleWire.Channel();
+        unsigned Plane = fGeometry->ChannelToWire(Channel).front().Plane;
+
+        // Get Single wire hits
+        std::map<float, recob::Hit> HitMap = FindSingleWireHits(SingleWire, Plane);
+        // Fill map data by pushing back the wire vector
+        fHitMapsByPlane.at(Plane).push_back(HitMap);
+    }// end loop over wires
+
 } // Constructor using all wire signals and geometry purposes
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -195,8 +223,16 @@ void lasercal::LaserHits::TimeMatchFilter()
 
 std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wire& SingleWire)
 {
-  std::map<float,recob::Hit> LaserHits;
-  
+    std::map<float,recob::Hit> LaserHits;
+
+    if (fParameters.UseROI)
+    {
+        if(!fLaserROI.IsWireInRange(SingleWire))
+        {
+            return LaserHits;
+        }
+    }
+
   // Set Numbers (-9999 for debugging purposes)
   int HitEnd = -9999;
   int HitStart = - 9999;
@@ -256,12 +292,18 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
 					    HitIdx, 
 					    1., 
 					    0 ).move();
-	  
-	  if(fLaserROI.IsHitInRange(RecoHit) || !fParameters.LaserROIFlag)
-	  {
-	      // Create a new map entry with hit time as a key
-	      LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
-	  }
+
+          if (fParameters.UseROI)
+          {
+              if(fLaserROI.IsHitInRange(RecoHit))
+              {
+                  LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
+              }
+          }
+          else
+          {
+              LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
+          }
 	  HitIdx++;
       }
     }
@@ -274,7 +316,16 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
 std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wire& SingleWire)
 {
   std::map<float,recob::Hit> LaserHits;
-  
+
+
+    if (fParameters.UseROI)
+    {
+        if(!fLaserROI.IsWireInRange(SingleWire))
+        {
+            return LaserHits;
+        }
+    }
+
   // Set Numbers (-9999 for debugging purposes)
   int HitEnd = -9999;
   int HitStart = - 9999;
@@ -362,14 +413,18 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
 					    HitIdx, 
 					    1., 
 					    0 ).move();
-					    
-	   
-	   //TODO: Fix this, there are no v-hits found with this condition
-	   if(fLaserROI.IsHitInRange(RecoHit) || !fParameters.LaserROIFlag)
-	   {
-	       // Create a new map entry with hit time as a key
-	       LaserHits.emplace( std::make_pair((float) HitTime, RecoHit) );
-	   }
+
+          if (fParameters.UseROI)
+          {
+              if(fLaserROI.IsHitInRange(RecoHit))
+              {
+                  LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
+              }
+          }
+          else
+          {
+              LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
+          }
 	  
 	  HitIdx++;
       }
@@ -383,7 +438,18 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
 std::map<float,recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wire& SingleWire)
 {
   std::map<float,recob::Hit> LaserHits;
-  
+
+  // Abort the hit search if wire is not in the defined range
+
+  if (fParameters.UseROI)
+  {
+      if(!fLaserROI.IsWireInRange(SingleWire))
+      {
+          return LaserHits;
+      }
+  }
+
+
   // Set Numbers (-9999 for debugging purposes)
   int HitEnd = -9999;
   int HitStart = - 9999;
@@ -442,15 +508,19 @@ std::map<float,recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wir
 					    HitIdx, 
 					    1., 
 					    0 ).move();
-					    
-      
-	  
-	  if(fLaserROI.IsHitInRange(RecoHit) || !fParameters.LaserROIFlag)
-	  {
-	      // Create a new map entry with hit time as a key
-	      LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
-	  }
-      
+
+      if (fParameters.UseROI)
+      {
+        if(fLaserROI.IsHitInRange(RecoHit))
+        {
+          LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
+        }
+      }
+      else
+      {
+        LaserHits.emplace( std::make_pair((float) PeakTime, RecoHit) );
+      }
+
 	  HitIdx++;
       }
     }

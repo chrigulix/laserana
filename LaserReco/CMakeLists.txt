@@ -1,8 +1,8 @@
 
-simple_plugin(LaserReco "module"
+art_make( MODULE_LIBRARIES
 			LaserObjects
 			larcore_Geometry_Geometry_service
-                        larcore_Geometry
+		    larcore_Geometry
 			lardata_RecoBaseArt
 			lardata_RecoBase
 			lardata_RawData
@@ -25,4 +25,3 @@ simple_plugin(LaserReco "module"
 install_headers()
 install_fhicl()
 install_source()
-install_scripts()
