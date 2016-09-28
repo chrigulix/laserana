@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def Track(Plane, StartPosition, EndPosition, RawHitDef):
     """ Produces a track along the line in wire / time tick space space with the specificed
     shape.
@@ -23,17 +24,18 @@ def Track(Plane, StartPosition, EndPosition, RawHitDef):
     wire_range = abs(EndWire - StartWire)
 
     gradient = (EndTick - StartTick) / float(wire_range)
-    hits = -1 * np.ones((abs(wire_range+1),7), dtype=int)
+    hits = -1 * np.ones((abs(wire_range + 1), 7), dtype=int)
 
     # handle inverted case
-    if (EndWire < StartWire):
+    if EndWire < StartWire:
         EndWire, StartWire = StartWire, EndWire
 
-    for wire in range(StartWire, EndWire+1):
+    for wire in range(StartWire, EndWire + 1):
         tick = int(np.around(wire * gradient + StartTick))
         hits[wire - StartWire, :] = [Plane, wire, tick, RawHitDef[0], RawHitDef[1], RawHitDef[2], 1]
 
     return hits
+
 
 def Event(TrackDefinitions):
     """" Produces a list of all hits representing all tracks based on the TrackDefinitions within a single event.
@@ -47,8 +49,9 @@ def Event(TrackDefinitions):
     """
     pass
 
+
 def Run(Events):
     pass
 
 
-print Track(0, (0,3500), (50,4000), [5,10,20])
+print Track(0, (0, 3500), (50, 4000), [5, 10, 20])
