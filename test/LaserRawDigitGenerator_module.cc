@@ -98,7 +98,7 @@ private:
         Multiplicity
     };
 
-    bool DEBUG = true;
+    bool DEBUG = false;
 
 };
 
@@ -276,6 +276,8 @@ void LaserRawDigitGenerator::reconfigure(fhicl::ParameterSet const &pset) {
     fRawDigitFile = pset.get<std::string>("RawDigitFile");
     fNoiseAmplitude = pset.get<uint>("NoiseAmplitude");
     fNumberTimeSamples = pset.get<int>("NumberTimeSamples", -1);
+
+    DEBUG = pset.get<bool>("DEBUG", false);
 
     // Tag for producing raw digit data
     fRawDigitLabel = pset.get<std::string>("RawDigitLabel", "GeneratedRaw");
