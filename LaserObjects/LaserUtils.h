@@ -30,5 +30,6 @@
 namespace lasercal
 {
     std::vector<recob::Wire> GetWires(art::ValidHandle<std::vector<raw::RawDigit>> &DigitVecHandle,
-                                      lasercal::LaserRecoParameters &fParameterSet);
+                                      lasercal::LaserRecoParameters &fParameterSet,
+                                      bool SubstractPedestal=true);
 }

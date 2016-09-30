@@ -69,7 +69,7 @@ namespace LaserSpotter {
         std::vector< std::pair < unsigned int, unsigned int> >fWireBoxes;
 
         unsigned int fMinHits;
-
+        bool fPedestalStubtract;
     protected:
     };
 
@@ -88,6 +88,7 @@ namespace LaserSpotter {
         fWireBoxes  = pset.get<std::vector<std::pair<unsigned int, unsigned int>>>("WireBoxes");
         fTickWidths = pset.get<std::vector<int> >("TickWidths");
         fMinHits = pset.get<int> ("MinHits");
+        fPedestalStubtract = pset.get<bool> ("PedestalSubtract", true);
 
         // --------------------------------------------- Hit Finder Parameters ---------------------------------------------- //
         fParameterSet.WireMapGenerator = pset.get<bool>("GenerateWireMap");
@@ -167,7 +168,7 @@ namespace LaserSpotter {
             exit(-1);
         }
 
-        auto wires = lasercal::GetWires(DigitVecHandle, fParameterSet);
+        auto wires = lasercal::GetWires(DigitVecHandle, fParameterSet, fPedestalStubtract);
 
         auto laser_roi = lasercal::LaserROI();
         laser_roi.setRanges(CenterTick, TickWidth, Plane, WireRange);
