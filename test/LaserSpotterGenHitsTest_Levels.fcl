@@ -41,7 +41,7 @@ physics:
     {
       DEBUG: false
       module_type: "LaserRawDigitGenerator"
-      RawDigitFile: "RawDigits_test.txt"
+      RawDigitFile: "RawDigits_HitLevel.txt"
       NoiseAmplitude: 0
       #NumberTimeSamples: 200 # just for testing purposes
 
@@ -119,7 +119,15 @@ physics:
               module_type: "LaserSpotterGenTest"
               SelectEvents: { SelectEvents: [reco] }
 
-              TestConfigFile: "RawDigits_test.txt"
+              TestConfigFile: "RawDigits_HitLevel.txt"
+          }
+          LaserSpotterGenTestInv:
+          {
+              module_type: "LaserSpotterGenTest"
+              SelectEvents: { SelectEvents: ["!reco"] }
+
+              Inverted:       true
+              TestConfigFile: "RawDigits_HitLevel.txt"
           }
       }
 
@@ -127,7 +135,7 @@ physics:
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ LaserRawDigitGenerator,LaserDataMerger, LaserSpotter ]
 
- hmm: [LaserSpotterGenTest]
+ hmm: [LaserSpotterGenTest, LaserSpotterGenTestInv]
 
  #trigger_paths is a keyword and contains the paths that modify the art::event, 
  #ie filters and producers

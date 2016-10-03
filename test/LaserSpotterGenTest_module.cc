@@ -44,6 +44,7 @@ private:
 
     // Declare member data here.
     std::string fTestConfigFile;
+    bool fInverted;
 };
 
 
@@ -60,19 +61,24 @@ void LaserSpotterGenTest::analyze(art::Event const &event) {
 
 
 
-    if (fTestConfigFile.compare("RawDigits_test.txt") == 0)
+    if (fTestConfigFile.compare("RawDigits_HitLevel.txt") == 0)
     {
-        std::cout << "==> Testing Hit Level acceptance" << std::endl;
+        std::cout << "==> Testing Hit Level Acceptance" << std::endl;
+        // checking if all other events have passed the selection criterion
 
-        std::cout << "ID:" << id << std::endl;
-        //assert(id == 0);
-
+        // testing logic hell...
+        if (!fInverted) {
+            if (id == 0) assert(false);
+        } else {
+            if (id != 0) assert(false);
+        }
     }
 }
 
 void LaserSpotterGenTest::reconfigure(fhicl::ParameterSet const &pset) {
     // Implementation of optional member function here.
     fTestConfigFile = pset.get<std::string>("TestConfigFile");
+    fInverted = pset.get<bool>("Inverted", false);
 }
 
 
