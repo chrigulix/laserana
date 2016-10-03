@@ -2,6 +2,7 @@ __author__ = 'matthias'
 
 from datadefs.laserdef import *
 from datadefs.recobhits import *
+from datadefs.metadata import *
 import numpy as np
 import root_numpy as rn
 
@@ -9,14 +10,22 @@ import root_numpy as rn
 class LarData():
     def __init__(self, filename):
         self.file = filename
-        self.datatypes = ["laser", "hits"]
+        self.datatypes = ["meta", "laser", "hits"]
 
-        self.id = None
+        self.ids = None
 
         self.laser = None
         self.hits = None
 
         self.n_entries = None
+
+        self.read_ids()
+
+    def read_ids(self):
+        metadata = MetaData()
+        self.ids = rn.root2array(self.file, treename=metadata.tree, branches="EventAuxiliary.id_.event_")
+
+        self.get_index(1002)
 
     def read_laser(self):
         laserdefs = Laseref()
@@ -63,6 +72,17 @@ class LarData():
         data.dtype.names = ("channel", "tick", "peak_amp", "start_tick", "end_tick")
 
         return data
+
+    def get_index(self, event):
+        if self.ids is None:
+            raise ValueError("ids are empty, you need to load ids before accessing them")
+
+        idx = np.where(self.ids == event)[0]
+
+        if not idx:
+            raise ValueError("Event id was not in sample!")
+
+        return int(idx[0])
 
     def get_info(self):
         trees = rn.list_trees(self.file)

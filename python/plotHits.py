@@ -27,7 +27,8 @@ def view(data, eventid):
 
     fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True)
     ax.errorbar(hit.channel, hit.tick, yerr=[hit.tick - hit.start_tick, hit.end_tick - hit.tick], fmt='o')
-
+    plt.xlabel("Wire Number")
+    plt.ylabel("Time Tick")
     plt.show()
 
 filename = "/home/matthias/data/uboone/laser/LaserHitAna-3165-020.root"
@@ -40,5 +41,5 @@ print data.get_info()
 data.read_hits(planes="y")
 print data.read(meta.tree, meta.id())
 
-
-view(data, )
+idx = data.get_index(1169)
+view(data, idx)
