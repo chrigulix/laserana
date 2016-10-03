@@ -67,10 +67,26 @@ void LaserSpotterGenTest::analyze(art::Event const &event) {
         // checking if all other events have passed the selection criterion
 
         // testing logic hell...
+
+        std::vector<uint> good_events = {1,2,3,4,5};
+        std::vector<uint> bad_events = {0};
+
         if (!fInverted) {
-            if (id == 0) assert(false);
+            assert( std::find(good_events.begin(), good_events.end(), id) != good_events.end() );
         } else {
-            if (id != 0) assert(false);
+            assert( std::find(bad_events.begin(), bad_events.end(), id) != bad_events.end() );
+        }
+    }
+    else if (fTestConfigFile.compare("RawDigits_Threshold.txt") == 0 ){
+        std::cout << "==> Testing Number of Hits" << std::endl;
+
+        std::vector<uint> good_events = {2,3};
+        std::vector<uint> bad_events = {0,1};
+
+        if (!fInverted) {
+            assert( std::find(good_events.begin(), good_events.end(), id) != good_events.end() );
+        } else {
+            assert( std::find(bad_events.begin(), bad_events.end(), id) != bad_events.end() );
         }
     }
 }
