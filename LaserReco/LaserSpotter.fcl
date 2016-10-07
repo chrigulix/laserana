@@ -58,8 +58,10 @@ physics:
       hitfinder:
       {
         # Hit Finder Definitons (only Y Hit Finder is used)
-        UseROI:                  false
+        GenerateWireMap:         false
+        UseROI:            false
         HitBoxSize:              10       #cm
+
         MinAllowedChannelStatus: 4
 
         # High amplitude threshold for high signal exceptions for all planes
@@ -81,8 +83,6 @@ physics:
         YHitPeakThreshold:       10.0
         YAmplitudeToWidthRatio:  1.5
         YHitWidthThreshold:      6
-
-        PedestalSubtract:        true
       }
   }
 

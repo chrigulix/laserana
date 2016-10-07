@@ -9,7 +9,7 @@ laserspotter:
         LaserBeamInstanceLabel:     "LaserBeam"
       }
 
-      box:
+      spotter:
       {
         # Box definitions for both laser systems
         CenterTicks:           [5130, 5063]
@@ -23,8 +23,10 @@ laserspotter:
       hitfinder:
       {
         # Hit Finder Definitons (only Y Hit Finder is used)
-        UseROI:                  false
+        GenerateWireMap:         false
+        UseROI:            false
         HitBoxSize:              10       #cm
+
         MinAllowedChannelStatus: 4
 
         # High amplitude threshold for high signal exceptions for all planes
