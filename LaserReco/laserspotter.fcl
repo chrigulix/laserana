@@ -2,46 +2,51 @@ BEGIN_PROLOG
 
 laserspotter:
     {
-      module_type:         "LaserSpotter"
+      io:
+      {
+        LaserRecoModuleLabel:       "daq"
+        LaserDataMergerModuleLabel: "LaserDataMerger"
+        LaserBeamInstanceLabel:     "LaserBeam"
+      }
 
-      # Box definitions for both laser systems
-      CenterTicks:           [5130, 5063]
-      TickWidths:            [200, 200]
-      WireBoxes:             [[0,100],[3400,3500]]
+      box:
+      {
+        # Box definitions for both laser systems
+        CenterTicks:           [5130, 5063]
+        TickWidths:            [200, 200]
+        WireBoxes:             [[0,100],[3400,3500]]
 
-      # Filter criterias:
-      MinHits:               10 # minimal amout of Wires with hit
+        # Filter criterias:
+        MinHits:               10 # minimal amout of Wires with hit
+      }
 
-      # Hit Finder Definitons (only Y Hit Finder is used)
-      GenerateWireMap:         false
-      UseROI:            false
-      HitBoxSize:              10       #cm
+      hitfinder:
+      {
+        # Hit Finder Definitons (only Y Hit Finder is used)
+        UseROI:                  false
+        HitBoxSize:              10       #cm
+        MinAllowedChannelStatus: 4
 
-      LaserRecoModuleLabel:       "daq"
-      LaserDataMergerModuleLabel: "LaserDataMerger"
-      LaserBeamInstanceLabel:     "LaserBeam"
+        # High amplitude threshold for high signal exceptions for all planes
+        HighAmplThreshold:       1000
 
-      MinAllowedChannelStatus: 4
+        # U-Plane hit thresholds
+        UHitPeakThreshold:      -25.0
+        UAmplitudeToWidthRatio:  1
+        UHitWidthThreshold:      10
 
-      # High amplitude threshold for high signal exceptions for all planes
-      HighAmplThreshold:       1000
+        # V-Plane hit thresholds
+        VHitPeakThreshold:       10.0
+        VAmplitudeToWidthRatio:  1.0
+        VAmplitudeToRMSRatio:    2.0
+        VHitWidthThreshold:      12
+        VRMSThreshold:           4
 
-      # U-Plane hit thresholds
-      UHitPeakThreshold:      -25.0
-      UAmplitudeToWidthRatio:  1
-      UHitWidthThreshold:      10
-
-      # V-Plane hit thresholds
-      VHitPeakThreshold:       10.0
-      VAmplitudeToWidthRatio:  1.0
-      VAmplitudeToRMSRatio:    2.0
-      VHitWidthThreshold:      12
-      VRMSThreshold:           4
-
-      # Y-Plane hit thresholds
-      YHitPeakThreshold:       10.0
-      YAmplitudeToWidthRatio:  1.5
-      YHitWidthThreshold:      6
+        # Y-Plane hit thresholds
+        YHitPeakThreshold:       10.0
+        YAmplitudeToWidthRatio:  1.5
+        YHitWidthThreshold:      6
+      }
     }
 
 LaserSpotter: @local::laserspotter

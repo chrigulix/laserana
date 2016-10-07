@@ -68,50 +68,59 @@ physics:
       {
         LaserSpotter:
         {
-          LaserRecoModuleLabel:       "LaserRawDigitGenerator"
-          LaserDataMergerModuleLabel: "LaserDataMerger"
-          LaserBeamInstanceLabel:     "LaserBeam"
+            module_type:         "LaserSpotter"
+            PedestalSubtract:       false
 
-          module_type:         "LaserSpotter"
+            io:
+            {
+                LaserRecoModuleLabel:       "LaserRawDigitGenerator"
+                LaserDataMergerModuleLabel: "LaserDataMerger"
+                LaserBeamInstanceLabel:     "LaserBeam"
+            }
 
-          PedestalSubtract:       false
+            spotter:
+            {
+                # Box definitions for both laser systems
+                CenterTicks:           [5130, 5063]
+                TickWidths:            [200, 200]
+                WireBoxes:             [[0,100],[3400,3500]]
+                # Filter criterias:
+                MinHits:               10 # minimal amout of Wires with hit
+            }
 
-          # Box definitions for both laser systems
-          CenterTicks:           [5130, 5063]
-          TickWidths:            [200, 200]
-          WireBoxes:             [[0,100],[3400,3500]]
+            hitfinder:
+            {
+                # Hit Finder Definitons (only Y Hit Finder is used)
+                GenerateWireMap:         false
+                UseROI:            false
+                HitBoxSize:              10       #cm
 
-          # Filter criterias:
-          MinHits:               10 # minimal amout of Wires with hit
+                MinAllowedChannelStatus: 4
 
-          # Hit Finder Definitons (only Y Hit Finder is used)
-          GenerateWireMap:         false
-          UseROI:            false
-          HitBoxSize:              10       #cm
+                # High amplitude threshold for high signal exceptions for all planes
+                HighAmplThreshold:       1000
 
-          MinAllowedChannelStatus: 4
+                # U-Plane hit thresholds
+                UHitPeakThreshold:      -25.0
+                UAmplitudeToWidthRatio:  1
+                UHitWidthThreshold:      10
 
-          # High amplitude threshold for high signal exceptions for all planes
-          HighAmplThreshold:       1000
+                # V-Plane hit thresholds
+                VHitPeakThreshold:       10.0
+                VAmplitudeToWidthRatio:  1.0
+                VAmplitudeToRMSRatio:    2.0
+                VHitWidthThreshold:      12
+                VRMSThreshold:           4
 
-          # U-Plane hit thresholds
-          UHitPeakThreshold:      -25.0
-          UAmplitudeToWidthRatio:  1
-          UHitWidthThreshold:      10
+                # Y-Plane hit thresholds
+                YHitPeakThreshold:       10.0
+                YAmplitudeToWidthRatio:  1.5
+                YHitWidthThreshold:      6
+            }
 
-          # V-Plane hit thresholds
-          VHitPeakThreshold:       10.0
-          VAmplitudeToWidthRatio:  1.0
-          VAmplitudeToRMSRatio:    2.0
-          VHitWidthThreshold:      12
-          VRMSThreshold:           4
-
-          # Y-Plane hit thresholds
-          YHitPeakThreshold:       10.0
-          YAmplitudeToWidthRatio:  1.5
-          YHitWidthThreshold:      6
+          }
         }
-      }
+
 
  analyzers:
       {
