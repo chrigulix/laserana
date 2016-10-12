@@ -1,0 +1,48 @@
+#include "geometry.fcl"
+#include "reco_uboone_data_minimal.fcl"
+
+process_name: LaserObjectsTest
+
+services.DetectorClocksService.InheritClockConfig: false
+services.DatabaseUtil.ShouldConnect: false
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+
+services:
+{
+  ExptGeoHelperInterface:    @local::standard_geometry_helper
+  Geometry:                  @local::standard_geo
+  @table::microboone_reco_minimal_services
+}
+
+
+source:
+{
+  module_type: RootInput
+  maxEvents:  1        # Number of events to create
+}
+
+outputs:
+{
+}
+
+physics:
+{
+    analyzers:
+    {
+      LaserHitFinder: { module_type: "LaserObjectsTest" }
+    }
+
+    #define the path for analyzer modules, order does not matter.
+    #see lines starting physics.analyzers below
+    ana:  [ LaserHitFinder ]
+
+    #trigger_paths is a keyword and contains the paths that modify the art::event,
+    #ie filters and producers
+    trigger_paths: [ ana ]
+
+    #end_paths is a keyword and contains the paths that do not modify the art::Event,
+    #ie analyzers and output streams.  these all run simultaneously
+    #end_paths:     [ana]
+}
+
+
