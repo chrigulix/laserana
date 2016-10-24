@@ -86,14 +86,23 @@ def ProduceSingleTrack(filename, Plane, TrackDefinitions, HitDefinitions):
         file.write("# finished\n")
 
 
-planes= [0, 0, 0, 0]
-edges = [[(0, 3500), (50, 3600)],
-         [(0, 3500), (50, 3600)],
-         [(0, 3500), (50, 3600)]
-         ]
+if __name__ == "__main__":
+    planes= [2, 2, 2, 2, 2, 2]
 
-hit_defs = [[5, 5, 5],
-            [10, 10, 10],
-            [20, 20, 20]]
+    edges = [[(1, 5130), (8, 5130)],
+             [(1, 5130), (9, 5130)],
+             [(1, 5130), (10, 5130)],
+             [(1, 5130), (11, 5130)],
 
-ProduceSingleTrack("test", planes, edges, hit_defs)
+            ]
+
+    # widths: are at sqrt(2) level, take care not to make it too broad otherwise the hit finder will reject the hit based
+    # on the peak/width ratio.
+
+    hit_defs = [[4,   25, 1],
+                [4,   25, 1],
+                [4,   25, 1],
+                [4,   25, 1],
+    ]
+
+    ProduceSingleTrack("test", planes, edges, hit_defs)
