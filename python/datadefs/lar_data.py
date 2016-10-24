@@ -25,8 +25,6 @@ class LarData():
         metadata = MetaData()
         self.ids = rn.root2array(self.file, treename=metadata.tree, branches="EventAuxiliary.id_.event_")
 
-        self.get_index(1002)
-
     def read_laser(self):
         laserdefs = Laseref()
         tree = laserdefs.tree

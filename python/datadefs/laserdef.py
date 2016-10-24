@@ -11,8 +11,9 @@ class Laseref(Base):
         self.tree = "Events"
         self.product = "LaserBeam"
         self.producer = "RecoDataMinimal"
+
         self.producer = "LaserHitAna"
-        self.branch = "lasercal::LaserBeam_LaserDataMerger_LaserBeam_" + self.producer + ".obj."
+        self.branch = "lasercal::LaserBeam_LaserMerger_LaserBeam_" + self.producer + ".obj."
         self.XYZ = ["X", "Y", "Z"]
 
     def pos(self):
