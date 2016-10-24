@@ -65,11 +65,12 @@ def cummulative_width(hits):
         print
     return sum
 
-filename = "/mnt/lheppc46/data/larsoft/userdev/maluethi/laser_v05_08_00/prod/3165/LaserHitAna-3165-050.root"
+filename = "/mnt/lheppc46/data/larsoft/userdev/maluethi/laser_v05_08_00/prod/3165/LaserHitAna-3165.root"
+#filename = "/home/matthias/Downloads/sync_gpvm/LaserRun-3007-00004_LaserHitFinder.root"
 
 data = LarData(filename)
 data.read_laser()
-data.read_hits(planes="Y")
+data.read_hits(planes="y")
 
 laser_tick_mean = 5065
 laser_tick_offset = 100
@@ -91,12 +92,14 @@ for i in range(data.n_entries):
     amp[i] = cummulative_amp(hits_i)
     width[i] = cummulative_width(hits_i)
     power[i] = data.get_laser(i).power
-    dir_z[i] = np.rad2deg (np.pi / 4.0 - np.arctan( data.get_laser(i).dir_y / data.get_laser(i).dir_z))
+    dir_z[i] = np.rad2deg (np.pi / 4.0 - np.arctan( data.get_laser(i).dir_y / data.get_laser(i).dir_z)) + 48.4805
 
+
+print power[8]
 
 # prepare the data for the best fit line:
-power_fit = np.array([0.3, 0.3, 0.4, 0.6, 0.7, 0.8])
-angle_fit = [100,80,40,20,10,0]
+power_fit = np.array([0.25, 0.45, 0.55, 0.66, 0.88,0.95])
+angle_fit = [150,120,100,80,60,30]
 z_offset = 5
 
 # plotting
@@ -108,14 +111,13 @@ axarr = []
 
 power_offset = 0
 
-for i in range(len(z_data)):
-    ax = fig.add_subplot(1, 3, i+1, projection='3d')
+for i in range(1):
+    ax = fig.add_subplot(1, 1, i+1, projection='3d')
 
     axarr.append(ax)
-    print axarr
 
-    ax.set_xlabel('power')
-    ax.set_ylabel('direction')
+    ax.set_xlabel('power [%]')
+    ax.set_ylabel('polar angle [deg]')
     ax.set_zlabel(z_label[i])
 
     ax.scatter(power, dir_z, z_data[i], c=power)
