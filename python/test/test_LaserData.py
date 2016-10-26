@@ -29,10 +29,13 @@ def test_rotary_conversion():
 def test_expand_data():
     laser = Laser(1)
 
-    data = np.array([[1, 2, 3, 4, 5, 6], [11, 22, 33, 44, 55, 66]])
+    data = np.array([[  1,   2,   3,   4,   5,   6],
+                     [ 11,  22,  33,  44,  55,  66],
+                     [111, 222, 333, 444, 555, 666]])
     exp_data = laser.expand_data(data)
-    assert_array_almost_equal(exp_data, np.array([[1.,  0.,  2.,  3.,  4., 0.,  5.,  6., 0., 0., 0., 0., 0.],
-                                                  [11., 0., 22., 33., 44., 0., 55., 66., 0., 0., 0., 0., 0.]]))
+    assert_array_almost_equal(exp_data, np.array([[  1., 0.,   2.,   3.,   4., 0.,   5.,   6., 0., 0., 0., 0., 0.],
+                                                  [ 11., 0.,  22.,  33.,  44., 0.,  55.,  66., 1., 0., 0., 0., 0.],
+                                                  [111., 0., 222., 333., 444., 0., 555., 666., 2., 0., 0., 0., 0.]]))
 
 def test_read_data():
     laser = Laser()

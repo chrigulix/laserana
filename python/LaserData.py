@@ -18,6 +18,7 @@ class Laser():
         self.col_power = 4
         self.col_sec = 6
         self.col_usec = 7
+        self.col_event = 8
 
         self.usecols = [self.col_id, self.col_rotary, self.col_linear, self.col_power, self.col_sec, self.col_usec]
 
@@ -52,7 +53,7 @@ class Laser():
         ''' Reads file and return a numpy array  '''
         data =  np.genfromtxt(filename, usecols=self.usecols)
 
-        if data.shape == (6,):
+        if data.shape == (len(self.usecols),):
             self.laser_id = data[0]
         else:
             self.laser_id = data[0, 0]
@@ -61,6 +62,7 @@ class Laser():
 
     def expand_data(self, data):
         expanded_data = np.zeros((len(data), self.n_cols))
+        expanded_data[:, self.col_event] = np.arange(0, len(data))
 
         for idx, col in enumerate(self.usecols):
             expanded_data[:, col] = data[:, idx]
@@ -74,5 +76,6 @@ class Laser():
 if __name__ == "__main__":
     laser = Laser()
     data = laser.read("test/test_data_0.txt")
+
 
     print(laser.laser_id)
