@@ -1,8 +1,9 @@
 #include "services_microboone.fcl"
 #include "reco_uboone_data_minimal.fcl"
+
 #include "merger.fcl"
 #include "laserreco.fcl"
-
+#include "laserspotter.fcl"
 
 process_name: LaserHitAna
 
@@ -26,18 +27,32 @@ source:
 
 physics: { 
     producers: {
-	LaserMerger:    @local::LaserDataMerger
+	    LaserMerger:    @local::LaserDataMerger
         LaserReco:      @local::LaserReco
     }
 
-    p1: [ LaserMerger, LaserReco ]
+    filters: {
+        LaserSpotter: {
+            module_type:         "LaserSpotter"
+
+            spotter:        @local::LaserSpotter.spotter
+            hitfinder:      @local::LaserSpotter.hitfinder
+            io:
+            {
+                LaserRecoModuleLabel:       "daq"
+                LaserDataMergerModuleLabel: "LaserMerger"
+                LaserBeamInstanceLabel:     "LaserBeam"
+            }
+        }
+    }
+    #p1: [ LaserMerger ]
+    p1: [ LaserMerger, LaserSpotter ]
     
     stream1:  [ out1 ]
     
     trigger_paths: [ p1 ]
 
-    #e1: [  ]
-    #end_paths: [ e1 ]
+    #end_paths: [ p1 ]
 }
 
 outputs:

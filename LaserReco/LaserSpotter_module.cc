@@ -69,7 +69,7 @@ namespace LaserSpotter {
         std::vector< std::pair < unsigned int, unsigned int> >fWireBoxes;
 
         unsigned int fMinHits;
-
+        bool fPedestalStubtract;
     protected:
     };
 
@@ -83,47 +83,55 @@ namespace LaserSpotter {
     void LaserSpotter::reconfigure(fhicl::ParameterSet const &pset) {
         // --------------------------------------------- Filter Parameters ---------------------------------------------- //
 
-        fCenterTicks = pset.get<std::vector<int> >("CenterTicks");
-        fTickWidths = pset.get<std::vector<int> >("TickWidths");
-        fWireBoxes  = pset.get<std::vector<std::pair<unsigned int, unsigned int>>>("WireBoxes");
-        fTickWidths = pset.get<std::vector<int> >("TickWidths");
-        fMinHits = pset.get<int> ("MinHits");
+        // get nested psets:
+        fhicl::ParameterSet pset_io = pset.get<fhicl::ParameterSet>("io");
+        fhicl::ParameterSet pset_box = pset.get<fhicl::ParameterSet>("spotter");
+        fhicl::ParameterSet pset_hitfinder = pset.get<fhicl::ParameterSet>("hitfinder");
 
-        // --------------------------------------------- Hit Finder Parameters ---------------------------------------------- //
-        fParameterSet.WireMapGenerator = pset.get<bool>("GenerateWireMap");
-        fParameterSet.UseROI = pset.get<bool>("GenerateWireMap");
-        fParameterSet.HitBoxSize = pset.get<float>("HitBoxSize");
+
+        fPedestalStubtract = pset.get<bool> ("PedestalSubtract", true);
+
+        // --------------------------------------------- Spotter Parameters ---------------------------------------------- //
+        fCenterTicks =  pset_box.get<std::vector<int> >("CenterTicks");
+        fTickWidths =   pset_box.get<std::vector<int> >("TickWidths");
+        fWireBoxes  =   pset_box.get<std::vector<std::pair<unsigned int, unsigned int>>>("WireBoxes");
+        fMinHits =      pset_box.get<int> ("MinHits");
+
+
+        // --------------------------------------------- File Handling Parameters --------------------------------------- //
         // Tag for reading raw digit data
-        fParameterSet.RawDigitTag = pset.get<art::InputTag>("LaserRecoModuleLabel");
-
+        fParameterSet.RawDigitTag =                 pset_io.get<art::InputTag>("LaserRecoModuleLabel");
         // Label for Laser beam data
-        fParameterSet.LaserDataMergerModuleLabel = pset.get<std::string>("LaserDataMergerModuleLabel");
-        fParameterSet.LaserBeamInstanceLabel = pset.get<std::string>("LaserBeamInstanceLabel");
+        fParameterSet.LaserDataMergerModuleLabel =  pset_io.get<std::string>("LaserDataMergerModuleLabel");
+        fParameterSet.LaserBeamInstanceLabel =      pset_io.get<std::string>("LaserBeamInstanceLabel");
+
+        // --------------------------------------------- Hit Finder Parameters ------------------------------------------ //
+        fParameterSet.WireMapGenerator =    pset_hitfinder.get<bool>("GenerateWireMap");
+        fParameterSet.UseROI =              pset_hitfinder.get<bool>("GenerateWireMap");
+        fParameterSet.HitBoxSize =          pset_hitfinder.get<float>("HitBoxSize");
 
         // Wire status tag
-        fParameterSet.MinAllowedChanStatus = pset.get<int>("MinAllowedChannelStatus");
+        fParameterSet.MinAllowedChanStatus = pset_hitfinder.get<int>("MinAllowedChannelStatus");
 
         // Common hit finder threshold
-        fParameterSet.HighAmplitudeThreshold = pset.get<float>("HighAmplThreshold");
+        fParameterSet.HighAmplitudeThreshold = pset_hitfinder.get<float>("HighAmplThreshold");
 
         // U-Plane hit finder thresholds
-        fParameterSet.UHitThreshold = pset.get<float>("UHitPeakThreshold");
-        fParameterSet.UAmplitudeToWidthRatio = pset.get<float>("UAmplitudeToWidthRatio");
-        fParameterSet.UHitWidthThreshold = pset.get<int>("UHitWidthThreshold");
+        fParameterSet.UHitThreshold = pset_hitfinder.get<float>("UHitPeakThreshold");
+        fParameterSet.UAmplitudeToWidthRatio = pset_hitfinder.get<float>("UAmplitudeToWidthRatio");
+        fParameterSet.UHitWidthThreshold = pset_hitfinder.get<int>("UHitWidthThreshold");
 
         // V-Plane hit finder thresholds
-        fParameterSet.VHitThreshold = pset.get<float>("VHitPeakThreshold");
-        fParameterSet.VAmplitudeToWidthRatio = pset.get<float>("VAmplitudeToWidthRatio");
-        fParameterSet.VAmplitudeToRMSRatio = pset.get<float>("VAmplitudeToRMSRatio");
-        fParameterSet.VHitWidthThreshold = pset.get<int>("VHitWidthThreshold");
-        fParameterSet.VRMSThreshold = pset.get<int>("VRMSThreshold");
+        fParameterSet.VHitThreshold = pset_hitfinder.get<float>("VHitPeakThreshold");
+        fParameterSet.VAmplitudeToWidthRatio = pset_hitfinder.get<float>("VAmplitudeToWidthRatio");
+        fParameterSet.VAmplitudeToRMSRatio = pset_hitfinder.get<float>("VAmplitudeToRMSRatio");
+        fParameterSet.VHitWidthThreshold = pset_hitfinder.get<int>("VHitWidthThreshold");
+        fParameterSet.VRMSThreshold = pset_hitfinder.get<int>("VRMSThreshold");
 
         // Y-Plane hit finder thresholds
-        fParameterSet.YHitThreshold = pset.get<float>("YHitPeakThreshold");
-        fParameterSet.YAmplitudeToWidthRatio = pset.get<float>("YAmplitudeToWidthRatio");
-        fParameterSet.YHitWidthThreshold = pset.get<int>("YHitWidthThreshold");
-
-        // Configurations
+        fParameterSet.YHitThreshold = pset_hitfinder.get<float>("YHitPeakThreshold");
+        fParameterSet.YAmplitudeToWidthRatio = pset_hitfinder.get<float>("YAmplitudeToWidthRatio");
+        fParameterSet.YHitWidthThreshold = pset_hitfinder.get<int>("YHitWidthThreshold");
 
     }
 
@@ -140,6 +148,7 @@ namespace LaserSpotter {
         art::ValidHandle <std::vector<raw::RawDigit>> DigitVecHandle = evt.getValidHandle<std::vector<raw::RawDigit>>(fParameterSet.RawDigitTag);
         art::ValidHandle <lasercal::LaserBeam> LaserBeamHandle = evt.getValidHandle<lasercal::LaserBeam>(fParameterSet.GetLaserBeamTag());
 
+        //TODO: Implement adjustements of box due to drift field
 
         // load appropriate windows according to laser
         int CenterTick = -9999;
@@ -167,7 +176,7 @@ namespace LaserSpotter {
             exit(-1);
         }
 
-        auto wires = lasercal::GetWires(DigitVecHandle, fParameterSet);
+        auto wires = lasercal::GetWires(DigitVecHandle, fParameterSet, fPedestalStubtract);
 
         auto laser_roi = lasercal::LaserROI();
         laser_roi.setRanges(CenterTick, TickWidth, Plane, WireRange);
@@ -175,6 +184,8 @@ namespace LaserSpotter {
         auto hits = lasercal::LaserHits(wires, fParameterSet, laser_roi);
 
         auto YHits = hits.GetPlaneHits(Plane);
+        std::cout << "Number of wires: "<< wires.size() << std::endl;
+        std::cout << "Number of hits:  "<< hits.NumberOfWiresWithHits().at(Plane) << std::endl;
 
         if (hits.NumberOfWiresWithHits().at(Plane) >= fMinHits) {
             std::cout << "True" << std::endl;

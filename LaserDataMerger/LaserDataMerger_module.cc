@@ -325,7 +325,8 @@ void LaserDataMerger::produce(art::Event& event)
     }
     else if (fReadTimeMap)
     {
-        if (DEBUG) std::cout << "Event idx: " << fEvent << " Laser idx: " << timemap.at(fEvent) << std::endl;
+        int laser_id = timemap.at(fEvent);
+        if (DEBUG) std::cout << "Event idx: " << fEvent << " Laser idx: " << laser_id << std::endl;
         
         //auto LaserAA = std::make_unique<lasercal::LaserBeam>;
         std::unique_ptr < lasercal::LaserBeam > LaserAA(new lasercal::LaserBeam());
@@ -334,8 +335,8 @@ void LaserDataMerger::produce(art::Event& event)
         float Theta;
         float Phi;
         
-        float Theta_raw =  laser_values.at(fEvent).at(DataStructure::LinearPosition);
-        float Phi_raw =     laser_values.at(fEvent).at(DataStructure::RotaryPosition); 
+        float Theta_raw =  laser_values.at(laser_id).at(DataStructure::LinearPosition);
+        float Phi_raw =     laser_values.at(laser_id).at(DataStructure::RotaryPosition);
         
         
         
@@ -358,11 +359,11 @@ void LaserDataMerger::produce(art::Event& event)
         //CalibratedAngles.Set(TMath::DegToRad() * 45, TMath::DegToRad() * 190);
         lasercal::LaserBeam Laser(Position, Phi, Theta);
         Laser.SetLaserID(LCS_ID);
-        Laser.SetLaserEventID(laser_values.at(fEvent).at(DataStructure::TriggerCount));
-        Laser.SetAssID(fEvent);
-        Laser.SetPower(AttenuatorTickToPercentage(laser_values.at(fEvent).at(DataStructure::AttenuatorPosition)));
-        Laser.SetTime(laser_values.at(fEvent).at(DataStructure::TriggerTimeSec), 
-                      laser_values.at(fEvent).at(DataStructure::TriggerTimeUsec));
+        Laser.SetLaserEventID(laser_values.at(laser_id).at(DataStructure::TriggerCount));
+        Laser.SetAssID(laser_id);
+        Laser.SetPower(AttenuatorTickToPercentage(laser_values.at(laser_id).at(DataStructure::AttenuatorPosition)));
+        Laser.SetTime(laser_values.at(laser_id).at(DataStructure::TriggerTimeSec),
+                      laser_values.at(laser_id).at(DataStructure::TriggerTimeUsec));
         if (DEBUG) Laser.Print();
         
         
@@ -390,7 +391,7 @@ float LaserDataMerger::LinearRawToAngle( float RawTicks ){
             
         float linear2angle = 0.3499;         ///< conversion constant of linear encoder to angle (mm/deg)
         float TickLength = 0.00001;          ///< Tick length in mm
-        float err_linear2angle = 0.0002;     ///< error of conversion factor
+        //float err_linear2angle = 0.0002;     ///< error of conversion factor
                 
         return RawTicks * TickLength / linear2angle;;
     }

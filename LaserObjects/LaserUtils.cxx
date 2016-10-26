@@ -4,7 +4,8 @@
 #include "LaserUtils.h"
 #include "LaserParameters.h"
 
-std::vector<recob::Wire> lasercal::GetWires(art::ValidHandle<std::vector<raw::RawDigit>> &DigitVecHandle, lasercal::LaserRecoParameters &fParameterSet) {
+std::vector<recob::Wire> lasercal::GetWires(art::ValidHandle<std::vector<raw::RawDigit>> &DigitVecHandle, lasercal::LaserRecoParameters &fParameterSet,
+                                            bool SubstractPedestal) {
 
     std::vector<recob::Wire> WireVec;
 
@@ -45,10 +46,11 @@ std::vector<recob::Wire> lasercal::GetWires(art::ValidHandle<std::vector<raw::Ra
         std::copy(RawADC.begin(), RawADC.end(), RawROI.begin());
 
         // subtract pedestial
-        for (auto &RawSample : RawROI) {
-            RawSample -= PedestalRetrievalAlg.PedMean(channel);
+        if (SubstractPedestal) {
+            for (auto &RawSample : RawROI) {
+                RawSample -= PedestalRetrievalAlg.PedMean(channel);
+            }
         }
-
         // Create the region of interest (in this case the whole wire)
         RegionOfInterest.add_range(0, RawROI.begin(), RawROI.end());
 

@@ -35,49 +35,55 @@ physics:
 {
  filters:
   {
-    LaserSpotter:
-    {
       module_type:         "LaserSpotter"
 
-      # Box definitions for both laser systems
-      CenterTicks:           [5000, 5063]
-      TickWidths:            [200, 200]
-      WireBoxes:             [[0,100],[3400,3500]]
+      io:
+      {
+        LaserRecoModuleLabel:       "daq"
+        LaserDataMergerModuleLabel: "LaserDataMerger"
+        LaserBeamInstanceLabel:     "LaserBeam"
+      }
 
-      # Filter criterias:
-      MinHits:               10 # minimal amout of Wires with hit
+      box:
+      {
+        # Box definitions for both laser systems
+        CenterTicks:           [5063, 5130]
+        TickWidths:            [200, 200]
+        WireBoxes:             [[0,100],[3354,3455]]
 
-      # Hit Finder Definitons (only Y Hit Finder is used)
-      GenerateWireMap:         false
-      UseROI:            false
-      HitBoxSize:              10       #cm
+        # Filter criterias:
+        MinHits:               10 # minimal amout of Wires with hit
+      }
 
-      LaserRecoModuleLabel:       "daq"
-      LaserDataMergerModuleLabel: "LaserDataMerger"
-      LaserBeamInstanceLabel:     "LaserBeam"
+      hitfinder:
+      {
+        # Hit Finder Definitons (only Y Hit Finder is used)
+        GenerateWireMap:         false
+        UseROI:            false
+        HitBoxSize:              10       #cm
 
-      MinAllowedChannelStatus: 4
+        MinAllowedChannelStatus: 4
 
-      # High amplitude threshold for high signal exceptions for all planes
-      HighAmplThreshold:       1000
+        # High amplitude threshold for high signal exceptions for all planes
+        HighAmplThreshold:       1000
 
-      # U-Plane hit thresholds
-      UHitPeakThreshold:      -25.0
-      UAmplitudeToWidthRatio:  1
-      UHitWidthThreshold:      10
+        # U-Plane hit thresholds
+        UHitPeakThreshold:      -25.0
+        UAmplitudeToWidthRatio:  1
+        UHitWidthThreshold:      10
 
-      # V-Plane hit thresholds
-      VHitPeakThreshold:       10.0
-      VAmplitudeToWidthRatio:  1.0
-      VAmplitudeToRMSRatio:    2.0
-      VHitWidthThreshold:      12
-      VRMSThreshold:           4
+        # V-Plane hit thresholds
+        VHitPeakThreshold:       10.0
+        VAmplitudeToWidthRatio:  1.0
+        VAmplitudeToRMSRatio:    2.0
+        VHitWidthThreshold:      12
+        VRMSThreshold:           4
 
-      # Y-Plane hit thresholds
-      YHitPeakThreshold:       10.0
-      YAmplitudeToWidthRatio:  1.5
-      YHitWidthThreshold:      6
-    }
+        # Y-Plane hit thresholds
+        YHitPeakThreshold:       10.0
+        YAmplitudeToWidthRatio:  1.5
+        YHitWidthThreshold:      6
+      }
   }
 
  #define the producer and filter modules for this path, order matters, 

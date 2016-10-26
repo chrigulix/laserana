@@ -1,7 +1,7 @@
 #include "geometry.fcl"
 #include "reco_uboone_data_minimal.fcl"
 
-process_name: LaserRawDigitGenerator
+process_name: LaserObjectsTest
 
 services.DetectorClocksService.InheritClockConfig: false
 services.DatabaseUtil.ShouldConnect: false
@@ -14,13 +14,11 @@ services:
   @table::microboone_reco_minimal_services
 }
 
+
 source:
 {
-  module_type: EmptyEvent
-  timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
-  maxEvents:   4           # Number of events to create
-  firstRun:    1           # Run number to use for this file
-  firstEvent:  0           # number of first event in the file
+  module_type: RootInput
+  maxEvents:  1        # Number of events to create
 }
 
 outputs:
@@ -29,22 +27,14 @@ outputs:
 
 physics:
 {
-    producers:
+    analyzers:
     {
-      LaserRawDigitGenerator: { module_type: "LaserRawDigitGenerator"
-            RawDigitFile: "RawDigits.txt"
-            NoiseAmplitude: 1
-            NumberTimeSamples: 200 # just for testing purposes
-
-            RawDigitLabel: "RawDigitTest"
-       }
+      LaserHitFinder: { module_type: "LaserObjectsTest" }
     }
 
     #define the path for analyzer modules, order does not matter.
     #see lines starting physics.analyzers below
-    ana:  [ LaserRawDigitGenerator ]
-    stream1:  [ out1 ]
-
+    ana:  [ LaserHitFinder ]
 
     #trigger_paths is a keyword and contains the paths that modify the art::event,
     #ie filters and producers
@@ -55,14 +45,4 @@ physics:
     #end_paths:     [ana]
 }
 
-outputs:
-{
- out1:
- {
-   module_type: RootOutput
-   fileName:    "RawGen.root"
-   #sam_ignore:  true
-   dataTier:    "reconstructed-2d"
-   compressionLevel: 1
- }
-}
+

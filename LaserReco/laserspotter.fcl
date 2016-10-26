@@ -1,0 +1,56 @@
+BEGIN_PROLOG
+
+laserspotter:
+    {
+      io:
+      {
+        LaserRecoModuleLabel:       "daq"
+        LaserDataMergerModuleLabel: "LaserDataMerger"
+        LaserBeamInstanceLabel:     "LaserBeam"
+      }
+
+      spotter:
+      {
+        # Box definitions for both laser systems
+        CenterTicks:           [5063, 5130]
+        TickWidths:            [200, 200]
+        WireBoxes:             [[0,100],[3354,3455]]
+
+        # Filter criterias:
+        MinHits:               10 # minimal amout of Wires with hit
+      }
+
+      hitfinder:
+      {
+        # Hit Finder Definitons (only Y Hit Finder is used)
+        GenerateWireMap:         false
+        UseROI:            false
+        HitBoxSize:              10       #cm
+
+        MinAllowedChannelStatus: 4
+
+        # High amplitude threshold for high signal exceptions for all planes
+        HighAmplThreshold:       1000
+
+        # U-Plane hit thresholds
+        UHitPeakThreshold:      -25.0
+        UAmplitudeToWidthRatio:  1
+        UHitWidthThreshold:      10
+
+        # V-Plane hit thresholds
+        VHitPeakThreshold:       10.0
+        VAmplitudeToWidthRatio:  1.0
+        VAmplitudeToRMSRatio:    2.0
+        VHitWidthThreshold:      12
+        VRMSThreshold:           4
+
+        # Y-Plane hit thresholds
+        YHitPeakThreshold:       10.0
+        YAmplitudeToWidthRatio:  1.5
+        YHitWidthThreshold:      6
+      }
+    }
+
+LaserSpotter: @local::laserspotter
+
+END_PROLOG
