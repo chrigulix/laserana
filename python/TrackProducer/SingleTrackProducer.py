@@ -22,17 +22,18 @@ def Track(Plane, StartPosition, EndPosition, RawHitDef):
     StartTick = StartPosition[1]
     EndTick = EndPosition[1]
 
+    # handle inverted case
+    if EndWire < StartWire:
+        EndWire, StartWire = StartWire, EndWire
+
     wire_range = abs(EndWire - StartWire)
 
     gradient = (EndTick - StartTick) / float(wire_range)
     hits = -1 * np.ones((abs(wire_range + 1), 7), dtype=int)
 
-    # handle inverted case
-    if EndWire < StartWire:
-        EndWire, StartWire = StartWire, EndWire
 
     for wire in range(StartWire, EndWire + 1):
-        tick = int(np.around(wire * gradient + StartTick))
+        tick = int(np.around( gradient * (wire - StartWire) + StartTick))
         hits[wire - StartWire, :] = [Plane, wire, tick, RawHitDef[0], RawHitDef[1], RawHitDef[2], 1]
 
     return hits
@@ -53,7 +54,7 @@ def Event(Plane, TrackDefinitions, HitDefinitions):
 
     for plane, track, hit_def in zip(Plane, TrackDefinitions,HitDefinitions):
         track = Track(plane, track[0], track[1], hit_def)
-        print track
+        print(track)
 
 
 def Run():
@@ -76,8 +77,8 @@ def ProduceSingleTrack(filename, Plane, TrackDefinitions, HitDefinitions):
     with open(filename + ".txt", "w+") as file:
         file.write("# plane, wire, tick, width, amplitude, offset, multipicity\n")
         for event, plane, track, hit_def in zip( range(len(Plane)), Plane, TrackDefinitions,HitDefinitions):
-            track = Track(plane, track[0], track[1], hit_def)
 
+            track = Track(plane, track[0], track[1], hit_def)
             file.write("# event " + str(event) + "\n")
             for hit in track:
                 string = ", ".join([str(num) for num in hit.tolist()])
