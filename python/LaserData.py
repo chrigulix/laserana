@@ -66,7 +66,6 @@ class Laser():
 
         for idx, col in enumerate(self.usecols):
             expanded_data[:, col] = data[:, idx]
-        print(expanded_data)
         return expanded_data
 
     def write(self, filename, data):
