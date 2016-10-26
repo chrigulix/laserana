@@ -148,6 +148,7 @@ namespace LaserSpotter {
         art::ValidHandle <std::vector<raw::RawDigit>> DigitVecHandle = evt.getValidHandle<std::vector<raw::RawDigit>>(fParameterSet.RawDigitTag);
         art::ValidHandle <lasercal::LaserBeam> LaserBeamHandle = evt.getValidHandle<lasercal::LaserBeam>(fParameterSet.GetLaserBeamTag());
 
+        //TODO: Implement adjustements of box due to drift field
 
         // load appropriate windows according to laser
         int CenterTick = -9999;
@@ -183,8 +184,8 @@ namespace LaserSpotter {
         auto hits = lasercal::LaserHits(wires, fParameterSet, laser_roi);
 
         auto YHits = hits.GetPlaneHits(Plane);
-        std::cout << "TEST: "<< wires.size() << std::endl;
-        std::cout << "TEST: "<< hits.NumberOfWiresWithHits().at(Plane) << std::endl;
+        std::cout << "Number of wires: "<< wires.size() << std::endl;
+        std::cout << "Number of hits:  "<< hits.NumberOfWiresWithHits().at(Plane) << std::endl;
 
         if (hits.NumberOfWiresWithHits().at(Plane) >= fMinHits) {
             std::cout << "True" << std::endl;
