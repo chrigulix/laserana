@@ -7,7 +7,7 @@ class Laser():
         # id, status, rotary_deg, linear_tick, attenuator, time_s, time_usec, aperture, ?, mirror1_x / y, ,mirror2_x / y
         # 2 -1.0 155.322006226 8188568.0 12342.0 -9999.0 1471587789.0 714883.0 0.0 1.0 -1.0 4374.0 1833.0 -3673.0 4477.0
 
-        self.n_cols = 13
+        self.n_cols = 15
 
         self.laser_id = laser_id
 
@@ -69,7 +69,7 @@ class Laser():
         return expanded_data
 
     def write(self, filename, data):
-        np.savetxt(filename, self.expand_data(data), fmt=2*('%i',) + ('%f',) + 10*('%i',))
+        np.savetxt(filename, self.expand_data(data), fmt=2*('%i',) + ('%f',) + 12*('%i',))
 
 
 if __name__ == "__main__":
