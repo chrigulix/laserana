@@ -155,7 +155,6 @@ namespace LaserSpotter {
         int TickWidth = -9999;
 
         fParameterSet.UseROI = true;
-        fParameterSet.MinAllowedChanStatus = 4;
         std::pair<unsigned int, unsigned int> WireRange;
 
         auto laserid = LaserBeamHandle->GetLaserID();
