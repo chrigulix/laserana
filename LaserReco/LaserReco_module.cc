@@ -111,6 +111,8 @@ namespace LaserReco {
 
         unsigned short fLCSNumber;
 
+        bool fPedestalStubtract;
+
     }; // class LaserReco
 
     DEFINE_ART_MODULE(LaserReco)
@@ -168,6 +170,8 @@ namespace LaserReco {
     void LaserReco::reconfigure(fhicl::ParameterSet const &parameterSet) {
         //Read ficl parameterSet
 
+        fPedestalStubtract = parameterSet.get<bool> ("PedestalSubtract", true);
+
         // Switches
         fParameterSet.WireMapGenerator = parameterSet.get<bool>("GenerateWireMap");
         fParameterSet.UseROI = parameterSet.get<bool>("GenerateWireMap");
@@ -202,6 +206,7 @@ namespace LaserReco {
         fParameterSet.YHitThreshold = parameterSet.get<float>("YHitPeakThreshold");
         fParameterSet.YAmplitudeToWidthRatio = parameterSet.get<float>("YAmplitudeToWidthRatio");
         fParameterSet.YHitWidthThreshold = parameterSet.get<int>("YHitWidthThreshold");
+
     }
 
     //-----------------------------------------------------------------------
@@ -320,11 +325,11 @@ namespace LaserReco {
             // Copy the Raw ADC digit (short) into the signal vector (float)
             std::copy(RawADC.begin(), RawADC.end(), RawROI.begin());
 
-            // subtract pedestial
-            for (auto &RawSample : RawROI) {
-                RawSample -= PedestalRetrievalAlg.PedMean(channel);
+            if (fPedestalStubtract) {
+                for (auto &RawSample : RawROI) {
+                    RawSample -= PedestalRetrievalAlg.PedMean(channel);
+                }
             }
-
             // Create the region of interest (in this case the whole wire)
             RegionOfInterest.add_range(0, RawROI.begin(), RawROI.end());
 
