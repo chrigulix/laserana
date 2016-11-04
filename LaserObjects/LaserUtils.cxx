@@ -4,7 +4,8 @@
 #include "LaserUtils.h"
 #include "LaserParameters.h"
 
-std::vector<recob::Wire> lasercal::GetWires(art::ValidHandle<std::vector<raw::RawDigit>> &DigitVecHandle, lasercal::LaserRecoParameters &fParameterSet,
+std::vector<recob::Wire> lasercal::GetWires(art::ValidHandle<std::vector<raw::RawDigit>> &DigitVecHandle,
+                                            lasercal::LaserRecoParameters &fParameterSet,
                                             bool SubstractPedestal) {
 
     std::vector<recob::Wire> WireVec;
@@ -60,4 +61,68 @@ std::vector<recob::Wire> lasercal::GetWires(art::ValidHandle<std::vector<raw::Ra
     } // end loop over raw digit entries
 
     return WireVec;
+}
+
+// inner most vector is configuration for hit
+// middle vector contains all hits for the specific event
+// outer vector contians hits over all events
+std::vector<std::vector<std::vector<float>>> lasercal::ReadHitDefs(std::string Filename, bool DEBUG) ///< line by line csv container
+{
+    std::vector<std::vector<std::vector<float> > > RawDigitValues; ///< line by line csv container
+    std::fstream stream(Filename, std::ios::in);
+
+    if (stream) {
+        typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+        boost::char_separator<char> sep(", ");
+        std::string line;
+
+        std::vector<std::vector<float>> Hits;
+
+        // Reading of RawDigit config file
+        int EventIdx = -2;
+
+        // read the hit data file into a vector
+        std::fstream stream(Filename, std::ios::in);
+        if (stream) {
+            typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+            boost::char_separator<char> sep(", ");
+            std::string line;
+
+            std::vector<std::vector<float>> Hits;
+
+            while (getline(stream, line)) {
+                // skip comments
+                if (line[0] == '#') {
+                    if (EventIdx > -1) RawDigitValues.push_back(Hits);
+                    Hits.clear();
+                    EventIdx++;
+                    continue;
+                }
+
+                Tokenizer info(line, sep); // tokenize the line of data
+                std::vector<float> values;
+                for (Tokenizer::iterator it = info.begin(); it != info.end(); ++it) {
+                    // convert data into double value, and store
+                    values.push_back(std::strtof(it->c_str(), 0));
+                }
+                // store array of values
+                Hits.push_back(values);
+
+
+                if (DEBUG) {
+                    std::cout << "DEBUG " << EventIdx << " ";
+                    for (auto entry : values) {
+                        std::cout << entry << " ";
+
+                    }
+                    std::cout << std::endl;
+                }
+            }
+            stream.close();
+        } else {
+            stream.close();
+            throw art::Exception(art::errors::FileOpenError) << " File does not exist: " << Filename << std::endl;
+        }
+    }
+    return RawDigitValues;
 }
