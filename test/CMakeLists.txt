@@ -189,6 +189,29 @@ simple_plugin(LaserSpotterGenTest "module"
         BASENAME_ONLY
         )
 
+simple_plugin(LaserRecoTest "module"
+        LaserObjects
+        larcore_Geometry_Geometry_service
+        larcore_Geometry
+        lardata_RecoBaseArt
+        lardata_RecoBase
+        lardata_RawData
+        ${SIMULATIONBASE}
+        ${ART_FRAMEWORK_CORE}
+        ${ART_FRAMEWORK_PRINCIPAL}
+        ${ART_FRAMEWORK_SERVICES_REGISTRY}
+        ${ART_FRAMEWORK_SERVICES_OPTIONAL}
+        ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
+        ${ART_PERSISTENCY_COMMON}
+        ${ART_PERSISTENCY_PROVENANCE}
+        ${ART_UTILITIES}
+        ${MF_MESSAGELOGGER}
+        ${MF_UTILITIES}
+        ${CETLIB}
+        ${ROOT_BASIC_LIB_LIST}
+        BASENAME_ONLY
+        )
+
 #cet_test( LaserUtilsTest HANDBUILT
 #        TEST_EXEC lar
 #        TEST_ARGS -c LaserUtilsTest.fcl $ENV{MRB_TOP}/runs/TestEvent.root
@@ -241,6 +264,13 @@ cet_test( LaserSpotter_Threshold HANDBUILT
         TEST_ARGS -c LaserSpotterGenHitsTest_Threshold.fcl
         DATAFILES RawDigits_Threshold.txt ./spotter/TimeMap-999999.root ./spotter/Run-999999.txt
         )
+
+cet_test( LaserReco_SingleTrack HANDBUILT
+        TEST_EXEC lar
+        TEST_ARGS -c LaserReco_TestSingleTrack.fcl
+        DATAFILES ./reco/WireIndexMap.root ./reco/HitDefs-10000.txt ./reco/Run-10000.txt ./reco/TimeMap-10000.root
+        )
+
 
 # Add test items here
 #cet_test( LaserSpotterTest1 HANDBUILT
