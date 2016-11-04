@@ -58,3 +58,11 @@ def test_InvertedTrack():
     npt.assert_almost_equal(a, np.array([[0, 0, 5, 5, 10, 10, 1],
                                          [0, 1, 5, 5, 10, 10, 1]
                                          ]))
+
+def test_EventGeneration():
+    pass
+    # a single track in the event
+    #b = sn.Event(0, [(0,5)], [(1,5)], [[5, 10, 10]])
+    #npt.assert_almost_equal(b, np.array([[0, 0, 5, 5, 10, 10, 1],
+    #                                     [0, 1, 5, 5, 10, 10, 1]
+    #                                     ]))

@@ -17,13 +17,15 @@ def crop_view(limits, hits):
 
 
 def view(data, eventid):
-    laser_tick_mean = 5065
-    laser_tick_offset = 100
+    #laser_tick_mean = 5065     # for LCS2
+    #laser_tick_offset = 100    # for LCS2
+    laser_tick_mean = 5400
+    laser_tick_offset = 1200
     laser_tick_limits = [laser_tick_mean - laser_tick_offset, laser_tick_mean + laser_tick_offset]
 
-    hits = data.get_hits(eventid)
+    hit = data.get_hits(eventid)
 
-    hit = crop_view(laser_tick_limits, hits)
+    hit = crop_view(laser_tick_limits, hit)
 
     fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True)
     ax.errorbar(hit.channel, hit.tick, yerr=[hit.tick - hit.start_tick, hit.end_tick - hit.tick], fmt='o')
@@ -31,15 +33,15 @@ def view(data, eventid):
     plt.ylabel("Time Tick")
     plt.show()
 
-filename = "/home/matthias/data/uboone/laser/LaserHitAna-3165-020.root"
-
+filename = "/home/matthias/data/uboone/laser/LaserHitAna-3007-020.root"
+filename = "/home/matthias/data/uboone/laser/3007/all.root"
 data = LarData(filename)
 meta = MetaData()
 
-print data.get_info()
 
 data.read_hits(planes="y")
 print data.read(meta.tree, meta.id())
 
-idx = data.get_index(1169)
-view(data, idx)
+#idx = data.get_index(1169)
+for i in range(150, data.n_entries):
+    view(data, i)
