@@ -165,10 +165,10 @@ physics:
     {
         LaserRecoTest:
         {
-            module_type:         "LaserROIRange"
+            module_type:         "LaserRecoTest"
             TestConfigFile:      "HitDefs-10000.txt"
             HitModul:              "LaserReco"
-            HitLabel:              "UPlaneLaserHits"
+            HitLabel:              "YPlaneLaserHits"
         }
     }
 
