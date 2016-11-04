@@ -32,6 +32,17 @@
 
 #include "art/Utilities/Exception.h"
 
+struct  RawDigitDefinition{
+    enum Value {
+        Plane,
+        Wire,
+        CenterTick,
+        Width,
+        Amplitude,
+        Offset,
+        Multiplicity
+    };
+};
 
 namespace lasercal
 {

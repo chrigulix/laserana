@@ -63,10 +63,19 @@ std::vector<recob::Wire> lasercal::GetWires(art::ValidHandle<std::vector<raw::Ra
     return WireVec;
 }
 
-// inner most vector is configuration for hit
-// middle vector contains all hits for the specific event
-// outer vector contians hits over all events
-std::vector<std::vector<std::vector<float>>> lasercal::ReadHitDefs(std::string Filename, bool DEBUG) ///< line by line csv container
+std::vector<std::vector<std::vector<float>>> lasercal::ReadHitDefs(std::string Filename, bool DEBUG)
+/*
+ * Reads hit definitions from csv file
+ *
+ *  Filename:   path to csv file
+ *  DEBUG:      outputs line by line input read
+ *
+ *  returns:    - inner most vector is configuration of hit in the form:
+ *              - middle vector contains all hits for a single event
+ *              - outer vector contains hits over all events
+ *
+ */
+
 {
     std::vector<std::vector<std::vector<float> > > RawDigitValues; ///< line by line csv container
     std::fstream stream(Filename, std::ios::in);
