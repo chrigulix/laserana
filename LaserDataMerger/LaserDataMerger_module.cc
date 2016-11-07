@@ -99,13 +99,13 @@ public:
     // The analysis routine, called once per event. 
     virtual void produce(art::Event& event) override;
     
-    float LinearRawToAngle(float Angles);
+    double LinearRawToAngle(double Angles);
 
     float AttenuatorTickToPercentage(float Tick);
 
 private:
 
-    bool DEBUG = false;
+    bool fDebug = false;
 
     // All this goes into the root tree
     TTree* fTimeAnalysis;
@@ -114,7 +114,7 @@ private:
     unsigned int time_ms;
 
     std::map< Long64_t, unsigned int > timemap; ///< Key value: index of event, corresponding index in laser data file
-    std::vector< std::vector<float> > laser_values; ///< line by line csv container
+    std::vector< std::vector<double> > laser_values; ///< line by line csv container
 
     bool fReadTimeMap = false;
     bool fGenerateTimeInfo = false;
@@ -220,7 +220,7 @@ void LaserDataMerger::beginRun(art::Run& run)
             tree->GetEntry(idx);
             timemap.insert(std::pair< Long64_t, unsigned int >(idx, map_root));
 
-            if (DEBUG)
+            if (fDebug)
             {
                 std::cout << "idx: " << idx << " mapped to: " << timemap.at(idx) << std::endl;
             }
@@ -241,7 +241,7 @@ void LaserDataMerger::beginRun(art::Run& run)
             while (getline(file, line))
             {
                 Tokenizer info(line, sep); // tokenize the line of data
-                std::vector<float> values;
+                std::vector<double> values;
 
                 for (Tokenizer::iterator it = info.begin(); it != info.end(); ++it)
                 {
@@ -252,7 +252,7 @@ void LaserDataMerger::beginRun(art::Run& run)
                 // store array of values
                 laser_values.push_back(values);
 
-                if (DEBUG)
+                if (fDebug)
                 {
                     for (unsigned int idx = 0; idx < 15; idx++)
                     {
@@ -300,6 +300,7 @@ void LaserDataMerger::reconfigure(fhicl::ParameterSet const& parameterSet)
     PositionLCS1.SetXYZ(fPositionLCS1[0], fPositionLCS1[1], fPositionLCS1[2]);
     PositionLCS2.SetXYZ(fPositionLCS2[0], fPositionLCS2[1], fPositionLCS2[2]);
 
+    fDebug = parameterSet.get< bool >("Debug", false);
 
     //fLaserSystemFile        = parameterSet.get< bool        >("LaserSystemFile");
 }
@@ -314,7 +315,7 @@ void LaserDataMerger::produce(art::Event& event)
         time_s = (unsigned int) event.time().timeHigh();
         time_ms = (unsigned int) event.time().timeLow();
 
-        if (DEBUG)
+        if (fDebug)
         {
             std::cout << "Event ID: " << fEvent << std::endl;
             std::cout << "Event Time (low): " << time_s << std::endl;
@@ -325,31 +326,30 @@ void LaserDataMerger::produce(art::Event& event)
     }
     else if (fReadTimeMap)
     {
-        int laser_id = timemap.at(fEvent);
-        if (DEBUG) std::cout << "Event idx: " << fEvent << " Laser idx: " << laser_id << std::endl;
+        uint laser_id = timemap.at(fEvent);
+        if (fDebug) std::cout << "Event idx: " << fEvent << " Laser idx: " << laser_id << std::endl;
         
         //auto LaserAA = std::make_unique<lasercal::LaserBeam>;
         std::unique_ptr < lasercal::LaserBeam > LaserAA(new lasercal::LaserBeam());
         // This is just for convinience, the TVector2 holds only the two angles
         
-        float Theta;
-        float Phi;
+        double Theta;
+        double Phi;
         
-        float Theta_raw =  laser_values.at(laser_id).at(DataStructure::LinearPosition);
-        float Phi_raw =     laser_values.at(laser_id).at(DataStructure::RotaryPosition);
-        
+        double Theta_raw =  laser_values.at(laser_id).at(DataStructure::LinearPosition);
+        double Phi_raw =     laser_values.at(laser_id).at(DataStructure::RotaryPosition);
         
         
         TVector3 Position;        
         TVector2 CalibratedAngles;
 
         if (LCS_ID == 1){ // The downstream laser system (sitting at z = -20)
-            Theta = TMath::DegToRad() * (90 - LinearRawToAngle(Theta_raw - fDirCalLCS1[1]));
+            Theta = TMath::DegToRad() * (90.0 - LinearRawToAngle(Theta_raw - fDirCalLCS1[1]));
             Phi = TMath::DegToRad() * Phi_raw - fDirCalLCS1[0];
             Position = PositionLCS1;
         }
         else if (LCS_ID == 2) { // The upstream laser system (sitting at z = 1020)
-            Theta = TMath::DegToRad() * (90 - LinearRawToAngle(Theta_raw - fDirCalLCS2[1]));
+            Theta = TMath::DegToRad() * (90.0 - LinearRawToAngle( Theta_raw - fDirCalLCS2[1]));
             Phi = TMath::DegToRad() * (Phi_raw - fDirCalLCS2[0]);
             Position = PositionLCS2;
         }
@@ -364,7 +364,7 @@ void LaserDataMerger::produce(art::Event& event)
         Laser.SetPower(AttenuatorTickToPercentage(laser_values.at(laser_id).at(DataStructure::AttenuatorPosition)));
         Laser.SetTime(laser_values.at(laser_id).at(DataStructure::TriggerTimeSec),
                       laser_values.at(laser_id).at(DataStructure::TriggerTimeUsec));
-        if (DEBUG) Laser.Print();
+        if (fDebug) Laser.Print();
         
         
         *LaserAA = Laser;
@@ -387,13 +387,12 @@ float LaserDataMerger::AttenuatorTickToPercentage(float Tick){
     else return -999.;
 }
 
-float LaserDataMerger::LinearRawToAngle( float RawTicks ){
+double LaserDataMerger::LinearRawToAngle( double RawTicks ){
             
         float linear2angle = 0.3499;         ///< conversion constant of linear encoder to angle (mm/deg)
         float TickLength = 0.00001;          ///< Tick length in mm
         //float err_linear2angle = 0.0002;     ///< error of conversion factor
-                
-        return RawTicks * TickLength / linear2angle;;
+        return RawTicks * TickLength / linear2angle;
     }
 
 DEFINE_ART_MODULE(LaserDataMerger)
