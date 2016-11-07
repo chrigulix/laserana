@@ -164,7 +164,7 @@ namespace lasercal
       
       inline void SetAssID(unsigned int id) {fAssosiateEventID = id;}
       
-      inline unsigned int GetAssID(float id) const { return fAssosiateEventID; }
+      inline unsigned int GetAssID() const { return fAssosiateEventID; }
       
       void SetErrors();//Error values
       
