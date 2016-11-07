@@ -17,6 +17,7 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "LaserObjects/LaserHits.h"
+#include "LaserObjects/LaserBeam.h"
 
 #include "LaserObjects/LaserUtils.h"
 
@@ -70,8 +71,22 @@ void LaserMergerTest::analyze(art::Event const &event) {
 
 
     if (fTestConfigFile.compare("HitDefs-10000.txt") == 0) {
-        std::cout << "==> Testing Merging Laser " << id << std::endl;
+        std::cout << "==> Testing Merging Laser 1 " << id << std::endl;
         assert(LaserBeam->GetLaserID() == 1);
+        assert(LaserBeam->GetTime().sec == id);
+        assert(LaserBeam->GetTime().usec == id);
+        assert(LaserBeam->GetLaserEventID() == id);
+        assert(LaserBeam->GetAssID() == id);
+        assert(LaserBeam->GetPower() == (float) id / 4.);
+
+        TVector3 Position =  LaserBeam->GetLaserPosition();
+        TVector3 Pos(0, 0, 0);
+        assert(Position == Pos);
+
+        TVector3 Direction = LaserBeam->GetLaserDirection();
+        assert(Direction.Theta() - id - 2.0 < 0.0001);
+        assert(std::fmod(Direction.Phi(), 90.) < 0.0001);
+
     }
 
 }

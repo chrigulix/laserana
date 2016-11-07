@@ -53,16 +53,17 @@ physics:
       module_type:          "LaserDataMerger"
       ReadTimeMap:          true
       GenerateTimeInfo:     false
+      Debug: false
 
       # These are all calibration values, only change them if you know what you
       # are doing!
       TickToAngle:          1                   # conversion constant for linear encoder
-      DirCalLCS1:           [0. , 0.]           # Direction Calibration
-      DirCalLCS2:           [-18.432 , 10500000.]       # Direction Calibration (161.568deg for straight -180deg to invert )
-      PositionLCS1:         [103. , 0., -20.]           # Position of Mirror
-      PositionLCS2:         [103. , 0., 1056.8]  #
-      EnergyMinMaxLCS1:     [8000, 12500]
-      EnergyMinMaxLCS2:     [8000, 12500]
+      DirCalLCS1:           [0. , 349900.]           # Direction Calibration
+      DirCalLCS2:           [1. , 1.]       # Direction Calibration (161.568deg for straight -180deg to invert )
+      PositionLCS1:         [0. , 0., 0.]           # Position of Mirror
+      PositionLCS2:         [1. , 1., 1]  #
+      EnergyMinMaxLCS1:     [0, 4]
+      EnergyMinMaxLCS2:     [0, 4]
     }
  }
  analyzers:
