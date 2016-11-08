@@ -26,7 +26,7 @@ source:
   module_type: EmptyEvent
   timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
   maxEvents:   5          # Number of events to create
-  firstRun:    10000           # Run number to use for this file
+  firstRun:    10002           # Run number to use for this file
   firstEvent:  0           # number of first event in the file
 }
 
@@ -42,7 +42,7 @@ physics:
     {
       DEBUG: false
       module_type: "LaserRawDigitGenerator"
-      RawDigitFile: "HitDefs-10000.txt"
+      RawDigitFile: "HitDefs-10002.txt"
       NoiseAmplitude: 0
       #NumberTimeSamples: 200 # just for testing purposes
 
@@ -70,7 +70,7 @@ physics:
         LaserMergerTest:
         {
             module_type:         "LaserMergerTest"
-            TestConfigFile:      "HitDefs-10000.txt"
+            TestConfigFile:      "HitDefs-10002.txt"
 
             MergerModul: "LaserDataMerger"
             MergerLabel:  "LaserBeam"

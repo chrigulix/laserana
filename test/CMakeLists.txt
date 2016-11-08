@@ -294,10 +294,22 @@ cet_test( LaserReco_SingleTrack HANDBUILT
         DATAFILES ./reco/WireIndexMap.root ./reco/HitDefs-10000.txt ./reco/Run-10000.txt ./reco/TimeMap-10000.root
         )
 
-cet_test( LaserMerger_Merging HANDBUILT
+cet_test( LaserMerger_Merging_LCS1 HANDBUILT
         TEST_EXEC lar
-        TEST_ARGS -c LaserMerger_TestMerging.fcl
+        TEST_ARGS -c LaserMerger_TestMerging_LCS1.fcl
         DATAFILES ./merger/WireIndexMap.root ./merger/HitDefs-10000.txt ./merger/Run-10000.txt ./merger/TimeMap-10000.root
+        )
+
+cet_test( LaserMerger_Merging_LCS2 HANDBUILT
+        TEST_EXEC lar
+        TEST_ARGS -c LaserMerger_TestMerging_LCS2.fcl
+        DATAFILES ./merger/WireIndexMap.root ./merger/HitDefs-10001.txt ./merger/Run-10001.txt ./merger/TimeMap-10001.root
+        )
+
+cet_test( LaserMerger_Mapping HANDBUILT
+        TEST_EXEC lar
+        TEST_ARGS -c LaserMerger_TestMapping.fcl
+        DATAFILES ./merger/WireIndexMap.root ./merger/HitDefs-10002.txt ./merger/Run-10002.txt ./merger/TimeMap-10002.root
         )
 
 # Add test items here
