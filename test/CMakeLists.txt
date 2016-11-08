@@ -276,24 +276,6 @@ cet_test( RawDigit_MultiplicityError HANDBUILT
 set_tests_properties(RawDigit_MultiplicityError PROPERTIES PASS_REGULAR_EXPRESSION Multiplicity error @)
 
 
-cet_test( LaserSpotter_HitLevels HANDBUILT
-        TEST_EXEC lar
-        TEST_ARGS -c LaserSpotterGenHitsTest_Levels.fcl
-        DATAFILES RawDigits_HitLevel.txt ./spotter/TimeMap-999999.root ./spotter/Run-999999.txt
-        )
-
-cet_test( LaserSpotter_Threshold HANDBUILT
-        TEST_EXEC lar
-        TEST_ARGS -c LaserSpotterGenHitsTest_Threshold.fcl
-        DATAFILES RawDigits_Threshold.txt ./spotter/TimeMap-999999.root ./spotter/Run-999999.txt
-        )
-
-cet_test( LaserReco_SingleTrack HANDBUILT
-        TEST_EXEC lar
-        TEST_ARGS -c LaserReco_TestSingleTrack.fcl
-        DATAFILES ./reco/WireIndexMap.root ./reco/HitDefs-10000.txt ./reco/Run-10000.txt ./reco/TimeMap-10000.root
-        )
-
 cet_test( LaserMerger_Merging_LCS1 HANDBUILT
         TEST_EXEC lar
         TEST_ARGS -c LaserMerger_TestMerging_LCS1.fcl
@@ -312,6 +294,23 @@ cet_test( LaserMerger_Mapping HANDBUILT
         DATAFILES ./merger/WireIndexMap.root ./merger/HitDefs-10002.txt ./merger/Run-10002.txt ./merger/TimeMap-10002.root
         )
 
+cet_test( LaserSpotter_HitLevels HANDBUILT
+        TEST_EXEC lar
+        TEST_ARGS -c LaserSpotterGenHitsTest_Levels.fcl
+        DATAFILES RawDigits_HitLevel.txt ./spotter/TimeMap-999999.root ./spotter/Run-999999.txt
+        )
+
+cet_test( LaserSpotter_Threshold HANDBUILT
+        TEST_EXEC lar
+        TEST_ARGS -c LaserSpotterGenHitsTest_Threshold.fcl
+        DATAFILES RawDigits_Threshold.txt ./spotter/TimeMap-999999.root ./spotter/Run-999999.txt
+        )
+
+cet_test( LaserReco_SingleTrack HANDBUILT
+        TEST_EXEC lar
+        TEST_ARGS -c LaserReco_TestSingleTrack.fcl
+        DATAFILES ./reco/WireIndexMap.root ./reco/HitDefs-10000.txt ./reco/Run-10000.txt ./reco/TimeMap-10000.root
+        )
 # Add test items here
 #cet_test( LaserSpotterTest1 HANDBUILT
 #        TEST_EXEC lar
