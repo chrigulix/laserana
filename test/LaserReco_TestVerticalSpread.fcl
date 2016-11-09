@@ -25,8 +25,8 @@ source:
 {
   module_type: EmptyEvent
   timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
-  maxEvents:   1          # Number of events to create
-  firstRun:    10000           # Run number to use for this file
+  maxEvents:   20          # Number of events to create
+  firstRun:    10001           # Run number to use for this file
   firstEvent:  0           # number of first event in the file
 }
 
@@ -42,7 +42,7 @@ physics:
     {
       DEBUG: false
       module_type: "LaserRawDigitGenerator"
-      RawDigitFile: "HitDefs-10000.txt"
+      RawDigitFile: "HitDefs-10001.txt"
       NoiseAmplitude: 0
       #NumberTimeSamples: 200 # just for testing purposes
 
@@ -166,7 +166,7 @@ physics:
         LaserRecoTest:
         {
             module_type:         "LaserRecoTest"
-            TestConfigFile:      "HitDefs-10000.txt"
+            TestConfigFile:      "HitDefs-10001.txt"
             HitModul:              "LaserReco"
             HitLabel:              "YPlaneLaserHits"
         }

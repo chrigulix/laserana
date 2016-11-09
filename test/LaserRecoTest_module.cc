@@ -44,10 +44,9 @@ public:
 
     void beginJob() override;
 
-    int CheckHits( art::ValidHandle<std::vector<recob::Hit>> reco_hits, std::vector<std::vector<float>> def_hits);
+    int CheckHits(art::ValidHandle<std::vector<recob::Hit>> reco_hits, std::vector<std::vector<float>> def_hits);
 
 private:
-
 
 
     std::vector<std::vector<std::vector<float> > > RawDigitDefs; ///< line by line csv container
@@ -66,35 +65,26 @@ LaserRecoTest::LaserRecoTest(fhicl::ParameterSet const &pset)
 
 void LaserRecoTest::analyze(art::Event const &event) {
     auto id = event.id().event();
-    auto DigitTag = art::InputTag(fHitModul, fHitLabel );
+    auto DigitTag = art::InputTag(fHitModul, fHitLabel);
     std::stringstream error_string;
 
-    std::cout << "==> Testing Single Track Reco fucki bluebuu" << id << std::endl;
 
-    if (fTestConfigFile.compare("HitDefs-10000.txt") == 0) {
-
-        std::cout << "==> Testing Single Track Reco fucki bluebuu" << id << std::endl;
-        try {
-            art::ValidHandle<std::vector<recob::Hit>> LaserHits = event.getValidHandle<std::vector<recob::Hit>>(DigitTag);
-        }
-        catch (...)
-        {
-            assert(false && "Event does not contain any hits");
-        }
+    std::cout << "==> Testing Simple Single Track Reco " << id << std::endl;
+    try {
         art::ValidHandle<std::vector<recob::Hit>> LaserHits = event.getValidHandle<std::vector<recob::Hit>>(DigitTag);
-
-        switch(id) {
-            case 0:
-                auto hit_def = RawDigitDefs.at(id);
-                assert(CheckHits(LaserHits, hit_def) == -1);
-                break;
-        }
-
-        //for (auto const &hit : *LaserHits){
-        //    std::cout << hit.PeakTime() << std::endl;
-        //}
-
     }
+    catch (...) {
+        assert(false && "Event does not contain any hits");
+    }
+    art::ValidHandle<std::vector<recob::Hit>> LaserHits = event.getValidHandle<std::vector<recob::Hit>>(DigitTag);
+
+    auto hit_def = RawDigitDefs.at(id);
+    assert(CheckHits(LaserHits, hit_def) == -1);
+
+    //for (auto const &hit : *LaserHits){
+    //    std::cout << hit.PeakTime() << std::endl;
+    //}
+
 }
 
 void LaserRecoTest::reconfigure(fhicl::ParameterSet const &pset) {
@@ -107,17 +97,19 @@ void LaserRecoTest::beginJob() {
     RawDigitDefs = lasercal::ReadHitDefs(fTestConfigFile);
 }
 
-int LaserRecoTest::CheckHits( art::ValidHandle<std::vector<recob::Hit>> reco_hits, std::vector<std::vector<float> > hit_defs){
+int LaserRecoTest::CheckHits(art::ValidHandle<std::vector<recob::Hit>> reco_hits,
+                             std::vector<std::vector<float> > hit_defs) {
     /*
      *  Checks if a hit vector and a hit definition vector are identical, if true this return -1, otherwise it returns the wire index
      *  in the hit definitions vector where the discrepancy was found.
      */
     for (uint wire = 0; wire < reco_hits->size(); wire++) {
-        if ((reco_hits->at(wire).WireID().Wire != hit_defs.at(wire).at(RawDigitDefinition::Wire))){
+        if ((reco_hits->at(wire).WireID().Wire != hit_defs.at(wire).at(RawDigitDefinition::Wire))) {
             throw std::out_of_range("reco hit wires and hit defs wires are not corresponding");
         }
-        if (reco_hits->at(wire).PeakTime()+1 != (int) hit_defs.at(wire).at(RawDigitDefinition::CenterTick)){
-            std::cout << "Hits were of at wire: " << wire << ", times were (reco/def):" << reco_hits->at(wire).PeakTime() << "/" << hit_defs.at(wire).at(RawDigitDefinition::CenterTick);
+        if (reco_hits->at(wire).PeakTime() != (int) hit_defs.at(wire).at(RawDigitDefinition::CenterTick)) {
+            std::cout << "Hits were of at wire: " << wire << ", times were (reco/def):"
+                      << reco_hits->at(wire).PeakTime() << "/" << hit_defs.at(wire).at(RawDigitDefinition::CenterTick);
             return wire;
         }
     }
