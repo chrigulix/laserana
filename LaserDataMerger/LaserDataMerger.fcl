@@ -4,7 +4,7 @@
 #include "services_microboone.fcl"
 #include "reco_uboone_data_minimal.fcl"
 
-process_name: RecoDataMinimal
+process_name: LaserDataMerger
 
 services:
 {
