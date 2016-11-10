@@ -10,6 +10,10 @@ laserreco:
 
       MinAllowedChannelStatus: 4
 
+      LaserRecoModuleLabel:       "LaserHitAna"
+      LaserDataMergerModuleLabel: "LaserDataMerger"
+      LaserBeamInstanceLabel:     "LaserBeam"
+
       # High amplitude threshold for high signal exceptions for all planes
       HighAmplThreshold:       1000
 
