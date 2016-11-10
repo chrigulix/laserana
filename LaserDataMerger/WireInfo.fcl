@@ -36,7 +36,7 @@ physics:
     WireInfo: 
     {
         module_type:          "WireInfo"
-        Wires:                [[0,0], [0,1], [1,0], [1,1],  [2,0], [2,1]]
+        Wires:                [[0,0], [0,1], [1,0], [1,1],  [2,0], [2,1], [2,3455]]
     }
   }
   reco: [ WireInfo ]
