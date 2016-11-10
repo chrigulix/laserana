@@ -10,7 +10,7 @@ laserreco:
 
       MinAllowedChannelStatus: 4
 
-      LaserRecoModuleLabel:       "LaserHitAna"
+      LaserRecoModuleLabel:       "daq"
       LaserDataMergerModuleLabel: "LaserDataMerger"
       LaserBeamInstanceLabel:     "LaserBeam"
 
