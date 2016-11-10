@@ -198,7 +198,6 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
 
     if (fParameters.UseROI) {
         if (!fLaserROI.IsWireInRange(SingleWire)) {
-
             return LaserHits;
         }
     }
