@@ -253,25 +253,25 @@ simple_plugin(LaserMergerTest "module"
 cet_test( RawDigit_SingleGeneration HANDBUILT
         TEST_EXEC lar
         TEST_ARGS -c LaserRawDigitGeneratorTest1.fcl
-        DATAFILES RawDigits_Test_SingleGeneration.txt
+        DATAFILES ./spotter/RawDigits_Test_SingleGeneration.txt
         )
 
 cet_test( RawDigit_MultiGeneration HANDBUILT
         TEST_EXEC lar
         TEST_ARGS -c LaserRawDigitGeneratorTest2.fcl
-        DATAFILES RawDigits_Test_MultiGeneration.txt
+        DATAFILES ./spotter/RawDigits_Test_MultiGeneration.txt
         )
 
 cet_test( RawDigit_MultiplicityGeneration HANDBUILT
         TEST_EXEC lar
         TEST_ARGS -c LaserRawDigitGeneratorTest3.fcl
-        DATAFILES RawDigits_Test_MultiplicityGeneration.txt
+        DATAFILES ./spotter/RawDigits_Test_MultiplicityGeneration.txt
         )
 
 cet_test( RawDigit_MultiplicityError HANDBUILT
         TEST_EXEC lar
         TEST_ARGS -c LaserRawDigitGeneratorTest4.fcl
-        DATAFILES RawDigits_Test_MultiplicityError.txt
+        DATAFILES ./spotter/RawDigits_Test_MultiplicityError.txt
         )
 set_tests_properties(RawDigit_MultiplicityError PROPERTIES PASS_REGULAR_EXPRESSION Multiplicity error @)
 
@@ -297,13 +297,13 @@ cet_test( LaserMerger_Mapping HANDBUILT
 cet_test( LaserSpotter_HitLevels HANDBUILT
         TEST_EXEC lar
         TEST_ARGS -c LaserSpotterGenHitsTest_Levels.fcl
-        DATAFILES RawDigits_HitLevel.txt ./spotter/TimeMap-999999.root ./spotter/Run-999999.txt
+        DATAFILES ./spotter/RawDigits_HitLevel.txt ./spotter/TimeMap-999999.root ./spotter/Run-999999.txt
         )
 
 cet_test( LaserSpotter_Threshold HANDBUILT
         TEST_EXEC lar
         TEST_ARGS -c LaserSpotterGenHitsTest_Threshold.fcl
-        DATAFILES RawDigits_Threshold.txt ./spotter/TimeMap-999999.root ./spotter/Run-999999.txt
+        DATAFILES ./spotter/RawDigits_Threshold.txt ./spotter/TimeMap-999999.root ./spotter/Run-999999.txt
         )
 
 cet_test( LaserReco_SingleTrack HANDBUILT
