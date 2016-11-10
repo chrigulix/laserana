@@ -45,12 +45,11 @@ physics: {
             }
         }
     }
-    #p1: [ LaserMerger ]
-    p1: [ LaserMerger, LaserSpotter ]
+    reco: [ LaserMerger, LaserSpotter, LaserReco ]
     
     stream1:  [ out1 ]
     
-    trigger_paths: [ p1 ]
+    trigger_paths: [reco]
 
     #end_paths: [ p1 ]
 }
@@ -60,7 +59,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "outs.root"
+   fileName:    "LaserHit-%04r-%04s.root"
    #sam_ignore:  true
    dataTier:    "reconstructed-2d"
    outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
