@@ -5,6 +5,9 @@ merger:
       module_type:          "LaserDataMerger"
       ReadTimeMap:          true
       GenerateTimeInfo:     false
+
+      Debug:                false
+
       # These are all calibration values, only change them if you know what you
       # are doing!
       TickToAngle:          1                   # conversion constant for linear encoder
