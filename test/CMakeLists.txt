@@ -323,6 +323,12 @@ cet_test( LaserReco_TestHorizontalSpread HANDBUILT
         TEST_ARGS -c LaserReco_TestHorizontalSpread.fcl
         DATAFILES ./reco/WireIndexMap.root ./reco/HitDefs-10002.txt ./reco/Run-10002.txt ./reco/TimeMap-10002.root
         )
+
+cet_test( LaserReco_TestROI HANDBUILT
+        TEST_EXEC lar
+        TEST_ARGS -c LaserReco_TestROI.fcl
+        DATAFILES ./reco/WireIndexMap.root ./reco/HitDefs-10003.txt ./reco/Run-10003.txt ./reco/TimeMap-10003.root
+        )
 # Add test items here
 #cet_test( LaserSpotterTest1 HANDBUILT
 #        TEST_EXEC lar

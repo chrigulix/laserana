@@ -79,7 +79,7 @@ physics:
 
       # Hit Finder Definitons (only Y Hit Finder is used)
       GenerateWireMap:         false
-      UseROI:            	   true
+      UseROI:            	   false
       HitBoxSize:              100       #cm
 
       MinAllowedChannelStatus: 0

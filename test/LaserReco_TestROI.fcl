@@ -2,7 +2,7 @@
 #include "reco_uboone_data_minimal.fcl"
 #include "laserreco.fcl"
 
-process_name: LaserHitReco
+process_name: LaserHitAna
 
 services.DetectorClocksService.InheritClockConfig: false
 services.DatabaseUtil.ShouldConnect: false
@@ -25,8 +25,8 @@ source:
 {
   module_type: EmptyEvent
   timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
-  maxEvents:   20          # Number of events to create
-  firstRun:    10002           # Run number to use for this file
+  maxEvents:   1          # Number of events to create
+  firstRun:    10003          # Run number to use for this file
   firstEvent:  0           # number of first event in the file
 }
 
@@ -42,7 +42,7 @@ physics:
     {
       DEBUG: false
       module_type: "LaserRawDigitGenerator"
-      RawDigitFile: "HitDefs-10002.txt"
+      RawDigitFile: "HitDefs-10003.txt"
       NoiseAmplitude: 0
       #NumberTimeSamples: 200 # just for testing purposes
 
@@ -54,7 +54,7 @@ physics:
       ReadTimeMap:          true
       GenerateTimeInfo:     false
 
-      Debug: 		    false
+      Debug: 		    true
 
 
       # These are all calibration values, only change them if you know what you
@@ -79,7 +79,7 @@ physics:
 
       # Hit Finder Definitons (only Y Hit Finder is used)
       GenerateWireMap:         false
-      UseROI:            	   false
+      UseROI:            	   true
       HitBoxSize:              100       #cm
 
       MinAllowedChannelStatus: 0
@@ -103,7 +103,6 @@ physics:
       YAmplitudeToWidthRatio:  1.5
       YHitWidthThreshold:      6
     }
-
  }
     filters:
       {
@@ -166,7 +165,7 @@ physics:
         LaserRecoTest:
         {
             module_type:         "LaserRecoTest"
-            TestConfigFile:      "HitDefs-10002.txt"
+            TestConfigFile:      "HitDefs-10003.txt"
             HitModul:              "LaserReco"
             HitLabel:              "YPlaneLaserHits"
         }
@@ -174,14 +173,31 @@ physics:
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- reco: [ LaserRawDigitGenerator,LaserDataMerger, LaserSpotter, LaserReco ]
+ reco: [ LaserRawDigitGenerator,LaserDataMerger, LaserReco ]
 
  test: [LaserRecoTest]
+
+ stream1: [out1]
 
  #trigger_paths is a keyword and contains the paths that modify the art::event, 
  #ie filters and producers
  trigger_paths: [reco]
 
- end_paths:     [reco, test]
 
+end_paths:     [reco]
+
+
+}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "LaserHit-%04r-%04s.root"
+   #sam_ignore:  true
+   dataTier:    "reconstructed-2d"
+   outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
+   compressionLevel: 1
+ }
 }
