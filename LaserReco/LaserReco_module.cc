@@ -174,7 +174,7 @@ namespace LaserReco {
 
         // Switches
         fParameterSet.WireMapGenerator = parameterSet.get<bool>("GenerateWireMap");
-        fParameterSet.UseROI = parameterSet.get<bool>("GenerateWireMap");
+        fParameterSet.UseROI = parameterSet.get<bool>("UseROI");
         fParameterSet.HitBoxSize = parameterSet.get<float>("HitBoxSize");
 
         // Tag for reading raw digit data
