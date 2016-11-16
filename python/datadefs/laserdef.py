@@ -13,7 +13,7 @@ class Laseref(Base):
         self.producer = "RecoDataMinimal"
 
         self.producer = "LaserHitAna"
-        self.branch = "lasercal::LaserBeam_LaserMerger_LaserBeam_" + self.producer + ".obj."
+        self.branch = "lasercal::LaserBeam_LaserDataMerger_LaserBeam_" + self.producer + ".obj."
         self.XYZ = ["X", "Y", "Z"]
 
     def pos(self):
@@ -21,6 +21,12 @@ class Laseref(Base):
 
     def dir(self):
         return self.gen_string("fDirection.f", self.XYZ)
+
+    def entry_point(self):
+        return self.gen_string("fEntryPoint", self.XYZ)
+
+    def exit_point(self):
+        return self.gen_string("fExitPoint", self.XYZ)
 
     def power(self):
         return self.gen_string("fPower")
