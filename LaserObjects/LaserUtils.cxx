@@ -79,19 +79,10 @@ std::unique_ptr<std::vector<std::vector<std::vector<float>>>> lasercal::ReadHitD
 {
     std::unique_ptr<std::vector<std::vector<std::vector<float> > > > RawDigitValues( new std::vector<std::vector<std::vector<float> > >); ///< line by line csv container
     std::fstream stream(Filename, std::ios::in);
-
-    if (stream) {
-        typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-        boost::char_separator<char> sep(", ");
-        std::string line;
-
-        std::vector<std::vector<float>> Hits;
-
         // Reading of RawDigit config file
         int EventIdx = -2;
 
         // read the hit data file into a vector
-        std::fstream stream(Filename, std::ios::in);
         if (stream) {
             typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
             boost::char_separator<char> sep(", ");
@@ -132,7 +123,6 @@ std::unique_ptr<std::vector<std::vector<std::vector<float>>>> lasercal::ReadHitD
             stream.close();
             throw art::Exception(art::errors::FileOpenError) << " File does not exist: " << Filename << std::endl;
         }
-    }
 
     return std::move(RawDigitValues);
 }
