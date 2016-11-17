@@ -185,14 +185,14 @@ void LaserRawDigitGenerator::produce(art::Event &event) {
         RawWires->emplace_back(std::move(RawDigit));
         WireADCSignal.clear();
     }
-    if (DEBUG) {
-        for (auto Wire : *RawWires) {
-            std::cout << "channel: " << Wire.Channel() << std::endl;
-            for (auto ADC : Wire.ADCs()) {
-                std::cout << ADC << " ";
-            }
-        }
-    }
+    //if (DEBUG) {
+    //    for (auto Wire : *RawWires) {
+    //        std::cout << "channel: " << Wire.Channel() << std::endl;
+    //        for (auto ADC : Wire.ADCs()) {
+    //            std::cout << ADC << " ";
+    //        }
+    //    }
+    //}
 
     event.put(std::move(RawWires), fRawDigitLabel);
 
