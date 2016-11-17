@@ -49,7 +49,7 @@ public:
 private:
 
 
-    std::vector<std::vector<std::vector<float> > > RawDigitDefs; ///< line by line csv container
+    std::unique_ptr< std::vector<std::vector<std::vector<float> > > > RawDigitDefs; ///< line by line csv container
     std::string fHitModul, fHitLabel;
     std::string fTestConfigFile;
 };
@@ -78,7 +78,10 @@ void LaserRecoTest::analyze(art::Event const &event) {
     }
     art::ValidHandle<std::vector<recob::Hit>> LaserHits = event.getValidHandle<std::vector<recob::Hit>>(DigitTag);
 
-    auto hit_def = RawDigitDefs.at(id);
+    auto hit_def = RawDigitDefs->at(id);
+
+    std::cout << "REALLY: " << hit_def.size() << std::endl;
+
     assert(CheckHits(LaserHits, hit_def) == -1);
 
     //for (auto const &hit : *LaserHits){
@@ -94,7 +97,7 @@ void LaserRecoTest::reconfigure(fhicl::ParameterSet const &pset) {
 }
 
 void LaserRecoTest::beginJob() {
-    RawDigitDefs = lasercal::ReadHitDefs(fTestConfigFile);
+    RawDigitDefs = lasercal::ReadHitDefs(fTestConfigFile, true);
 }
 
 int LaserRecoTest::CheckHits(art::ValidHandle<std::vector<recob::Hit>> reco_hits,
@@ -106,21 +109,50 @@ int LaserRecoTest::CheckHits(art::ValidHandle<std::vector<recob::Hit>> reco_hits
 
     int epsilon_tick = 5;
 
-    for (uint wire = 0; wire < hit_defs.size(); wire++) {
-        if ((reco_hits->at(wire).WireID().Wire != hit_defs.at(wire).at(RawDigitDefinition::Wire))) {
-            std::cout << "reco / def " << reco_hits->at(wire).WireID().Wire << " " << hit_defs.at(wire).at(RawDigitDefinition::Wire) << std::endl;
-            //throw std::out_of_range("reco hit wires and hit defs wires are not corresponding");
+    // array is set to true if the defined hit was present in the reconstructed hits
+    std::vector<bool> hit_checked(hit_defs.size(), false);
+
+    // check reconstructed hits for an associate defined hit
+    for (uint hit = 0; hit < reco_hits->size(); hit++) {
+        int wire_reco = reco_hits->at(hit).WireID().Wire;
+        int reco_peak_time = (int) reco_hits->at(hit).PeakTime();
+
+        int idx_def = -1;
+        // search for the associate wire in the wire def array
+        for (uint idx = 0; idx < hit_defs.size(); idx++) {
+            if (hit_defs.at(idx).at(RawDigitDefinition::Wire) == wire_reco){
+                idx_def = idx;
+            }
+        }
+        if (idx_def == -1){
+            std::cout << "No def hit could be found for the reconstructed hit: w: " << wire_reco << " pt " << reco_peak_time << std::endl;
+            return wire_reco;
         }
 
-        auto def_peak_time = (int) hit_defs.at(wire).at(RawDigitDefinition::CenterTick);
-        auto reco_peak_time = reco_hits->at(wire).PeakTime();
+        int def_peak_time = (int) hit_defs.at(idx_def).at(RawDigitDefinition::CenterTick);
 
-        if (def_peak_time - epsilon_tick < reco_peak_time && reco_peak_time < def_peak_time + epsilon_tick) {
-            std::cout << "Hits were of at wire: " << wire << ", times were (reco/def):"
-                      << reco_hits->at(wire).PeakTime() << "/" << hit_defs.at(wire).at(RawDigitDefinition::CenterTick);
+        if ((def_peak_time - epsilon_tick) < reco_peak_time && reco_peak_time < (def_peak_time + epsilon_tick)) {
+            hit_checked.at(hit) = true;
+        }
+        else {
+            std::cout << "Hits were of at wire: " << hit << ", times were (reco/def): "
+                      << reco_peak_time << " / " << def_peak_time << std::endl;
+
+            return wire_reco;
+        }
+    }
+
+    // have all defined hits been found?
+    for (auto hit_check = hit_checked.begin(); hit_check != hit_checked.end(); ++hit_check) {
+        auto wire = std::distance(hit_checked.begin(), hit_check);
+
+        if (*hit_check != true){
+            std::cout << "Not all hits found! missed hit at wire " << wire << std::endl;
             return wire;
         }
     }
+
+
     return -1;
 }
 
