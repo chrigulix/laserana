@@ -88,7 +88,7 @@ private:
     // inner most vector is configuration for hit
     // middle vector contains all hits for the specific event
     // outer vector contians hits over all events
-    std::vector<std::vector<std::vector<float> > > RawDigitValues; ///< line by line csv container
+    std::unique_ptr< std::vector<std::vector<std::vector<float> > > > RawDigitValues; ///< line by line csv container
 
 
     bool DEBUG = false;
@@ -115,13 +115,13 @@ void LaserRawDigitGenerator::produce(art::Event &event) {
     std::unique_ptr<std::vector<raw::RawDigit> > RawWires(new std::vector<raw::RawDigit>);
 
     // Handle config vs events
-    if (id > RawDigitValues.size() - 1) {
+    if (id > RawDigitValues->size() - 1) {
         event.put(std::move(RawWires), fRawDigitLabel);
         return;
     };
 
     boost::random::mt19937 gen;
-    auto RawDigitsInThisEvent = RawDigitValues.at(id);
+    auto RawDigitsInThisEvent = RawDigitValues->at(id);
     //std::vector<raw::RawDigit> RawWires;
 
     // create all hits in this event

@@ -63,7 +63,7 @@ std::vector<recob::Wire> lasercal::GetWires(art::ValidHandle<std::vector<raw::Ra
     return WireVec;
 }
 
-std::vector<std::vector<std::vector<float>>> lasercal::ReadHitDefs(std::string Filename, bool DEBUG)
+std::unique_ptr<std::vector<std::vector<std::vector<float>>>> lasercal::ReadHitDefs(std::string Filename, bool DEBUG)
 /*
  * Reads hit definitions from csv file
  *
@@ -77,7 +77,7 @@ std::vector<std::vector<std::vector<float>>> lasercal::ReadHitDefs(std::string F
  */
 
 {
-    std::vector<std::vector<std::vector<float> > > RawDigitValues; ///< line by line csv container
+    std::unique_ptr<std::vector<std::vector<std::vector<float> > > > RawDigitValues( new std::vector<std::vector<std::vector<float> > >); ///< line by line csv container
     std::fstream stream(Filename, std::ios::in);
 
     if (stream) {
@@ -102,7 +102,7 @@ std::vector<std::vector<std::vector<float>>> lasercal::ReadHitDefs(std::string F
             while (getline(stream, line)) {
                 // skip comments
                 if (line[0] == '#') {
-                    if (EventIdx > -1) RawDigitValues.push_back(Hits);
+                    if (EventIdx > -1) RawDigitValues->push_back(Hits);
                     Hits.clear();
                     EventIdx++;
                     continue;
@@ -133,5 +133,6 @@ std::vector<std::vector<std::vector<float>>> lasercal::ReadHitDefs(std::string F
             throw art::Exception(art::errors::FileOpenError) << " File does not exist: " << Filename << std::endl;
         }
     }
-    return RawDigitValues;
+
+    return std::move(RawDigitValues);
 }

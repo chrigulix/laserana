@@ -50,5 +50,5 @@ namespace lasercal
                                       lasercal::LaserRecoParameters &fParameterSet,
                                       bool SubstractPedestal=true);
 
-    std::vector<std::vector<std::vector<float> > > ReadHitDefs(std::string Filename, bool DEBUG = false);
+    std::unique_ptr<std::vector<std::vector<std::vector<float> > > > ReadHitDefs(std::string Filename, bool DEBUG = false);
 }
