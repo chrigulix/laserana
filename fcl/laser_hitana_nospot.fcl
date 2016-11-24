@@ -33,7 +33,7 @@ physics: {
             module_type:         "LaserReco"
 
             GenerateWireMap:         false
-            UseROI:                  true
+            UseROI:                  false
             HitBoxSize:              10       #cm
 
             MinAllowedChannelStatus: 4
@@ -77,7 +77,7 @@ physics: {
             }
         }
     }
-    reco: [ LaserDataMerger, LaserSpotter,  LaserReco ]
+    reco: [ LaserDataMerger,  LaserReco ]
     
     stream1:  [ out1 ]
     
