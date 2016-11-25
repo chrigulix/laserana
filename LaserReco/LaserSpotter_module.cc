@@ -83,6 +83,7 @@ namespace LaserSpotter {
 
 
         bool fPedestalStubtract;
+        bool fDebug;
     protected:
     };
 
@@ -105,6 +106,8 @@ namespace LaserSpotter {
         fPedestalStubtract = pset.get<bool> ("PedestalSubtract", true);
 
         // --------------------------------------------- Spotter Parameters ---------------------------------------------- //
+        fDebug =        pset_box.get<uint>("Debug", false);
+
         fTickWidth =    pset_box.get<uint>("TickWidth", 100);
         fWireWidth =    pset_box.get<uint>("WireWidth", 100);
         fMinHits =      pset_box.get<uint>("MinHits", 10);
@@ -198,7 +201,7 @@ namespace LaserSpotter {
             WireRange.second = DummyLaserBeam.getEntryWire().at(Plane).Wire + laser_sign(laserid) * fWireWidth;
         }
 
-        if (true) {
+        if (fDebug) {
             std::cout << "Box Definitions for LCS" << laserid << std::endl;;
             std::cout << "Wires range: [" << WireRange.first << ", " << WireRange.second << "]" << std::endl;
             std::cout << "Tick range:  [" << CenterTick - TickWidth/2 << ", " << CenterTick + TickWidth/2 << "]" << std::endl;
