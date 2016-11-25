@@ -75,7 +75,7 @@ void lasercal::LaserBeam::SetIntersectionPoints()
 
     // Load geometry core
     geo::GeometryCore const* Geometry = &*(art::ServiceHandle<geo::Geometry>());
-    
+
     // Create the active Volume
     geo::BoxBoundedGeo ActiveVolume( 0,2*Geometry->TPC().ActiveHalfWidth(), // xmin, xmax
 				     -Geometry->TPC().ActiveHalfHeight(),Geometry->TPC().ActiveHalfHeight(), // ymin, ymax  
@@ -123,6 +123,9 @@ void lasercal::LaserBeam::Print() const
     std::cout   << "Mirror Direction    "; fDirection.Print();
     std::cout   << "EntryPoint          "; fEntryPoint.Print();
     std::cout   << "ExitPoint           "; fExitPoint.Print();
+    std::cout   << "EntryTick           " << fEntryTick << std::endl;
+    std::cout   << "ExitTick            " << fExitTick  << std::endl;
+
     std::cout  << std::endl;
 }
 
