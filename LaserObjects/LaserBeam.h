@@ -28,7 +28,7 @@
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
 
 // Framework includes
-
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 
 
 
@@ -55,11 +55,32 @@ namespace lasercal
       TVector3 fDirection;           ///< Direction of the Laser beam
       TVector3 fEntryPoint;          ///< First Point in TPC
       TVector3 fExitPoint;           ///< Last Point in TPC
-      
+
+
+
+      std::vector<geo::WireID> fEntryWire;      ///< Entry wire on each plane
+      std::vector<geo::WireID> fExitWire;       ///< Exit wire on each plane
+
+      uint fEntryTick;                          ///< Entry time tick
+      uint fExitTick;                           ///< Exit Time tick
+
       /// Errors
       TVector3 fLaserPositionError;
       TVector3 fDirectionError;
       TVector3 fEntryPointError;
+
+  public:
+      const std::vector<geo::WireID> &getEntryWire() const;
+      const geo::WireID &getEntryWire(uint) const;
+
+      const std::vector<geo::WireID> &getExitWire() const;
+      const geo::WireID &getExitWire(uint) const;
+
+      uint getEntryTick() const;
+      uint getExitTick() const;
+
+
+  protected:
       TVector3 fExitPointError;
       
       Time fTime;                       ///< Trigger time recorded by laser server

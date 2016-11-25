@@ -235,6 +235,21 @@ simple_plugin(LaserMergerTest "module"
         BASENAME_ONLY
         )
 
+simple_plugin(LaserBeamTest "module"
+        LaserObjects
+        larcore_Geometry_Geometry_service
+        larcore_Geometry
+        lardata_RecoBaseArt
+        ${SIMULATIONBASE}
+        ${ART_FRAMEWORK_CORE}
+        ${ART_FRAMEWORK_PRINCIPAL}
+        ${ART_FRAMEWORK_SERVICES_REGISTRY}
+        ${CETLIB}
+        ${ROOT_BASIC_LIB_LIST}
+        BASENAME_ONLY
+        )
+
+
 #cet_test( LaserUtilsTest HANDBUILT
 #        TEST_EXEC lar
 #        TEST_ARGS -c LaserUtilsTest.fcl $ENV{MRB_TOP}/runs/TestEvent.root
@@ -329,6 +344,14 @@ cet_test( LaserReco_TestROI HANDBUILT
         TEST_ARGS -c LaserReco_TestROI.fcl
         DATAFILES ./reco/WireIndexMap.root ./reco/HitDefs-10003.txt ./reco/Run-10003.txt ./reco/TimeMap-10003.root
         )
+
+cet_test( LaserBeam_Test HANDBUILT
+        TEST_EXEC lar
+        TEST_ARGS -c LaserBeamTest.fcl
+        )
+
+#cet_test( LaserBeamTest LIBRARIES LaserObjects )
+
 # Add test items here
 #cet_test( LaserSpotterTest1 HANDBUILT
 #        TEST_EXEC lar
@@ -359,7 +382,7 @@ cet_test( LaserReco_TestROI HANDBUILT
 #            $ENV{MRB_SOURCE}/laserana/test/spotter/LaserRun-3007-151.root
 #            $ENV{MRB_SOURCE}/laserana/test/spotter/LaserRun-3007-154.root
 #        )
-#cet_test( LaserUtils_test LIBRARIES LaserObjects )
+
 
 install_headers()
 install_fhicl()
