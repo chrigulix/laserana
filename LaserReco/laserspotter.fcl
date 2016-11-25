@@ -12,11 +12,17 @@ laserspotter:
       spotter:
       {
         # Box definitions for both laser systems
-        CenterTicks:           [5130, 5063]
-        TickWidths:            [200, 200]
-        WireBoxes:             [[0, 100],[3354,3455]]
+        TickWidth:             200
+        WireRange:             100
+
+        ManualBox:             false
+
         # Filter criterias:
         MinHits:               10 # minimal amout of Wires with hit
+
+        # only used in case if ManualBox is enabled. Here you can select the box size and position by hand
+        CenterTicks:           [5063, 5130]
+        WireBoxes:             [[0,100],[3354,3455]]
       }
 
       hitfinder:

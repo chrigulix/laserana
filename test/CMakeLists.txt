@@ -315,6 +315,12 @@ cet_test( LaserSpotter_HitLevels HANDBUILT
         DATAFILES ./spotter/RawDigits_HitLevel.txt ./spotter/TimeMap-999999.root ./spotter/Run-999999.txt
         )
 
+cet_test( LaserSpotter_ManualBox HANDBUILT
+        TEST_EXEC lar
+        TEST_ARGS -c LaserSpotterGenHitsManual.fcl
+        DATAFILES ./spotter/RawDigits_Threshold.txt ./spotter/TimeMap-999999.root ./spotter/Run-999999.txt
+        )
+
 cet_test( LaserSpotter_Threshold HANDBUILT
         TEST_EXEC lar
         TEST_ARGS -c LaserSpotterGenHitsTest_Threshold.fcl

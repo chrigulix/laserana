@@ -24,7 +24,7 @@ source:
 {
   module_type: EmptyEvent
   timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
-  maxEvents:   6           # Number of events to create
+  maxEvents:   4           # Number of events to create
   firstRun:    999999           # Run number to use for this file
   firstEvent:  0           # number of first event in the file
 }
@@ -41,7 +41,7 @@ physics:
     {
       DEBUG: false
       module_type: "LaserRawDigitGenerator"
-      RawDigitFile: "RawDigits_HitLevel.txt"
+      RawDigitFile: "RawDigits_Threshold.txt"
       NoiseAmplitude: 0
       #NumberTimeSamples: 200 # just for testing purposes
 
@@ -80,7 +80,7 @@ physics:
 
             spotter:
             {
-                ManualBox: false
+                ManualBox:              true
                 # Box definitions for both laser systems
                 CenterTicks:           [5130, 5063]
                 TickWidths:            [200, 200]
@@ -119,8 +119,9 @@ physics:
                 YHitWidthThreshold:      6
             }
 
+          }
         }
-      }
+
 
  analyzers:
       {
@@ -128,7 +129,7 @@ physics:
               module_type: "LaserSpotterGenTest"
               SelectEvents: { SelectEvents: [reco] }
 
-              TestConfigFile: "RawDigits_HitLevel.txt"
+              TestConfigFile: "RawDigits_Threshold.txt"
           }
           LaserSpotterGenTestInv:
           {
@@ -136,7 +137,7 @@ physics:
               SelectEvents: { SelectEvents: ["!reco"] }
 
               Inverted:       true
-              TestConfigFile: "RawDigits_HitLevel.txt"
+              TestConfigFile: "RawDigits_Threshold.txt"
           }
       }
 

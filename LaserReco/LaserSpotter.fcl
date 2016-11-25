@@ -47,12 +47,17 @@ physics:
       box:
       {
         # Box definitions for both laser systems
-        CenterTicks:           [5063, 5130]
         TickWidths:            [200, 200]
-        WireBoxes:             [[0,100],[3354,3455]]
+        WireRange:             100
 
         # Filter criterias:
         MinHits:               10 # minimal amout of Wires with hit
+
+        # only used in case if ManualBox is enabled
+        CenterTicks:           [5063, 5130]
+        WireBoxes:             [[0,100],[3354,3455]]
+
+
       }
 
       hitfinder:

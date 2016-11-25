@@ -46,6 +46,8 @@
  *
  */
 
+auto laser_sign = [] (int x) { return -2 * x + 3; }; // no fuking ifs!
+
 namespace LaserSpotter {
 
     class LaserSpotter : public art::EDFilter {
@@ -64,11 +66,22 @@ namespace LaserSpotter {
         void reconfigure(fhicl::ParameterSet const &p);
 
     private:
+        bool fManualBox;
+
+        // for automatic mode
+        uint fTickWidth;
+        uint fWireWidth;
+
+        // for manual mode
         lasercal::LaserRecoParameters fParameterSet; ///< ficl parameter structure
         std::vector<int> fCenterTicks, fTickWidths;
         std::vector< std::pair < unsigned int, unsigned int> >fWireBoxes;
 
+        // filter parameters
         unsigned int fMinHits;
+
+
+
         bool fPedestalStubtract;
     protected:
     };
@@ -92,11 +105,15 @@ namespace LaserSpotter {
         fPedestalStubtract = pset.get<bool> ("PedestalSubtract", true);
 
         // --------------------------------------------- Spotter Parameters ---------------------------------------------- //
-        fCenterTicks =  pset_box.get<std::vector<int> >("CenterTicks");
-        fTickWidths =   pset_box.get<std::vector<int> >("TickWidths");
-        fWireBoxes  =   pset_box.get<std::vector<std::pair<unsigned int, unsigned int>>>("WireBoxes");
-        fMinHits =      pset_box.get<int> ("MinHits");
+        fTickWidth =    pset_box.get<uint>("TickWidth", 100);
+        fWireWidth =    pset_box.get<uint>("WireWidth", 100);
+        fMinHits =      pset_box.get<uint>("MinHits", 10);
+        fManualBox =    pset_box.get<bool>("ManualBox", false);
 
+        // in manual mode
+        fCenterTicks =  pset_box.get<std::vector<int> >("CenterTicks", std::vector<int> ());
+        fTickWidths =   pset_box.get<std::vector<int> >("TickWidths", std::vector<int> ());
+        fWireBoxes  =   pset_box.get<std::vector<std::pair<unsigned int, unsigned int>>>("WireBoxes", std::vector<std::pair<uint, uint>> ());
 
         // --------------------------------------------- File Handling Parameters --------------------------------------- //
         // Tag for reading raw digit data
@@ -146,7 +163,7 @@ namespace LaserSpotter {
 
         // Get the necessary products
         art::ValidHandle <std::vector<raw::RawDigit>> DigitVecHandle = evt.getValidHandle<std::vector<raw::RawDigit>>(fParameterSet.RawDigitTag);
-        art::ValidHandle <lasercal::LaserBeam> LaserBeamHandle = evt.getValidHandle<lasercal::LaserBeam>(fParameterSet.GetLaserBeamTag());
+        art::ValidHandle <lasercal::LaserBeam> LaserBeam = evt.getValidHandle<lasercal::LaserBeam>(fParameterSet.GetLaserBeamTag());
 
         //TODO: Implement adjustements of box due to drift field
 
@@ -157,23 +174,36 @@ namespace LaserSpotter {
         fParameterSet.UseROI = true;
         std::pair<unsigned int, unsigned int> WireRange;
 
-        auto laserid = LaserBeamHandle->GetLaserID();
+        auto laserid = LaserBeam->GetLaserID();
         int Plane = 2;
-        if (0 < laserid < 2) {
-            CenterTick = fCenterTicks.at(laserid - 1);
-            TickWidth = fTickWidths.at(laserid - 1);
-            WireRange.first = fWireBoxes.at(laserid-1).first;
-            WireRange.second = fWireBoxes.at(laserid-1).second;
 
-            //std::cout << "Box Definitions for LCS" << laserid << std::endl;;
-            //std::cout << "Wires range: [" << WireRange.first << ", " << WireRange.second << "]" << std::endl;
-            //std::cout << "Tick range:  [" << CenterTick - TickWidth/2 << ", " << CenterTick + TickWidth/2 << "]" << std::endl;
 
-        } else {
-            // TODO: Emmit proper error message within the art framework
-            std::cout << "laser ID not recoginized" << std::endl;
-            exit(-1);
+        if (fManualBox) {
+            if (0 < laserid && laserid < 2) {
+                CenterTick = fCenterTicks.at(laserid - 1);
+                TickWidth = fTickWidths.at(laserid - 1);
+                WireRange.first = fWireBoxes.at(laserid - 1).first;
+                WireRange.second = fWireBoxes.at(laserid - 1).second;
+            } else {
+                // TODO: Emmit proper error message within the art framework
+                std::cout << "laser ID not recoginized" << std::endl;
+                exit(-1);
+            }
         }
+        else {
+            lasercal::LaserBeam DummyLaserBeam(LaserBeam->GetLaserPosition(), TVector3(0,0,1));
+            CenterTick = DummyLaserBeam.getEntryTick();
+            TickWidth = fTickWidth;
+            WireRange.first = DummyLaserBeam.getEntryWire().at(Plane).Wire;
+            WireRange.second = DummyLaserBeam.getEntryWire().at(Plane).Wire + laser_sign(laserid) * fWireWidth;
+        }
+
+        if (true) {
+            std::cout << "Box Definitions for LCS" << laserid << std::endl;;
+            std::cout << "Wires range: [" << WireRange.first << ", " << WireRange.second << "]" << std::endl;
+            std::cout << "Tick range:  [" << CenterTick - TickWidth/2 << ", " << CenterTick + TickWidth/2 << "]" << std::endl;
+        }
+
 
         auto wires = lasercal::GetWires(DigitVecHandle, fParameterSet, fPedestalStubtract);
 
