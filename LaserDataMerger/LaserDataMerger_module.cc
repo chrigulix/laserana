@@ -220,10 +220,10 @@ void LaserDataMerger::beginRun(art::Run& run)
             tree->GetEntry(idx);
             timemap.insert(std::pair< Long64_t, unsigned int >(idx, map_root));
 
-            if (fDebug)
-            {
-                std::cout << "idx: " << idx << " mapped to: " << timemap.at(idx) << std::endl;
-            }
+            //if (fDebug)
+            //{
+            //    std::cout << "idx: " << idx << " mapped to: " << timemap.at(idx) << std::endl;
+            //}
         }
         delete InputFile;
 
@@ -256,9 +256,9 @@ void LaserDataMerger::beginRun(art::Run& run)
                 {
                     for (unsigned int idx = 0; idx < 15; idx++)
                     {
-                        std::cout << laser_values.back().at(idx) << " ";
+                        //std::cout << laser_values.back().at(idx) << " ";
                     }
-                    std::cout << std::endl;
+                    //std::cout << std::endl;
                 }
 
             }
@@ -338,8 +338,7 @@ void LaserDataMerger::produce(art::Event& event)
         
         double Theta_raw =  laser_values.at(laser_id).at(DataStructure::LinearPosition);
         double Phi_raw =     laser_values.at(laser_id).at(DataStructure::RotaryPosition);
-        
-        
+
         TVector3 Position;        
         TVector2 CalibratedAngles;
 
@@ -350,12 +349,25 @@ void LaserDataMerger::produce(art::Event& event)
         }
         else if (LCS_ID == 2) { // The upstream laser system (sitting at z = 1020)
             Theta = TMath::DegToRad() * (90.0 - LinearRawToAngle( Theta_raw - fDirCalLCS2[1]));
-            Phi = TMath::DegToRad() * (Phi_raw - fDirCalLCS2[0]);
+            Phi = - TMath::DegToRad() * (Phi_raw - fDirCalLCS2[0]);
             Position = PositionLCS2;
         }
         else {
             std::cerr << "Laser System not recognized " << std::endl;
         }
+
+        if (fDebug){
+            time_s = (unsigned int) event.time().timeHigh();
+            time_ms = (unsigned int) event.time().timeLow();
+
+            std::cout << "Positions from entry: " << laser_id  << std::endl;
+            std::cout << "rot: (raw / calib): " << Theta_raw << " / " << Theta  << std::endl;
+            std::cout << "lin: (raw / calib): " << Phi_raw << " / " << Phi  << std::endl;
+            std::cout << "Event Time (low): " << time_s << std::endl;
+            std::cout << "Event Time (hig): " << time_ms << std::endl;
+        }
+
+
         //CalibratedAngles.Set(TMath::DegToRad() * 45, TMath::DegToRad() * 190);
         lasercal::LaserBeam Laser(Position, Phi, Theta);
         Laser.SetLaserID(LCS_ID);
