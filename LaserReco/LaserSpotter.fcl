@@ -35,6 +35,9 @@ physics:
 {
  filters:
   {
+    LaserSpotter:
+      {
+
       module_type:         "LaserSpotter"
 
       io:
@@ -89,6 +92,7 @@ physics:
         YAmplitudeToWidthRatio:  1.5
         YHitWidthThreshold:      6
       }
+    }
   }
 
  #define the producer and filter modules for this path, order matters, 
