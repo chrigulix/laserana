@@ -23,13 +23,11 @@
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
 #include "larcore/Geometry/BoxBoundedGeo.h"
+
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #endif
 
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
-
-// Framework includes
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-
 
 
 #ifndef LASERBEAM_H
@@ -57,10 +55,10 @@ namespace lasercal
       TVector3 fExitPoint;           ///< Last Point in TPC
 
 
-
+#ifndef __GCCXML__
       std::vector<geo::WireID> fEntryWire;      ///< Entry wire on each plane
       std::vector<geo::WireID> fExitWire;       ///< Exit wire on each plane
-
+#endif
       uint fEntryTick;                          ///< Entry time tick
       uint fExitTick;                           ///< Exit Time tick
 
@@ -68,17 +66,6 @@ namespace lasercal
       TVector3 fLaserPositionError;
       TVector3 fDirectionError;
       TVector3 fEntryPointError;
-
-  public:
-      const std::vector<geo::WireID> &getEntryWire() const;
-      const geo::WireID &getEntryWire(uint) const;
-
-      const std::vector<geo::WireID> &getExitWire() const;
-      const geo::WireID &getExitWire(uint) const;
-
-      uint getEntryTick() const;
-      uint getExitTick() const;
-
 
   protected:
       TVector3 fExitPointError;
@@ -199,7 +186,15 @@ namespace lasercal
       
       TVector3 GetEntryPoint() const;
       TVector3 GetExitPoint() const;
-      
+
+        const std::vector<geo::WireID> &getEntryWire() const;
+        const geo::WireID &getEntryWire(uint) const;
+
+        const std::vector<geo::WireID> &getExitWire() const;
+        const geo::WireID &getExitWire(uint) const;
+
+        uint getEntryTick() const;
+        uint getExitTick() const;
       #endif
       //Anydatatype GetErrors();
       
