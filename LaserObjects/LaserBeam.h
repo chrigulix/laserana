@@ -19,15 +19,15 @@
 
 /// LArSoft
 #ifndef __GCCXML__
+
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
 #include "larcore/Geometry/BoxBoundedGeo.h"
-
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#endif
-
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
+
+#endif
 
 
 #ifndef LASERBEAM_H
@@ -47,7 +47,9 @@ namespace lasercal
     };
   class LaserBeam
   {
+#ifndef __GCCXML__
     protected:
+
       ///< Laser start position (last mirror before the TPC)
       TVector3 fLaserPosition;        ///< Laser start position (last mirror before the TPC)
       TVector3 fDirection;           ///< Direction of the Laser beam
@@ -55,10 +57,8 @@ namespace lasercal
       TVector3 fExitPoint;           ///< Last Point in TPC
 
 
-#ifndef __GCCXML__
       std::vector<geo::WireID> fEntryWire;      ///< Entry wire on each plane
       std::vector<geo::WireID> fExitWire;       ///< Exit wire on each plane
-#endif
       uint fEntryTick;                          ///< Entry time tick
       uint fExitTick;                           ///< Exit Time tick
 
@@ -66,8 +66,6 @@ namespace lasercal
       TVector3 fLaserPositionError;
       TVector3 fDirectionError;
       TVector3 fEntryPointError;
-
-  protected:
       TVector3 fExitPointError;
       
       Time fTime;                       ///< Trigger time recorded by laser server
@@ -77,11 +75,9 @@ namespace lasercal
       float fAperturePosition;          ///< Aperture position
       float fPower;                     ///< Attenuator setting (not measured pulse energy)
       
-      #ifndef __GCCXML__
       void SetIntersectionPoints();
-      #endif
-      
-      
+#endif
+
     public:
       
      /**
@@ -120,7 +116,7 @@ namespace lasercal
       LaserBeam(const TVector3& LaserPosition, const float& Phi, const float& Theta); 
       
      
-     #ifndef __GCCXML__
+#ifndef __GCCXML__
      /**
      * @brief Sets laser Position
      * @param LaserPosition start position of the laser 
@@ -180,7 +176,7 @@ namespace lasercal
        * @brief Print all protected value to stdout
        */
       void Print() const;
-      
+
       TVector3 GetLaserPosition() const;
       TVector3 GetLaserDirection() const;
       
@@ -195,9 +191,8 @@ namespace lasercal
 
         uint getEntryTick() const;
         uint getExitTick() const;
-      #endif
       //Anydatatype GetErrors();
-      
+#endif
   };
 }
 
