@@ -290,6 +290,10 @@ cet_test( RawDigit_MultiplicityError HANDBUILT
         )
 set_tests_properties(RawDigit_MultiplicityError PROPERTIES PASS_REGULAR_EXPRESSION Multiplicity error @)
 
+cet_test( LaserBeam_Test HANDBUILT
+        TEST_EXEC lar
+        TEST_ARGS -c LaserBeamTest.fcl
+        )
 
 cet_test( LaserMerger_Merging_LCS1 HANDBUILT
         TEST_EXEC lar
@@ -351,10 +355,6 @@ cet_test( LaserReco_TestROI HANDBUILT
         DATAFILES ./reco/WireIndexMap.root ./reco/HitDefs-10003.txt ./reco/Run-10003.txt ./reco/TimeMap-10003.root
         )
 
-cet_test( LaserBeam_Test HANDBUILT
-        TEST_EXEC lar
-        TEST_ARGS -c LaserBeamTest.fcl
-        )
 
 #cet_test( LaserBeamTest LIBRARIES LaserObjects )
 

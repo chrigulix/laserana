@@ -80,14 +80,19 @@ void LaserRecoTest::analyze(art::Event const &event) {
 
     auto hit_def = RawDigitDefs->at(id);
 
-    std::cout << "REALLY: " << hit_def.size() << std::endl;
 
-    assert(CheckHits(LaserHits, hit_def) == -1);
-
-    //for (auto const &hit : *LaserHits){
-    //    std::cout << hit.PeakTime() << std::endl;
-    //}
-
+    if (fTestConfigFile.compare("HitDefs-10003.txt") == 0) {
+        if (id == 0) {
+            // first track should not be fully found
+            assert(CheckHits(LaserHits, hit_def) != -1);
+        }
+        else{
+            assert(CheckHits(LaserHits, hit_def) == -1);
+        }
+    }
+    else {
+        assert(CheckHits(LaserHits, hit_def) == -1);
+    }
 }
 
 void LaserRecoTest::reconfigure(fhicl::ParameterSet const &pset) {
@@ -97,7 +102,7 @@ void LaserRecoTest::reconfigure(fhicl::ParameterSet const &pset) {
 }
 
 void LaserRecoTest::beginJob() {
-    RawDigitDefs = lasercal::ReadHitDefs(fTestConfigFile, true);
+    RawDigitDefs = lasercal::ReadHitDefs(fTestConfigFile, false);
 }
 
 int LaserRecoTest::CheckHits(art::ValidHandle<std::vector<recob::Hit>> reco_hits,
@@ -132,10 +137,10 @@ int LaserRecoTest::CheckHits(art::ValidHandle<std::vector<recob::Hit>> reco_hits
         int def_peak_time = (int) hit_defs.at(idx_def).at(RawDigitDefinition::CenterTick);
 
         if ((def_peak_time - epsilon_tick) < reco_peak_time && reco_peak_time < (def_peak_time + epsilon_tick)) {
-            hit_checked.at(hit) = true;
+            hit_checked.at(idx_def) = true;
         }
         else {
-            std::cout << "Hits were of at wire: " << hit << ", times were (reco/def): "
+            std::cout << "Hits were off at wire: " << hit << ", times were (reco/def): "
                       << reco_peak_time << " / " << def_peak_time << std::endl;
 
             return wire_reco;

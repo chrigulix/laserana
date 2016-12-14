@@ -1,6 +1,5 @@
 #include "geometry.fcl"
 #include "reco_uboone_data_minimal.fcl"
-#include "laserreco.fcl"
 
 process_name: LaserHitAna
 
@@ -25,7 +24,7 @@ source:
 {
   module_type: EmptyEvent
   timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
-  maxEvents:   1          # Number of events to create
+  maxEvents:   9          # Number of events to create
   firstRun:    10003          # Run number to use for this file
   firstEvent:  0           # number of first event in the file
 }
@@ -62,8 +61,8 @@ physics:
       TickToAngle:          1                   # conversion constant for linear encoder
       DirCalLCS1:           [0. , 0.]           # Direction Calibration
       DirCalLCS2:           [-18.432 , 10337483.]       # Direction Calibration (161.568deg for straight -180deg to invert )
-      PositionLCS1:         [103. , 0., -20.]           # Position of Mirror
-      PositionLCS2:         [103. , 0., 1056.8]  #
+      PositionLCS1:         [107. , 0., -20.]           # Position of Mirror
+      PositionLCS2:         [107. , 0., 1056.8]  #
       EnergyMinMaxLCS1:     [8000, 12500]
       EnergyMinMaxLCS2:     [8000, 12500]
     }
@@ -77,10 +76,9 @@ physics:
       LaserDataMergerModuleLabel: "LaserDataMerger"
       LaserBeamInstanceLabel:     "LaserBeam"
 
-      # Hit Finder Definitons (only Y Hit Finder is used)
       GenerateWireMap:         false
       UseROI:            	   true
-      HitBoxSize:              100       #cm
+      HitBoxSize:              10       #cm
 
       MinAllowedChannelStatus: 0
       # High amplitude threshold for high signal exceptions for all planes
@@ -110,7 +108,6 @@ physics:
         {
             module_type:         "LaserSpotter"
             PedestalSubtract:       false
-
             io:
             {
                 LaserRecoModuleLabel:       "LaserRawDigitGenerator"
@@ -133,9 +130,9 @@ physics:
                 # Hit Finder Definitons (only Y Hit Finder is used)
                 GenerateWireMap:         false
                 UseROI:            false
-                HitBoxSize:              10       #cm
+                HitBoxSize:              100       #cm
 
-                MinAllowedChannelStatus: 4
+                MinAllowedChannelStatus: 0
 
                 # High amplitude threshold for high signal exceptions for all planes
                 HighAmplThreshold:       1000
@@ -171,33 +168,31 @@ physics:
         }
     }
 
- #define the producer and filter modules for this path, order matters, 
+
+
+ #define the producer and filter modules for this path, order matters,
  #filters reject all following items.  see lines starting physics.producers below
- reco: [ LaserRawDigitGenerator,LaserDataMerger, LaserReco ]
+ reco: [ LaserRawDigitGenerator, LaserDataMerger, LaserReco ]
 
  test: [LaserRecoTest]
+ #define the output stream, there could be more than one if using filters
+ stream1:  [ out1 ]
 
- stream1: [out1]
-
- #trigger_paths is a keyword and contains the paths that modify the art::event, 
+ #trigger_paths is a keyword and contains the paths that modify the art::event,
  #ie filters and producers
  trigger_paths: [reco]
 
-
-end_paths:     [reco]
-
-
 }
+
 
 outputs:
 {
  out1:
  {
    module_type: RootOutput
-   fileName:    "LaserHit-%04r-%04s.root"
+   fileName:    "LaserTest_ROI.root"
    #sam_ignore:  true
    dataTier:    "reconstructed-2d"
-   outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
    compressionLevel: 1
  }
 }
