@@ -58,14 +58,16 @@ namespace lasercal
 #ifndef __GCCXML__
       std::vector<geo::WireID> fEntryWire;      ///< Entry wire on each plane
       std::vector<geo::WireID> fExitWire;       ///< Exit wire on each plane
-#endif
+
       uint fEntryTick;                          ///< Entry time tick
       uint fExitTick;                           ///< Exit Time tick
+
 
       /// Errors
       TVector3 fLaserPositionError;
       TVector3 fDirectionError;
       TVector3 fEntryPointError;
+#endif
 
   protected:
       TVector3 fExitPointError;
@@ -83,7 +85,7 @@ namespace lasercal
       
       
     public:
-      
+#ifndef __GCCXML__
      /**
      * @brief Default constructor: sets an empty volume
      * @see SetPosition
@@ -120,7 +122,7 @@ namespace lasercal
       LaserBeam(const TVector3& LaserPosition, const float& Phi, const float& Theta); 
       
      
-     #ifndef __GCCXML__
+
      /**
      * @brief Sets laser Position
      * @param LaserPosition start position of the laser 
