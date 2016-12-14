@@ -33,7 +33,7 @@ physics: {
             module_type:         "LaserReco"
 
             GenerateWireMap:         false
-            UseROI:                  false
+            UseROI:                  true
             HitBoxSize:              10       #cm
 
             MinAllowedChannelStatus: 4
