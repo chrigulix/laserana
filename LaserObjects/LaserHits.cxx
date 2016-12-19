@@ -35,6 +35,34 @@ lasercal::LaserHits::LaserHits(const std::vector<recob::Wire> &Wires, const lase
 
 } // Constructor using all wire signals and geometry purposes
 
+lasercal::LaserHits::LaserHits(const art::ValidHandle< std::vector<recob::Wire>> WireHandle, const lasercal::LaserRecoParameters &ParameterSet,
+                               const lasercal::LaserBeam &LaserBeam) {
+
+    fGeometry = &*(art::ServiceHandle<geo::Geometry>());
+    fParameters = ParameterSet;
+
+    fLaserROI = lasercal::LaserROI(fParameters.HitBoxSize, LaserBeam);
+
+    // Reserve space for hit container
+    for (auto &MapVector : fHitMapsByPlane) {
+        MapVector.reserve(WireHandle->size());
+    }
+
+    // Loop over all wires
+    for (const auto &SingleWire : *WireHandle) {
+        // Get channel information
+        raw::ChannelID_t Channel = SingleWire.Channel();
+        unsigned Plane = fGeometry->ChannelToWire(Channel).front().Plane;
+
+        // Get Single wire hits
+        std::map<float, recob::Hit> HitMap = FindSingleWireHits(SingleWire, Plane);
+
+        // Fill map data by pushing back the wire vector
+        fHitMapsByPlane.at(Plane).push_back(HitMap);
+    }// end loop over wires
+
+} // Constructor using all wire signals and geometry purposes
+
 //-------------------------------------------------------------------------------------------------------------------
 
 lasercal::LaserHits::LaserHits(const std::vector<recob::Wire> &Wires, const lasercal::LaserRecoParameters &ParameterSet,

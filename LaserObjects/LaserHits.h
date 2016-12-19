@@ -35,6 +35,10 @@ namespace lasercal
       // It already runs the hit finder algorithms and fills the map data.
       LaserHits(const std::vector<recob::Wire>& Wires, const lasercal::LaserRecoParameters& ParameterSet, const lasercal::LaserBeam& LaserBeam);
 
+      // Alternative constructor accepting art data products as an input. Use this in case you want to process raw data independantly (e.g. calroi) from
+      // this algorithm
+      LaserHits(const art::ValidHandle< std::vector<recob::Wire>>, const lasercal::LaserRecoParameters& ParameterSet, const lasercal::LaserBeam& LaserBeam);
+
       /// Alternative constructor where the user can supply a predefined ROI.
       LaserHits(const std::vector<recob::Wire>& Wires, const lasercal::LaserRecoParameters& ParameterSet, lasercal::LaserROI& LaserROI);
 
