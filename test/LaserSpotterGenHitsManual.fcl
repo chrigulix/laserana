@@ -93,7 +93,7 @@ physics:
             {
                 # Hit Finder Definitons (only Y Hit Finder is used)
                 GenerateWireMap:         false
-                UseROI:            false
+                UseROI:                  false
                 HitBoxSize:              10       #cm
 
                 MinAllowedChannelStatus: 4
@@ -141,14 +141,14 @@ physics:
           }
       }
 
- #define the producer and filter modules for this path, order matters, 
- #filters reject all following items.  see lines starting physics.producers below
+ # define the producer and filter modules for this path, order matters,
+ # filters reject all following items.  see lines starting physics.producers below
  reco: [ LaserRawDigitGenerator,LaserDataMerger, LaserSpotter ]
 
  hmm: [LaserSpotterGenTest, LaserSpotterGenTestInv]
 
- #trigger_paths is a keyword and contains the paths that modify the art::event, 
- #ie filters and producers
+ # trigger_paths is a keyword and contains the paths that modify the art::event,
+ # ie filters and producers
  trigger_paths: [reco]
 
  end_paths:     [hmm]
