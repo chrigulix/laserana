@@ -27,6 +27,8 @@ namespace lasercal
   class LaserHits
   {
     public:
+      LaserHits() = default;
+
       // Constructor with geometry and thresholds for the hit finder. 
       // It just initializes the object. There is no hit finding or filling of data.
       LaserHits(const lasercal::LaserRecoParameters& ParameterSet);
@@ -37,7 +39,7 @@ namespace lasercal
 
       // Alternative constructor accepting art data products as an input. Use this in case you want to process raw data independantly (e.g. calroi) from
       // this algorithm
-      LaserHits(const art::ValidHandle< std::vector<recob::Wire>>, const lasercal::LaserRecoParameters& ParameterSet, const lasercal::LaserBeam& LaserBeam);
+      LaserHits(const art::Handle< std::vector<recob::Wire>>, const lasercal::LaserRecoParameters& ParameterSet, const lasercal::LaserBeam& LaserBeam);
 
       /// Alternative constructor where the user can supply a predefined ROI.
       LaserHits(const std::vector<recob::Wire>& Wires, const lasercal::LaserRecoParameters& ParameterSet, lasercal::LaserROI& LaserROI);

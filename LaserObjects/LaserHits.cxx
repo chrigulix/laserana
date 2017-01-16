@@ -35,7 +35,7 @@ lasercal::LaserHits::LaserHits(const std::vector<recob::Wire> &Wires, const lase
 
 } // Constructor using all wire signals and geometry purposes
 
-lasercal::LaserHits::LaserHits(const art::ValidHandle< std::vector<recob::Wire>> WireHandle, const lasercal::LaserRecoParameters &ParameterSet,
+lasercal::LaserHits::LaserHits(const art::Handle< std::vector<recob::Wire>> WireHandle, const lasercal::LaserRecoParameters &ParameterSet,
                                const lasercal::LaserBeam &LaserBeam) {
 
     fGeometry = &*(art::ServiceHandle<geo::Geometry>());
