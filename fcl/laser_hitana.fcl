@@ -1,5 +1,9 @@
 #include "services_microboone.fcl"
 #include "reco_uboone_data_minimal.fcl"
+#include "database_standard.fcl"
+
+#include "caldata_microboone.fcl"
+
 
 #include "merger.fcl"
 #include "laserreco.fcl"
@@ -16,10 +20,10 @@ services:
 }
 
 services.DetectorClocksService.InheritClockConfig: false
-services.DatabaseUtil.ShouldConnect: false
+services.DatabaseUtil.ShouldConnect: true
 services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
 
-#source is the swizzled laser files
+# source is the swizzled laser files
 source:
 {
   module_type: RootInput
@@ -27,14 +31,20 @@ source:
 
 physics: { 
     producers: {
+        digitfilter:                 @local::microboone_rawdigitfilter
 	    LaserDataMerger:    @local::LaserDataMerger
+
+        gaushit:             @local::microboone_gaushitfinder
+	    caldat:                     @local::microboone_calroi
+
         LaserReco:
         {
             module_type:         "LaserReco"
 
             GenerateWireMap:         false
             UseROI:                  true
-            HitBoxSize:              10       #cm
+            CalDataTag:              "daq"
+            HitBoxSize:              25       # cm
 
             MinAllowedChannelStatus: 4
 
@@ -56,7 +66,7 @@ physics: {
              VHitWidthThreshold:      12
              VRMSThreshold:           4
 
-             #Y-Plane hit thresholds
+             # Y-Plane hit thresholds
              YHitPeakThreshold:       10.0
              YAmplitudeToWidthRatio:  1.5
              YHitWidthThreshold:      6
@@ -77,14 +87,19 @@ physics: {
             }
         }
     }
-    reco: [ LaserDataMerger, LaserSpotter,  LaserReco ]
+
+    reco: [ LaserDataMerger,  LaserReco ]
     
     stream1:  [ out1 ]
     
     trigger_paths: [reco]
 
-    #end_paths: [ p1 ]
+    # end_paths: [ p1 ]
 }
+
+
+# physics.producers.caldat.Threshold: [3,1,1]
+physics.producers.gaushit.CalDataModuleLabel:                   "caldat"
 
 outputs:
 {
@@ -92,7 +107,7 @@ outputs:
  {
    module_type: RootOutput
    fileName:    "LaserHit-%04r-%04s.root"
-   #sam_ignore:  true
+   # sam_ignore:  true
    dataTier:    "reconstructed-2d"
    outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
    compressionLevel: 1

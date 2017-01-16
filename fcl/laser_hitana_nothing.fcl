@@ -91,7 +91,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "LaserHit-%04r-%04s.root"
+   fileName:    "LaserHit-%04r-%04s-nospot-noroi.root"
    #sam_ignore:  true
    dataTier:    "reconstructed-2d"
    outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
