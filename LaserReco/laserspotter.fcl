@@ -29,8 +29,8 @@ laserspotter:
       {
         # Hit Finder Definitons (only Y Hit Finder is used)
         GenerateWireMap:         false
-        UseROI:            false
-        HitBoxSize:              10       #cm
+        UseROI:                  false
+        HitBoxSize:              25       #cm
 
         MinAllowedChannelStatus: 4
 
