@@ -2,4 +2,5 @@
     <class name="lasercal::Time"/>
     <class name="lasercal::LaserBeam"/>
     <class name="art::Wrapper<lasercal::LaserBeam>"/>
+    <class name="std::vector<lasercal::LaserBeam>"        />
 </lcgdict>

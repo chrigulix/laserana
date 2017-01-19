@@ -19,3 +19,6 @@ namespace {
         art::Wrapper<lasercal::LaserBeam> laser;
     };
 }
+
+template class std::vector< lasercal::LaserBeam >;
+template class art::Wrapper< std::vector<lasercal::LaserBeam> >;

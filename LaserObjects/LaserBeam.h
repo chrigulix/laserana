@@ -19,14 +19,12 @@
 
 /// LArSoft
 #ifndef __GCCXML__
-
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
 #include "larcore/Geometry/BoxBoundedGeo.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
-
 #endif
 
 
@@ -47,8 +45,7 @@ namespace lasercal
     };
   class LaserBeam
   {
-#ifndef __GCCXML__
-    protected:
+    private:
 
       ///< Laser start position (last mirror before the TPC)
       TVector3 fLaserPosition;        ///< Laser start position (last mirror before the TPC)
@@ -56,9 +53,6 @@ namespace lasercal
       TVector3 fEntryPoint;          ///< First Point in TPC
       TVector3 fExitPoint;           ///< Last Point in TPC
 
-
-      std::vector<geo::WireID> fEntryWire;      ///< Entry wire on each plane
-      std::vector<geo::WireID> fExitWire;       ///< Exit wire on each plane
       uint fEntryTick;                          ///< Entry time tick
       uint fExitTick;                           ///< Exit Time tick
 
@@ -67,19 +61,22 @@ namespace lasercal
       TVector3 fDirectionError;
       TVector3 fEntryPointError;
       TVector3 fExitPointError;
-      
+
       Time fTime;                       ///< Trigger time recorded by laser server
       unsigned int fLaserID;            ///< Laser System identifier (1 = upstream, 2 = downstream)
       unsigned int fLaserEventID;       ///< Laser event id (not daq)
       unsigned int fAssosiateEventID;   ///< ID of the assosiate event id ()
       float fAperturePosition;          ///< Aperture position
       float fPower;                     ///< Attenuator setting (not measured pulse energy)
-      
-      void SetIntersectionPoints();
+
+#ifndef __GCCXML__
+        void SetIntersectionPoints();
+        std::vector<geo::WireID> fEntryWire;      ///< Entry wire on each plane
+        std::vector<geo::WireID> fExitWire;       ///< Exit wire on each plane
 #endif
 
     public:
-      
+#ifndef __GCCXML__
      /**
      * @brief Default constructor: sets an empty volume
      * @see SetPosition
@@ -116,7 +113,7 @@ namespace lasercal
       LaserBeam(const TVector3& LaserPosition, const float& Phi, const float& Theta); 
       
      
-#ifndef __GCCXML__
+
      /**
      * @brief Sets laser Position
      * @param LaserPosition start position of the laser 
@@ -182,6 +179,7 @@ namespace lasercal
       
       TVector3 GetEntryPoint() const;
       TVector3 GetExitPoint() const;
+
 
         const std::vector<geo::WireID> &getEntryWire() const;
         const geo::WireID &getEntryWire(uint) const;
