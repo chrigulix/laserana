@@ -9,6 +9,8 @@
 #include "pandoramodules_microboone.fcl"
 #include "wirecellmodules_microboone.fcl"
 
+#include "merger.fcl"
+
 process_name: Laser
 
 services:
@@ -55,39 +57,41 @@ physics:
 
  producers:
  {
-   ### raw digit filter
+   # ## raw digit filter
    digitfilter:                  @local::microboone_rawdigitfilter
    wcNoiseFilter:                @local::microboone_wirecellnoisefilter
 
-   ### calwire producers
+   # ## calwire producers
    caldata:                      @local::microboone_calroi
 
-   ### hit-finder producers
+   # ## hit-finder producers
    gaushit:                      @local::microboone_gaushitfinder
 
    trackkalmanhittag:            @local::microboone_cosmictracktagger
 
-   ### Match kalman tracks to pandora cosmic PFParticles
+   # ## Match kalman tracks to pandora cosmic PFParticles
    trackPFParticleMatch:         @local::microboone_trackpfparticlematch
 
-   ### pandora cosmic pfparticle
+   # ## pandora cosmic pfparticle
    pandoraCosmicKHitPFPart:      @local::microboone_cosmicpfparticletagger
    pandoraCosmicKHitRemoval:     @local::microboone_crhitremoval
    pandoraCosmicKHit:            @local::microboone_track3Dkalmanhit
    trackkalmanhittag:            @local::microboone_cosmictracktagger
 
-   ### pandora cosmic pass
+   # ## pandora cosmic pass
    pandoraCosmic:                @local::microboone_pandora
 
-   ### pandora core modules
+   # ## pandora core modules
    pandoraNu:                    @local::microboone_pandora
    pandoraNuKHit:                @local::microboone_track3Dkalmanhit
 
-   ### Cluster3D
+   # ## Cluster3D
    cluster3d:                    @local::microboone_cluster3d
 
-   ### Allow for rerunning hit removal for debugging
+   # ## Allow for rerunning hit removal for debugging
    crhitremoval:                 @local::microboone_crhitremoval
+
+   LaserDataMerger:    @local::LaserDataMerger
 }
 
  filters:
@@ -100,13 +104,14 @@ physics:
 
  reco: [
 #         wcNoiseFilter,
+        LaserDataMerger,
          digitfilter,
          caldata,
          gaushit,
 #	 cluster3d #,
 	  pandoraCosmic #,
 #	  pandoraCosmicKHit,
-#	  trackkalmanhittag,
+# trackkalmanhittag,
 #         pandoraCosmicKHitPFPart,
 #	  trackPFParticleMatch,
 #         pandoraCosmicKHitRemoval,
