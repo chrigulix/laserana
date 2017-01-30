@@ -13,14 +13,14 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
+#include "lardataobj/RawData/RawDigit.h""
+#include "lardataobj/RawData/raw.h"
 
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"

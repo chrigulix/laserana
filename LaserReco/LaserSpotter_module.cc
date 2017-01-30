@@ -7,9 +7,9 @@
 #include "art/Framework/Core/EDFilter.h"
 #include "art/Framework/Principal/Event.h"
 
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/Wire.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Wire.h"
 
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"

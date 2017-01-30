@@ -1,10 +1,10 @@
 #ifndef lasercal_LaserROI_H
 #define lasercal_LaserROI_H
 
-#include "larcore/SimpleTypesAndConstants/RawTypes.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/Wire.h"
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Wire.h"
 #include "lardata/RecoBaseArt/HitCreator.h"
 #include "larcore/Geometry/GeometryCore.h"
 #include "larcore/Geometry/Geometry.h"

@@ -10,17 +10,17 @@ simple_plugin(LaserUtilsTest "module"
         larcore_Geometry_Geometry_service
         larcore_Geometry
         lardata_RecoBaseArt
-        lardata_RecoBase
-        lardata_RawData
-        ${SIMULATIONBASE}
+        lardataobj_RecoBase
+        lardataobj_RawData
+        nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        ${ART_PERSISTENCY_COMMON}
-        ${ART_PERSISTENCY_PROVENANCE}
-        ${ART_UTILITIES}
+        art_Persistency_Common canvas_Persistency_Common
+        art_Persistency_Provenance canvas_Persistency_Provenance
+        art_Utilities canvas_Utilities
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -33,17 +33,17 @@ simple_plugin(LaserHitFinderTest "module"
         larcore_Geometry_Geometry_service
         larcore_Geometry
         lardata_RecoBaseArt
-        lardata_RecoBase
-        lardata_RawData
-        ${SIMULATIONBASE}
+        lardataobj_RecoBase
+        lardataobj_RawData
+        nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        ${ART_PERSISTENCY_COMMON}
-        ${ART_PERSISTENCY_PROVENANCE}
-        ${ART_UTILITIES}
+        art_Persistency_Common canvas_Persistency_Common
+        art_Persistency_Provenance canvas_Persistency_Provenance
+        art_Utilities canvas_Utilities
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -56,17 +56,17 @@ simple_plugin(LaserObjectsTest "module"
         larcore_Geometry_Geometry_service
         larcore_Geometry
         lardata_RecoBaseArt
-        lardata_RecoBase
-        lardata_RawData
-        ${SIMULATIONBASE}
+        lardataobj_RecoBase
+        lardataobj_RawData
+        nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        ${ART_PERSISTENCY_COMMON}
-        ${ART_PERSISTENCY_PROVENANCE}
-        ${ART_UTILITIES}
+        art_Persistency_Common canvas_Persistency_Common
+        art_Persistency_Provenance canvas_Persistency_Provenance
+        art_Utilities canvas_Utilities
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -79,17 +79,17 @@ simple_plugin(LaserSpotterTest "module"
         larcore_Geometry_Geometry_service
         larcore_Geometry
         lardata_RecoBaseArt
-        lardata_RecoBase
-        lardata_RawData
-        ${SIMULATIONBASE}
+        lardataobj_RecoBase
+        lardataobj_RawData
+        nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        ${ART_PERSISTENCY_COMMON}
-        ${ART_PERSISTENCY_PROVENANCE}
-        ${ART_UTILITIES}
+        art_Persistency_Common canvas_Persistency_Common
+        art_Persistency_Provenance canvas_Persistency_Provenance
+        art_Utilities canvas_Utilities
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -102,17 +102,17 @@ simple_plugin(LaserHitGenerator "module"
         larcore_Geometry_Geometry_service
         larcore_Geometry
         lardata_RecoBaseArt
-        lardata_RecoBase
-        lardata_RawData
-        ${SIMULATIONBASE}
+        lardataobj_RecoBase
+        lardataobj_RawData
+        nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        ${ART_PERSISTENCY_COMMON}
-        ${ART_PERSISTENCY_PROVENANCE}
-        ${ART_UTILITIES}
+        art_Persistency_Common canvas_Persistency_Common
+        art_Persistency_Provenance canvas_Persistency_Provenance
+        art_Utilities canvas_Utilities
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -125,17 +125,17 @@ simple_plugin(LaserRawDigitGenerator "module"
         larcore_Geometry_Geometry_service
         larcore_Geometry
         lardata_RecoBaseArt
-        lardata_RecoBase
-        lardata_RawData
-        ${SIMULATIONBASE}
+        lardataobj_RecoBase
+        lardataobj_RawData
+        nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        ${ART_PERSISTENCY_COMMON}
-        ${ART_PERSISTENCY_PROVENANCE}
-        ${ART_UTILITIES}
+        art_Persistency_Common canvas_Persistency_Common
+        art_Persistency_Provenance canvas_Persistency_Provenance
+        art_Utilities canvas_Utilities
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -148,17 +148,17 @@ simple_plugin(LaserRawDigitGenTest "module"
         larcore_Geometry_Geometry_service
         larcore_Geometry
         lardata_RecoBaseArt
-        lardata_RecoBase
-        lardata_RawData
-        ${SIMULATIONBASE}
+        lardataobj_RecoBase
+        lardataobj_RawData
+        nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        ${ART_PERSISTENCY_COMMON}
-        ${ART_PERSISTENCY_PROVENANCE}
-        ${ART_UTILITIES}
+        art_Persistency_Common canvas_Persistency_Common
+        art_Persistency_Provenance canvas_Persistency_Provenance
+        art_Utilities canvas_Utilities
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -171,17 +171,17 @@ simple_plugin(LaserSpotterGenTest "module"
         larcore_Geometry_Geometry_service
         larcore_Geometry
         lardata_RecoBaseArt
-        lardata_RecoBase
-        lardata_RawData
-        ${SIMULATIONBASE}
+        lardataobj_RecoBase
+        lardataobj_RawData
+        nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        ${ART_PERSISTENCY_COMMON}
-        ${ART_PERSISTENCY_PROVENANCE}
-        ${ART_UTILITIES}
+        art_Persistency_Common canvas_Persistency_Common
+        art_Persistency_Provenance canvas_Persistency_Provenance
+        art_Utilities canvas_Utilities
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -194,17 +194,17 @@ simple_plugin(LaserRecoTest "module"
         larcore_Geometry_Geometry_service
         larcore_Geometry
         lardata_RecoBaseArt
-        lardata_RecoBase
-        lardata_RawData
-        ${SIMULATIONBASE}
+        lardataobj_RecoBase
+        lardataobj_RawData
+        nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        ${ART_PERSISTENCY_COMMON}
-        ${ART_PERSISTENCY_PROVENANCE}
-        ${ART_UTILITIES}
+        art_Persistency_Common canvas_Persistency_Common
+        art_Persistency_Provenance canvas_Persistency_Provenance
+        art_Utilities canvas_Utilities
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -217,17 +217,17 @@ simple_plugin(LaserMergerTest "module"
         larcore_Geometry_Geometry_service
         larcore_Geometry
         lardata_RecoBaseArt
-        lardata_RecoBase
-        lardata_RawData
-        ${SIMULATIONBASE}
+        lardataobj_RecoBase
+        lardataobj_RawData
+        nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        ${ART_PERSISTENCY_COMMON}
-        ${ART_PERSISTENCY_PROVENANCE}
-        ${ART_UTILITIES}
+        art_Persistency_Common canvas_Persistency_Common
+        art_Persistency_Provenance canvas_Persistency_Provenance
+        art_Utilities canvas_Utilities
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -240,7 +240,7 @@ simple_plugin(LaserBeamTest "module"
         larcore_Geometry_Geometry_service
         larcore_Geometry
         lardata_RecoBaseArt
-        ${SIMULATIONBASE}
+        nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}
         ${ART_FRAMEWORK_SERVICES_REGISTRY}

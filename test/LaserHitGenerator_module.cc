@@ -6,7 +6,7 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h"
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 
 #include "LaserObjects/LaserUtils.h"
 #include "LaserObjects/LaserHits.h"
@@ -75,7 +75,7 @@ namespace LaserHitGenerator {
 
         // read the hit data file into a vector
         std::string FileName = fHitFile;
-        fstream stream(FileName, std::ios::in);
+        std::fstream stream(FileName, std::ios::in);
         if (stream)
         {
             typedef boost::tokenizer< boost::char_separator<char> > Tokenizer;
@@ -119,8 +119,9 @@ namespace LaserHitGenerator {
         }
         else
         {
-            throw art::Exception(art::errors::FileOpenError) << " File does not exist: " << FileName << std::endl;
-        }
+           throw art::Exception(art::errors::FileOpenError) << " File does not exist: " << FileName << std::endl;
+           
+	}
     }
 
     void LaserHitGenerator::endJob() {

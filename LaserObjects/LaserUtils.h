@@ -9,15 +9,15 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/raw.h"
 #include "lardata/RecoBaseArt/WireCreator.h"
 
 #include "art/Framework/Principal/Event.h"
 
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/Wire.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Wire.h"
 
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
@@ -30,7 +30,7 @@
 #include <boost/tokenizer.hpp>
 #include <fstream>
 
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 
 struct  RawDigitDefinition{
     enum Value {

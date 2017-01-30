@@ -26,15 +26,15 @@
 // on LArSoft headers too -- if they can't be loaded by their own, it's a bug!
 
 // LArSoft includes
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/raw.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
 
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 
 // Framework includes
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 #include "art/Framework/Core/EDProducer.h"
 
 #include "art/Framework/Principal/Event.h"
@@ -42,10 +42,8 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Core/FindManyP.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "art/Persistency/Common/Ptr.h"
 
 // uBooNE includes
 #include "lardata/Utilities/AssociationUtil.h"
@@ -230,7 +228,7 @@ void LaserDataMerger::beginRun(art::Run& run)
 
         // read the laser data file into a vector
         std::string LaserFile = "Run-" + std::to_string(RunNumber) + ".txt";
-        fstream file(LaserFile, std::ios::in);
+        std::fstream file(LaserFile, std::ios::in);
 
         if (file)
         {

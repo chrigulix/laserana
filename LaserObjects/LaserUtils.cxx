@@ -121,8 +121,9 @@ std::unique_ptr<std::vector<std::vector<std::vector<float>>>> lasercal::ReadHitD
             stream.close();
         } else {
             stream.close();
-            throw art::Exception(art::errors::FileOpenError) << " File does not exist: " << Filename << std::endl;
-        }
+            //throw art::Exception(art::errors::FileOpenError) << " File does not exist: " << Filename << std::endl;
+            throw std::runtime_error("File seems not to exist");
+	}
 
     return std::move(RawDigitValues);
 }

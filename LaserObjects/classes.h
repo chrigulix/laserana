@@ -6,7 +6,9 @@
 //
 
 #include "LaserBeam.h"
-#include "art/Persistency/Common/Wrapper.h"
+#include "canvas/Persistency/Common/Wrapper.h"
+
+
 //
 // Only include objects that we would like to be able to put into the event.
 // Do not include the objects they contain internally.

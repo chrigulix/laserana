@@ -1,7 +1,7 @@
 #ifndef lasercal_LaserParameters_H
 #define lasercal_LaserParameters_H
 
-#include  "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 
 #include <string>
 

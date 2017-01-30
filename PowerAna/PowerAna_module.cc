@@ -8,19 +8,19 @@
 // LArSoft includes
 // #include "Simulation/SimChannel.h"
 // #include "Simulation/LArG4Parameters.h"
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/raw.h"
 #include "lardata/RecoBaseArt/WireCreator.h"
 #include "lardata/RecoBaseArt/HitCreator.h"
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/Cluster.h"
-#include "lardata/RecoBase/Wire.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Wire.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 
 // Framework includes
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 // #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
@@ -28,10 +28,8 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Core/FindManyP.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "art/Persistency/Common/Ptr.h"
 
 // uBooNE includes
 #include "lardata/Utilities/AssociationUtil.h"

@@ -3,7 +3,7 @@
 # The *parent* line must the first non-commented line and defines this product and version
 # The version should be of the form vxx_yy_zz (e.g. v01_02_03)
 parent lasercalibration v04_32_01
-defaultqual e9
+defaultqual e10
 
 # These optional lines define the installed directories where headers,
 # libraries, and executables will be found.
@@ -32,17 +32,17 @@ flcdir  product_dir     fcl
 # Add the dependent product and version
 
 product          version
-larsoft		v05_08_00
-gcc		v4_9_3
-cetbuildtools   v4_18_04       -       only_for_build
+larsoft		v06_20_00
+gcc		v4_9_3a
+cetbuildtools   v5_01_03       -       only_for_build
 end_product_list
 
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes". 
 qualifier	larsoft	 	gcc	notes
-e9:debug	e9:debug	-nq-
-e9:opt		e9:opt		-nq-
-e9:prof		e9:prof		-nq-
+e10:debug	e10:debug	-nq-
+e10:opt		e10:opt		-nq-
+e10:prof	e10:prof		-nq-
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:

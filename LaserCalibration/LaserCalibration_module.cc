@@ -42,7 +42,7 @@
 #include "SimpleTypesAndConstants/geo_types.h"
 
 // Framework includes
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 // #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h"

@@ -24,7 +24,7 @@
 #include "larcore/Geometry/GeometryCore.h"
 #include "larcore/Geometry/BoxBoundedGeo.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #endif
 
 
@@ -45,7 +45,7 @@ namespace lasercal
     };
   class LaserBeam
   {
-    private:
+    protected:
 
       ///< Laser start position (last mirror before the TPC)
       TVector3 fLaserPosition;        ///< Laser start position (last mirror before the TPC)
