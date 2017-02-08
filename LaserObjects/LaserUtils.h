@@ -27,9 +27,28 @@
 
 #include "LaserParameters.h"
 
+#include <boost/tokenizer.hpp>
+#include <fstream>
+
+#include "art/Utilities/Exception.h"
+
+struct  RawDigitDefinition{
+    enum Value {
+        Plane,
+        Wire,
+        CenterTick,
+        Width,
+        Amplitude,
+        Offset,
+        Multiplicity
+    };
+};
+
 namespace lasercal
 {
     std::vector<recob::Wire> GetWires(art::ValidHandle<std::vector<raw::RawDigit>> &DigitVecHandle,
                                       lasercal::LaserRecoParameters &fParameterSet,
                                       bool SubstractPedestal=true);
+
+    std::vector<std::vector<std::vector<float> > > ReadHitDefs(std::string Filename, bool DEBUG = false);
 }

@@ -33,6 +33,8 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
+#include "LaserObjects/LaserUtils.h"
+
 class LaserRawDigitGenerator;
 
 /* This module produces Gaussian hits which can be specified in the RawDigit file. It fills the rest of
@@ -88,15 +90,6 @@ private:
     // outer vector contians hits over all events
     std::vector<std::vector<std::vector<float> > > RawDigitValues; ///< line by line csv container
 
-    enum RawDigitDataStructure {
-        Plane,
-        Wire,
-        CenterTick,
-        Width,
-        Amplitude,
-        Offset,
-        Multiplicity
-    };
 
     bool DEBUG = false;
 
@@ -138,17 +131,17 @@ void LaserRawDigitGenerator::produce(art::Event &event) {
         raw::RawDigit::ADCvector_t WireADCSignal(NumberTimeSamples, 0);
 
         // Construct the appropriate channel for this hit
-        uint plane = (uint) SingleHit.at(RawDigitDataStructure::Plane);
-        uint wire = (uint) SingleHit.at(RawDigitDataStructure::Wire);
+        uint plane = (uint) SingleHit.at(RawDigitDefinition::Plane);
+        uint wire = (uint) SingleHit.at(RawDigitDefinition::Wire);
 
         auto channel = fGeometry->PlaneWireToChannel(plane, wire);
 
-        uint multiplicity = (uint) SingleHit.at(RawDigitDataStructure::Multiplicity);
+        uint multiplicity = (uint) SingleHit.at(RawDigitDefinition::Multiplicity);
         if (multiplicity == 1) {
             // Fill the vector with some random values
             boost::random::uniform_int_distribution<> Noise(-fNoiseAmplitude, fNoiseAmplitude);
             for (auto& Digit : WireADCSignal) {
-                Digit += Noise(gen) + SingleHit.at(RawDigitDataStructure::Offset);
+                Digit += Noise(gen) + SingleHit.at(RawDigitDefinition::Offset);
             }
         }
         else {
@@ -165,9 +158,9 @@ void LaserRawDigitGenerator::produce(art::Event &event) {
             RawWires->pop_back();
         }
 
-        uint mean = (uint) SingleHit.at(RawDigitDataStructure::CenterTick);
-        uint width = (uint) SingleHit.at(RawDigitDataStructure::Width);
-        int amplitude = SingleHit.at(RawDigitDataStructure::Amplitude);
+        uint mean = (uint) SingleHit.at(RawDigitDefinition::CenterTick);
+        uint width = (uint) SingleHit.at(RawDigitDefinition::Width);
+        int amplitude = SingleHit.at(RawDigitDefinition::Amplitude);
 
         int range = 3 * width; // min and max z = -range to +range.
         int start_range = mean - range;
@@ -208,51 +201,8 @@ void LaserRawDigitGenerator::produce(art::Event &event) {
 
 void LaserRawDigitGenerator::beginJob() {
     // Reading of RawDigit config file
-    int EventIdx = -2;
 
-    // read the hit data file into a vector
-    std::string FileName = fRawDigitFile;
-    fstream stream(FileName, std::ios::in);
-    if (stream) {
-        typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-        boost::char_separator<char> sep(", ");
-        std::string line;
-
-        std::vector<std::vector<float>> Hits;
-
-        while (getline(stream, line)) {
-            // skip comments
-            if (line[0] == '#') {
-                if (EventIdx > -1) RawDigitValues.push_back(Hits);
-                Hits.clear();
-                EventIdx++;
-                continue;
-            }
-
-            Tokenizer info(line, sep); // tokenize the line of data
-            std::vector<float> values;
-            for (Tokenizer::iterator it = info.begin(); it != info.end(); ++it) {
-                // convert data into double value, and store
-                values.push_back(std::strtof(it->c_str(), 0));
-            }
-            // store array of values
-            Hits.push_back(values);
-
-
-            if (DEBUG) {
-                std::cout << "DEBUG " << EventIdx << " ";
-                for (auto entry : values) {
-                    std::cout << entry << " ";
-
-                }
-                std::cout << std::endl;
-            }
-        }
-        stream.close();
-    } else {
-        stream.close();
-        throw art::Exception(art::errors::FileOpenError) << " File does not exist: " << FileName << std::endl;
-    }
+    RawDigitValues = lasercal::ReadHitDefs(fRawDigitFile, DEBUG);
 
     // Config TPC properties
     if (fNumberTimeSamples == -1) NumberTimeSamples = fDetProperties->NumberTimeSamples();
@@ -286,13 +236,13 @@ void LaserRawDigitGenerator::reconfigure(fhicl::ParameterSet const &pset) {
 std::string LaserRawDigitGenerator::PrintConfig(std::vector<float> Config) {
     std::stringstream ss;
     ss << "\n"
-       << "Plane:        " << Config.at(RawDigitDataStructure::Plane) << "\n"
-       << "Wire:         " << Config.at(RawDigitDataStructure::Wire) << "\n"
-       << "CenterTick:   " << Config.at(RawDigitDataStructure::CenterTick) << "\n"
-       << "Width:        " << Config.at(RawDigitDataStructure::Width) << "\n"
-       << "Amplitude:    " << Config.at(RawDigitDataStructure::Amplitude) << "\n"
-       << "Offset:       " << Config.at(RawDigitDataStructure::Offset) << "\n"
-       << "Multiplicity: " << Config.at(RawDigitDataStructure::Multiplicity) << "\n";
+       << "Plane:        " << Config.at(RawDigitDefinition::Plane) << "\n"
+       << "Wire:         " << Config.at(RawDigitDefinition::Wire) << "\n"
+       << "CenterTick:   " << Config.at(RawDigitDefinition::CenterTick) << "\n"
+       << "Width:        " << Config.at(RawDigitDefinition::Width) << "\n"
+       << "Amplitude:    " << Config.at(RawDigitDefinition::Amplitude) << "\n"
+       << "Offset:       " << Config.at(RawDigitDefinition::Offset) << "\n"
+       << "Multiplicity: " << Config.at(RawDigitDefinition::Multiplicity) << "\n";
 
     return ss.str();
 }
