@@ -8,7 +8,7 @@
 // on LArSoft headers too -- if they can't be loaded by their own, it's a bug!
 
 // LArSoft includes
-#include "lardata/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Track.h"
 
 // Framework includes
 #include "art/Framework/Core/EDProducer.h"
