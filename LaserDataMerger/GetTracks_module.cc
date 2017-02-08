@@ -108,7 +108,7 @@ void GetTracks::beginRun(art::Run& run)
     fTrackTree->Branch("track_id", &track_id);
 
     fLaserTree = tfs->make<TTree>("Laser", "Laser");
-    fTrackTree->Branch("event_id", &event_id);
+    fLaserTree->Branch("event", &event_id);
     fLaserTree->Branch("entry_x", &laser_entry_x);
     fLaserTree->Branch("entry_y", &laser_entry_y);
     fLaserTree->Branch("entry_z", &laser_entry_z);
@@ -137,9 +137,11 @@ void GetTracks::produce(art::Event& event)
 
     event.getByLabel(fTrackLabel, Tracks);
 
-    try {
-        event.getByLabel("LaserBeam", Laser);
+	auto LaserTag = art::InputTag("LaserDataMerger","LaserBeam");
+    //try {
+        event.getByLabel(LaserTag, Laser);
 
+	event_id = event.id().event();
         laser_entry_x = Laser->GetEntryPoint().x();
         laser_entry_y = Laser->GetEntryPoint().y();
         laser_entry_z = Laser->GetEntryPoint().z();
@@ -149,8 +151,8 @@ void GetTracks::produce(art::Event& event)
         laser_exit_z = Laser->GetExitPoint().z();
 
         fLaserTree->Fill();
-    }
-    catch (...){}; // pretty dangerous, but we just ignore writing the laser tree if no laser data is present.
+    //}
+    //catch (...){}; // pretty dangerous, but we just ignore writing the laser tree if no laser data is present.
     recob::Track track;
     lasercal::LaserBeam laserb;
 
