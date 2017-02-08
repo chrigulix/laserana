@@ -25,6 +25,7 @@ def Track(Plane, StartPosition, EndPosition, RawHitDef):
     # handle inverted case
     if EndWire < StartWire:
         EndWire, StartWire = StartWire, EndWire
+        EndTick, StartTick = StartTick, EndTick
 
     wire_range = abs(EndWire - StartWire)
 
