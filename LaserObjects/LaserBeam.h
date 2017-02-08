@@ -45,7 +45,7 @@ namespace lasercal
     };
   class LaserBeam
   {
-    private:
+    protected:
 
       ///< Laser start position (last mirror before the TPC)
       TVector3 fLaserPosition;        ///< Laser start position (last mirror before the TPC)
