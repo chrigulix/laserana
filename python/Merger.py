@@ -40,6 +40,8 @@ class Merger():
         self.NLaser = len(self.LaserArray[1, :])
         self.NEvent = len(self.EventArray[1, :])
 
+        self.LastEvent = self.EventArray[0, -1]
+
         self.NMin = np.min([self.NLaser, self.NEvent])
         self.NMax = np.max([self.NLaser, self.NEvent])
 
@@ -58,7 +60,7 @@ class Merger():
         self.offsets = []
 
         # define the mapping of the laser array to the event array
-        self.map = -1 * np.zeros((self.NEvent, 1)).astype(int)
+        self.map = -1 * np.zeros((int(self.LastEvent) + 1, 1)).astype(int)
 
         self.preprocess()
 
@@ -103,14 +105,14 @@ class Merger():
         for idx in range(self.NEvent):
             # loop over entries in event time array
 
-            search_size = 100
+            search_size = 200
             for idy in range(search_size):
                 #print idx, idy, self.EventArray[1, idx], self.LaserArray[1, idx + idy]
 
                 #self.log.debug("Event Time: " + str(self.EventArray[1, idx]))
                 #self.log.debug("Laser Time: " + str(self.LaserArray[1, idx + idy]))
                 if self.check_time(self.EventArray[1, idx], self.LaserArray[1, idx + idy]):
-                    self.map[idx] = idx + idy
+                    self.map[int(self.EventArray[0, idx])] = self.LaserArray[0, idx + idy]
 
                     if idy > self.idx_offset:
                         self.idx_offset += 1
@@ -134,7 +136,7 @@ class Merger():
         self.log.info("Found " + str(self.idx_offset) + " jumps, they are at:")
         self.log.info(str(self.offsets))
 
-        self.delta = self.EventArray[1, :] - np.transpose(self.LaserArray[1, self.map]).flatten()
+        self.delta = self.map
 
     def write(self):
         self.io.write_map(self.map)
@@ -155,12 +157,13 @@ class Merger():
         plt.grid()
         plt.show()
 
-        if False:
+        if True:
             fig2, ax2 = plt.subplots()
-            plt.plot(self.LaserArray[0, :], self.LaserArray[1, :] + self.LaserStartTime, "r-*")
-            plt.plot(self.EventArray[0, :], self.EventArray[1, :] + self.EventStartTime, "b*-")
+            plt.plot(self.LaserArray[0, :], self.LaserArray[1, :] + self.LaserStartTime, "r-*", label="Laser Data")
+            plt.plot(self.EventArray[0, :], self.EventArray[1, :] + self.EventStartTime, "b*-", label="TPC Data")
             plt.xlabel("Event ID")
             plt.ylabel("Time [s]")
+            plt.legend()
             plt.show()
 
         # plot time deltas of laser vs daq triggers
@@ -179,6 +182,7 @@ if __name__ == '__main__':
     merger = Merger(int(sys.argv[1]))
     merger.log.level == logging.ERROR
     merger.align()
+    print merger.map[39501]
     merger.plot()
     merger.write()
 

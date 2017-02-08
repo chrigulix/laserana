@@ -52,3 +52,7 @@ class MergerIO(object):
         self.log.info("writing map to " + self.OutFile)
         arr = np.array(array, dtype=[("map", np.uint32)])
         array2root(arr, self.OutFile, mode='recreate')
+
+    def write_map_to_file(self, array):
+        pass
+
