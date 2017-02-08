@@ -57,12 +57,21 @@ private:
 
     // All this goes into the root tree
     TTree* fTrackTree;
+    TTree* fLaserTree;
+
     std::vector<Double_t> trackx;
     std::vector<Double_t> tracky;
     std::vector<Double_t> trackz;
     unsigned int event_id;
     unsigned int track_id;
 
+    Double_t laser_entry_x;
+    Double_t laser_entry_y;
+    Double_t laser_entry_z;
+
+    Double_t laser_exit_x;
+    Double_t laser_exit_y;
+    Double_t laser_exit_z;
 
     art::InputTag fTrackLabel;
 
@@ -97,6 +106,16 @@ void GetTracks::beginRun(art::Run& run)
     fTrackTree->Branch("y", &tracky);
     fTrackTree->Branch("z", &trackz);
     fTrackTree->Branch("track_id", &track_id);
+
+    fLaserTree = tfs->make<TTree>("Laser", "Laser");
+    fTrackTree->Branch("event_id", &event_id);
+    fLaserTree->Branch("entry_x", &laser_entry_x);
+    fLaserTree->Branch("entry_y", &laser_entry_y);
+    fLaserTree->Branch("entry_z", &laser_entry_z);
+    fLaserTree->Branch("exit_x", &laser_exit_x);
+    fLaserTree->Branch("exit_y", &laser_exit_y);
+    fLaserTree->Branch("exit_z", &laser_exit_z);
+
     return;
 }
 
@@ -114,10 +133,28 @@ void GetTracks::reconfigure(fhicl::ParameterSet const& parameterSet)
 void GetTracks::produce(art::Event& event)
 {
     art::Handle<std::vector<recob::Track> > Tracks;
+    art::Handle<lasercal::LaserBeam>  Laser;
 
     event.getByLabel(fTrackLabel, Tracks);
 
+    try {
+        event.getByLabel("LaserBeam", Laser);
+
+        laser_entry_x = Laser->GetEntryPoint().x();
+        laser_entry_y = Laser->GetEntryPoint().y();
+        laser_entry_z = Laser->GetEntryPoint().z();
+
+        laser_exit_x = Laser->GetExitPoint().x();
+        laser_exit_y = Laser->GetExitPoint().y();
+        laser_exit_z = Laser->GetExitPoint().z();
+
+        fLaserTree->Fill();
+    }
+    catch (...){}; // pretty dangerous, but we just ignore writing the laser tree if no laser data is present.
     recob::Track track;
+    lasercal::LaserBeam laserb;
+
+
     //auto track = tr.fXYZ;
     for (auto const &Track : *Tracks) {
 
