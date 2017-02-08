@@ -1,6 +1,7 @@
 <lcgdict>
-    <class name="lasercal::Time"/>
-    <class name="lasercal::LaserBeam"/>
-    <class name="art::Wrapper<lasercal::LaserBeam>"/>
-    <class name="std::vector<lasercal::LaserBeam>"        />
+    	<class name="lasercal::Time", classVersion="10"/>
+    	<class name="lasercal::LaserBeam", classVersion="10"/>
+	<class name="std::vector<geo::WireID>", classVersion="10"/>
+	<class name="art::Wrapper<lasercal::LaserBeam>", classVersion="10"/>
+	<class name="art::Wrapper<lasercal::Time>", classVersion="10"/>
 </lcgdict>

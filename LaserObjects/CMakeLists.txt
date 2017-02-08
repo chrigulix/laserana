@@ -23,9 +23,12 @@ art_make( BASENAME_ONLY
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
-  DICT_LIBRARIES
-                        LaserObjects
+#  DICT_LIBRARIES
+#                        LaserObjects
 )
+
+
+#art_dictionary( DICTIONARY_LIBRARIES laser_LaserObjects )
 
 install_headers()
 install_fhicl()

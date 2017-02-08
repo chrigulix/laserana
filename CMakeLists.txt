@@ -64,7 +64,7 @@ add_subdirectory(HitAna)
 add_subdirectory(PowerAna)
 add_subdirectory(fcl)
 #add_subdirectory(ApplyField)
-add_subdirectory(SECAna)
+#add_subdirectory(SECAna)
 
 # tests
 add_subdirectory(test)

@@ -22,7 +22,7 @@ services:
 }
 
 #services.DatabaseUtil.ShouldConnect: false
-#services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+#services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
 services.DetectorClocksService.InheritClockConfig: false
 
 #source is now a root file
