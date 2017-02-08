@@ -17,12 +17,12 @@ os.path.isfile(args.filepath)
 laser = Laser()
 
 LaserFile = args.filepath
-colums = [laser.rot]
+colums = [laser.col_rotary]
 
 rotary_deg = np.loadtxt(fname=LaserFile, usecols=colums)
 
 
-test = laser.deg_to_theta(rotary_deg, 1)
+test = laser.deg_to_theta(rotary_deg)
 
 if args.entries:
     for entry in args.entries:

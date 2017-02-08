@@ -1,7 +1,7 @@
 from datadefs.lar_data import *
 import matplotlib.pyplot as plt
 
-filename = "/mnt/lheppc46/data/larsoft/userdev/maluethi/laser_v05_08_00/prod/3165/LaserHitAna-3165.root"
+filename = "/home/matthias/workspace/laser/runs/test_reco/test.root"
 
 data = LarData(filename)
 data.read_laser()
