@@ -44,7 +44,7 @@ class Laser():
 
     def theta_to_deg(self, rotary_meas):
         # returns rotary angle
-        return rotary_meas - self.rot_offset[self.laser_id - 1]
+        return (rotary_meas - self.rot_offset[self.laser_id - 1])
 
     def assemble_time(self, sec, usec):
         return sec + usec / 1000000
