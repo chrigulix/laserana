@@ -74,7 +74,7 @@ void lasercal::LaserBeam::SetIntersectionPoints()
     detinfo::DetectorProperties const *DetProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Load geometry core
-    geo::GeometryCore const* Geometry = &*(art::ServiceHandle<geo::Geometry>());
+    auto const* Geometry = lar::providerFrom<geo::Geometry>();
 
     // Create the active Volume
     geo::BoxBoundedGeo ActiveVolume( 0,2*Geometry->TPC().ActiveHalfWidth(), // xmin, xmax
