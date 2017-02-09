@@ -2,7 +2,7 @@
 ##  A "minimal" Reconstruction for uboone data
 ##
 
-process_name: RecoDataMinimal
+process_name: GetTracks
 
 services:
 {
@@ -29,7 +29,7 @@ physics:
 {
  producers:
   {
-    TimeMapProducer: 
+    GetTracks:
     {
         module_type:          "GetTracks"
         TrackLabel: "pandoraCosmic"
@@ -38,7 +38,7 @@ physics:
 
  # define the producer and filter modules for this path, order matters,
  # filters reject all following items.  see lines starting physics.producers below
- reco: [ TimeMapProducer ]
+ reco: [ GetTracks ]
 
  # define the output stream, there could be more than one if using filters
  # stream1:  [ out1 ]
