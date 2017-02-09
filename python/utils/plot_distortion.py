@@ -57,15 +57,27 @@ grid_z2 = griddata((z, x), res, (grid_z, grid_x), method='nearest')
 print np.max(grid_z2)
 
 v = np.linspace(0, 40, 9)
+
+plt.figure(figsize=(16,6), dpi=80)
+
+
 CS = plt.contourf(grid_z, grid_x, grid_z2, v, cmap=plt.viridis())
 
 
-plt.colorbar(CS, label="Distrortion [cm]")
+
 
 plt.scatter(z, x, alpha=.01, s=2)
 
-plt.xlim([0,1036])
-plt.ylim([0,250])
-plt.xlabel("z [cm]")
-plt.ylabel("x (drift) [cm]")
+fontsize=18
+plt.xlim([0, 1035])
+plt.ylim([0, 250])
+cbar = plt.colorbar(CS)
+cbar.set_label("Distrortion [cm]", fontsize=fontsize)
+cbar.ax.tick_params(labelsize=fontsize)
+plt.xlabel("z [cm]", fontsize=fontsize)
+plt.ylabel("x (drift) [cm]", fontsize=fontsize)
+plt.xticks(fontsize=fontsize)
+plt.yticks(fontsize=fontsize)
+plt.grid()
+
 plt.show()
