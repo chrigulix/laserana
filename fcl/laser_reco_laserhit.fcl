@@ -10,7 +10,7 @@
 #include "wirecellmodules_microboone.fcl"
 
 #include "merger.fcl"
-include "laserreco.fcl"
+#include "laserreco.fcl"
 
 process_name: Laser
 
@@ -67,7 +67,7 @@ physics:
 
    # ## hit-finder producers
    # gaushit:                      @local::microboone_gaushitfinder
-   laserhit                     @local::laserreco
+   laserhit:                     @local::LaserReco
 
 
    trackkalmanhittag:            @local::microboone_cosmictracktagger
@@ -111,9 +111,9 @@ physics:
          # digitfilter,
          # caldata,
          # gaushit,
-         laserhit
+         laserhit,
 # 	 cluster3d #,
-	  pandoraCosmic #,
+	  pandoraCosmic
 # 	  pandoraCosmicKHit,
 # trackkalmanhittag,
 #         pandoraCosmicKHitPFPart,
