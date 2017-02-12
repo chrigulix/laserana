@@ -10,6 +10,7 @@
 #include "wirecellmodules_microboone.fcl"
 
 #include "merger.fcl"
+include "laserreco.fcl"
 
 process_name: Laser
 
@@ -65,7 +66,9 @@ physics:
    caldata:                      @local::microboone_calroi
 
    # ## hit-finder producers
-   gaushit:                      @local::microboone_gaushitfinder
+   # gaushit:                      @local::microboone_gaushitfinder
+   laserhit                     @local::laserreco
+
 
    trackkalmanhittag:            @local::microboone_cosmictracktagger
 
@@ -105,9 +108,10 @@ physics:
  reco: [
 #         wcNoiseFilter,
         LaserDataMerger,
-         digitfilter,
-         caldata,
-         gaushit,
+         # digitfilter,
+         # caldata,
+         # gaushit,
+         laserhit
 # 	 cluster3d #,
 	  pandoraCosmic #,
 # 	  pandoraCosmicKHit,
@@ -160,13 +164,6 @@ physics.producers.caldata.DigitModuleLabel:                            "digitfil
 physics.producers.caldata.Threshold:                                   [ 0, 0, 0]
 physics.producers.caldata.NumSigma:                                    [ 9, 9, 9]
 physics.producers.caldata.DodQdxCalib:                                 false
-
-#physics.producers.gaushit.NumBinsToAverage:                            7
-physics.producers.gaushit.MinSig:                                      [3.25, 3.25, 3.75] #[15., 15., 15.] #
-physics.producers.gaushit.MinWidth:                                    [1.0, 1.0, 1.0]
-physics.producers.gaushit.MaxMultiHit:                                 4
-physics.producers.gaushit.TryNplus1Fits:                               false
-physics.producers.gaushit.Chi2NDF:                                     50.
 
 physics.producers.cluster3d.EnableMonitoring:                          true
 #physics.producers.cluster3d.Hit3DBuilderAlg.NumSigmaPeakTime:          2.5
