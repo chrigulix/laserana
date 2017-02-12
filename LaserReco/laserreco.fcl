@@ -5,8 +5,8 @@ laserreco:
       module_type:         "LaserReco"
 
       GenerateWireMap:         false
-      UseROI:            false
-      HitBoxSize:              10       #cm
+      UseROI:                  true
+      HitBoxSize:              25       #cm
 
       MinAllowedChannelStatus: 4
 

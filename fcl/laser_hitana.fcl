@@ -42,8 +42,7 @@ physics: {
             module_type:         "LaserReco"
 
             GenerateWireMap:         false
-            UseROI:                  true
-            CalDataTag:              "daq"
+            UseROI:                  false
             HitBoxSize:              25       # cm
 
             MinAllowedChannelStatus: 4
@@ -54,7 +53,7 @@ physics: {
 
              # High amplitude threshold for high signal exceptions for all planes
              HighAmplThreshold:       1000
-             
+
              # U-Plane hit thresholds
              UHitPeakThreshold:      -25.0
              UAmplitudeToWidthRatio:  1
@@ -70,7 +69,7 @@ physics: {
              YHitPeakThreshold:       10.0
              YAmplitudeToWidthRatio:  1.5
              YHitWidthThreshold:      6
-        }        
+        }
     }
 
     filters: {
