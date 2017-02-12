@@ -130,9 +130,10 @@ namespace LaserReco {
         this->reconfigure(pset);
 
 //     produces< std::vector<recob::Wire> >("blibla");
-        produces<std::vector<recob::Hit> >("UPlaneLaserHits");
-        produces<std::vector<recob::Hit> >("VPlaneLaserHits");
-        produces<std::vector<recob::Hit> >("YPlaneLaserHits");
+        //produces<std::vector<recob::Hit> >("UPlaneLaserHits");
+        //produces<std::vector<recob::Hit> >("VPlaneLaserHits");
+        //produces<std::vector<recob::Hit> >("YPlaneLaserHits");
+        produces<std::vector<recob::Hit> >("");
     }
 
 
@@ -230,9 +231,11 @@ namespace LaserReco {
         }
 
         // Prepairing the hit vectors for all planes
-        std::unique_ptr<std::vector<recob::Hit> > UHitVec(new std::vector<recob::Hit>);
-        std::unique_ptr<std::vector<recob::Hit> > VHitVec(new std::vector<recob::Hit>);
-        std::unique_ptr<std::vector<recob::Hit> > YHitVec(new std::vector<recob::Hit>);
+        //std::unique_ptr<std::vector<recob::Hit> > UHitVec(new std::vector<recob::Hit>);
+        //std::unique_ptr<std::vector<recob::Hit> > VHitVec(new std::vector<recob::Hit>);
+        //std::unique_ptr<std::vector<recob::Hit> > YHitVec(new std::vector<recob::Hit>);
+
+        std::unique_ptr<std::vector<recob::Hit> > HitVec(new std::vector<recob::Hit>);
 
         // Initialize Regions of interest
         recob::Wire::RegionsOfInterest_t RegionOfInterestFirst;
@@ -257,9 +260,11 @@ namespace LaserReco {
 //     AllLaserHits.TimeMatchFilter();
 
         // Fill plane specific hit vectors
-        UHitVec = AllLaserHits.GetPlaneHits(0);
-        VHitVec = AllLaserHits.GetPlaneHits(1);
-        YHitVec = AllLaserHits.GetPlaneHits(2);
+        //UHitVec = AllLaserHits.GetPlaneHits(0);
+        //VHitVec = AllLaserHits.GetPlaneHits(1);
+        //YHitVec = AllLaserHits.GetPlaneHits(2);
+
+        HitVec = AllLaserHits.GetHits();
 
 //     std::cout << fDetProperties->ConvertXToTicks(100,2,0,0) << std::endl;
 
@@ -268,9 +273,11 @@ namespace LaserReco {
 //     std::cout << YHitVec->size() << std::endl;
 
         // Fill Hits of all planes into the new
-        event.put(std::move(UHitVec), "UPlaneLaserHits");
-        event.put(std::move(VHitVec), "VPlaneLaserHits");
-        event.put(std::move(YHitVec), "YPlaneLaserHits");
+        //event.put(std::move(UHitVec), "UPlaneLaserHits");
+        //event.put(std::move(VHitVec), "VPlaneLaserHits");
+        //event.put(std::move(YHitVec), "YPlaneLaserHits");
+
+        event.put(std::move(HitVec));
     } // LaserReco::analyze()
 
     // Gives out a vector of WireIDs which cross a certain input wire
