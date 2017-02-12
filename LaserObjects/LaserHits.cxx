@@ -156,6 +156,25 @@ std::unique_ptr<std::vector<recob::Hit> > lasercal::LaserHits::GetPlaneHits(size
 
 //-------------------------------------------------------------------------------------------------------------------
 
+//-------------------------------------------------------------------------------------------------------------------
+
+std::unique_ptr<std::vector<recob::Hit> > lasercal::LaserHits::GetHits() {
+    std::unique_ptr<std::vector<recob::Hit> > HitVector(new std::vector<recob::Hit>);
+    for (size_t plane = 0; plane < fNumberOfPlanes; plane++ ) {
+        // Loop over all hit maps in a vector of a certain plane
+        for (const auto &HitMaps : fHitMapsByPlane.at(plane)) {
+            // Loop through map
+            for (const auto &HitMap : HitMaps) {
+                HitVector->push_back(HitMap.second);
+            }// loop through map
+        }// loop over hit map vector
+
+    }
+    return std::move(HitVector);
+}
+
+//-------------------------------------------------------------------------------------------------------------------
+
 std::map<float, recob::Hit> lasercal::LaserHits::FindSingleWireHits(const recob::Wire &Wire, unsigned Plane) {
     // Initialize hit map
     std::map<float, recob::Hit> HitMap;

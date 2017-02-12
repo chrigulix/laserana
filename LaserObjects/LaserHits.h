@@ -53,16 +53,21 @@ namespace lasercal
       
       // Get all hits of a certain plane
       std::unique_ptr< std::vector<recob::Hit> > GetPlaneHits(size_t PlaneIndex);
+
+      // Get all hits
+      std::unique_ptr< std::vector<recob::Hit> > GetHits();
       
       // Remove hits without time match
       void TimeMatchFilter();
       
     protected:
-      
+
+      static const size_t fNumberOfPlanes = 3;
+
       // Hit data member, it is an array for all planes cantainig vectors with all wire entries
       lasercal::LaserRecoParameters fParameters;
       
-      std::array< std::vector<std::map<float, recob::Hit>>, 3 > fHitMapsByPlane;
+      std::array< std::vector<std::map<float, recob::Hit>>, fNumberOfPlanes > fHitMapsByPlane;
       const geo::GeometryCore* fGeometry;
 //       std::array<float,3> fUVYThresholds;
       lasercal::LaserROI fLaserROI;
