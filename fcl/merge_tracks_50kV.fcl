@@ -11,7 +11,8 @@ services:
 {
   scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
-  TFileService:            { fileName: "Tracks-%04r-%03s.root" }
+  TFileService:            { fileName: "Tracks-%04r-%03s.root"
+                             closeFileFast : true }
   #Timing:                  {}
   #SimpleMemoryCheck:       { ignoreTotal: 1 } # default is one
   #RandomNumberGenerator:   {} #ART native random number generator
@@ -72,3 +73,4 @@ services.DetectorPropertiesService.InheritNumberTimeSamples:        false
 services.DetectorClocksService.InheritClockConfig:                             false
 services.DetectorClocksService.TriggerOffsetTPC:                              -0.400e3
 
+services.DetectorPropertiesService.Efield: [0.195,0.527,0.79] # 0.195 corresponds to 50kV
