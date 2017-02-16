@@ -6,20 +6,15 @@
 // LArSoft includes
 #include "lardataobj/RawData/RawDigit.h"
 #include "lardataobj/RawData/raw.h"
-#include "lardata/RecoBaseArt/WireCreator.h"
-#include "lardata/RecoBaseArt/HitCreator.h"
-#include "lardataobj/RecoBase/Hit.h"
-#include "lardataobj/RecoBase/Cluster.h"
-#include "lardataobj/RecoBase/Wire.h"
+
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "larcore/CoreUtils/ServiceUtil.h"
 
 // Framework includes
-#include "canvas/Utilities/Exception.h"
-// #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/EDProducer.h"
+
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"

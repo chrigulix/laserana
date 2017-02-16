@@ -10,7 +10,6 @@ services:
 {
   scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
-  SimpleMemoryCheck:       { ignoreTotal: 1 } # default is one
   message:                 @local::microboone_message_services_prod_debug
   FileCatalogMetadata:     @local::art_file_catalog_data
   @table::microboone_reco_minimal_services
