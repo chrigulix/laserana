@@ -2,6 +2,8 @@
 ##  A "minimal" Reconstruction for uboone data
 ##
 
+#include "services_microboone.fcl"
+
 process_name: GetTracks
 
 services:
