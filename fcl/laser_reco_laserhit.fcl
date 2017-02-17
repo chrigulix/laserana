@@ -66,7 +66,7 @@ physics:
    caldata:                      @local::microboone_calroi
 
    # ## hit-finder producers
-   # gaushit:                      @local::microboone_gaushitfinder
+   gaushit:                      @local::microboone_gaushitfinder
    laserhit:                     @local::LaserReco
 
 
@@ -108,9 +108,9 @@ physics:
  reco: [
 #         wcNoiseFilter,
         LaserDataMerger,
-         # digitfilter,
-         # caldata,
-         # gaushit,
+         digitfilter,
+         #caldata,
+         #gaushit,
          laserhit,
 # 	 cluster3d #,
 	  pandoraCosmic
@@ -128,7 +128,14 @@ physics:
  stream1:   [ out1 ]
  end_paths: [ stream1 ]
 }
+physics.producers.laserhit.LaserRecoModuleLabel: "digitfilter"
+physics.producers.laserhit.UseROI: false
+#physics.producers.laserhit.UseCalData: true
+#physics.producers.laserhit.CalDataTag: "caldata"
 
+physics.producers.pandoraCosmic.HitFinderModuleLabel: "laserhit" 
+
+# physics.producers.pandoraNuKHit.Track3DKalmanHitAlg.SeedFinderAlg.SpacePointAlg.MinViews: 2
 
 # ## Here, we overwrite ALL module labels with the ones defined above.
 
@@ -165,62 +172,20 @@ physics.producers.caldata.Threshold:                                   [ 0, 0, 0
 physics.producers.caldata.NumSigma:                                    [ 9, 9, 9]
 physics.producers.caldata.DodQdxCalib:                                 false
 
-physics.producers.cluster3d.EnableMonitoring:                          true
-#physics.producers.cluster3d.Hit3DBuilderAlg.NumSigmaPeakTime:          2.5
-#physics.producers.cluster3d.DBScanAlg.NumSigmaPeakTime:                1.0  #1.5
-#physics.producers.cluster3d.DBScanAlg.PairMaxDistance:                 0.5
-#physics.producers.cluster3d.DBScanAlg.PairSigmaPeakTime:               9.0  #1.5
 
-### Turn off the database...
-#services.ChannelStatusService.ChannelStatusProvider.UseDB:           false
-#services.DetPedestalService.DetPedestalRetrievalAlg.UseDB:           false
-#services.DetPedestalService.DetPedestalRetrievalAlg.DefaultCollMean: 473
-#services.DetPedestalService.DetPedestalRetrievalAlg.DefaultIndMean:  2046
-#services.DetPedestalService.DetPedestalRetrievalAlg.DefaultCollMean: 400
-#services.DetPedestalService.DetPedestalRetrievalAlg.DefaultIndMean:  2049
 
+physics.producers.gaushit.NumBinsToAverage:                            7
+physics.producers.gaushit.MinSig:                                      [3.25, 3.25, 3.75] #[15., 15., 15.] #
+physics.producers.gaushit.MinWidth:                                    [1.0, 1.0, 1.0]
+physics.producers.gaushit.MaxMultiHit:                                 4
+physics.producers.gaushit.TryNplus1Fits:                               false
+physics.producers.gaushit.Chi2NDF:                                     50.
+
+physics.producers.pandoraCosmic.GeantModuleLabel:			     "laserhit"
 physics.producers.pandoraCosmic.GeantModuleLabel:                            "largeant"
-physics.producers.pandoraCosmic.HitFinderModuleLabel:                        "gaushit"
+physics.producers.pandoraCosmic.HitFinderModuleLabel:                        "fds"
 physics.producers.pandoraCosmic.ConfigFile:                                  "PandoraSettings_MicroBooNE_Cosmic.xml"
 
-physics.producers.pandoraCosmicKHit.UseClusterHits:                          false
-physics.producers.pandoraCosmicKHit.UsePFParticleHits:                       true
-physics.producers.pandoraCosmicKHit.Track3DKalmanHitAlg.SelfSeed:            true
-physics.producers.pandoraCosmicKHit.ClusterModuleLabel:                      "pandoraCosmic"
-physics.producers.pandoraCosmicKHit.PFParticleModuleLabel:                   "pandoraCosmic"
-
-physics.producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel:             "pandoraCosmic"
-physics.producers.pandoraCosmicKHitPFPart.TrackModuleLabel:                  "pandoraCosmicKHit"
-physics.producers.pandoraCosmicKHitPFPart.TPCXBoundary:                      5
-physics.producers.pandoraCosmicKHitPFPart.TPCYBoundary:                      15
-physics.producers.pandoraCosmicKHitPFPart.TPCZBoundary:                      20
-physics.producers.pandoraCosmicKHitPFPart.EndTickPadding:                    75
-
-physics.producers.pandoraCosmicKHitRemoval.HitProducerLabel:                 "gaushit"
-physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:             ["pandoraCosmicKHitPFPart","trackkalmanhittag"]
-physics.producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel:          "pandoraCosmic"
-physics.producers.pandoraCosmicKHitRemoval.TrackProducerLabels:              ["pandoraCosmicKHit","trackkalmanhit"]
-physics.producers.pandoraCosmicKHitRemoval.AssnProducerLabels:               ["pandoraCosmicKHit","pandoraTrackPFPartMatch"]
-physics.producers.pandoraCosmicKHitRemoval.EndTickPadding:                   75
-#physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:             ["pandoraCosmicKHitPFPart"]
-#physics.producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel:          "pandoraCosmic"
-#physics.producers.pandoraCosmicKHitRemoval.TrackProducerLabels:              ["pandoraCosmicKHit"]
-#physics.producers.pandoraCosmicKHitRemoval.AssnProducerLabels:               ["pandoraCosmicKHit"]
-#physics.producers.pandoraCosmicKHitRemoval.EndTickPadding:                   75
-
-physics.producers.pandoraNu.GeantModuleLabel:                                "largeant"
-physics.producers.pandoraNu.HitFinderModuleLabel:                            "pandoraCosmicKHitRemoval"
-physics.producers.pandoraNu.ConfigFile:                                      "PandoraSettings_MicroBooNE_Neutrino.xml"
-
-physics.producers.pandoraNuKHit.UseClusterHits:                                           false
-physics.producers.pandoraNuKHit.UsePFParticleHits:                                        true
-physics.producers.pandoraNuKHit.ClusterModuleLabel:                                       "pandoraNu"
-physics.producers.pandoraNuKHit.PFParticleModuleLabel:                                    "pandoraNu"
-physics.producers.pandoraNuKHit.HitFinderModuleLabel:                                     "pandoraCosmicKHitRemoval"
-physics.producers.pandoraNuKHit.Track3DKalmanHitAlg.SelfSeed:                             true
-# physics.producers.pandoraNuKHit.Track3DKalmanHitAlg.SelfSeed:                             false
-# physics.producers.pandoraNuKHit.Track3DKalmanHitAlg.SeedFinderAlg.Allow2DSeeds:           true
-# physics.producers.pandoraNuKHit.Track3DKalmanHitAlg.SeedFinderAlg.SpacePointAlg.MinViews: 2
 
 services.message.destinations :
 {
