@@ -17,6 +17,8 @@ services:
   TFileService:            { fileName: "Hit_Analysis_Hist.root" }
   @table::microboone_reco_minimal_services
   message: @local::standard_info
+  channelstatusservice:    @local::microboone_channelstatus_service
+  @table::microboone_services_reco
 }
 
 services.DetectorClocksService.InheritClockConfig: false
