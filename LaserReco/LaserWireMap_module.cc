@@ -108,26 +108,7 @@ namespace LaserWireMap {
 
     //-----------------------------------------------------------------------
     void LaserWireMap::beginJob() {
-
-            TFile* InputFile = new TFile(fFileName.c_str(), "READ");
-
-            std::map<unsigned int, unsigned int>* pUMap;
-            std::map<unsigned int, unsigned int>* pVMap;
-            std::map<unsigned int, unsigned int>* pYMap;
-
-            InputFile->GetObject("UMap",pUMap);
-            InputFile->GetObject("VMap",pVMap);
-            InputFile->GetObject("YMap",pYMap);
-
-            UMap = *pUMap;
-            VMap = *pVMap;
-            YMap = *pYMap;
-
-            delete pUMap;
-            delete pVMap;
-            delete pYMap;
-
-    }
+            }
 
 
     void LaserWireMap::endJob() {
@@ -146,8 +127,7 @@ namespace LaserWireMap {
 
     //-----------------------------------------------------------------------
     void LaserWireMap::produce(art::Event &event) {
-        art::ValidHandle<std::vector<raw::RawDigit> > DigitVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>(
-                "daq");
+        art::ValidHandle<std::vector<raw::RawDigit> > DigitVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>("daq");
 
         unsigned int Index = 0;
         for (auto const &RawDigit : *DigitVecHandle) {

@@ -23,7 +23,7 @@ services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
 source:
 {
   module_type: RootInput
-  maxEvents:  1        # Number of events to create
+  maxEvents:  -1        # Number of events to create
 }
 
 # Define and configure some modules to do work on each event.
