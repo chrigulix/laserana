@@ -5,7 +5,7 @@
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Wire.h"
-#include "lardata/RecoBaseArt/HitCreator.h"
+#include "lardata/ArtDataHelper/HitCreator.h"
 #include "larcore/Geometry/GeometryCore.h"
 #include "larcore/Geometry/Geometry.h"
 
