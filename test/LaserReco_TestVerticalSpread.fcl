@@ -13,10 +13,12 @@ services:
   scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService:            { fileName: "LaserHits.root" }
-  Timing:                  {}
+  message:                 @local::microboone_message_services_prod_debug
+  TimeTracker:             {}
+  MemoryTracker:           { ignoreTotal: 1 } # default is one
   RandomNumberGenerator:   {} #ART native random number generator
-  @table::microboone_reco_minimal_services
-  message: @local::standard_info
+  channelstatusservice:    @local::microboone_channelstatus_service
+  			   @table::microboone_services_reco
 }
 
 
@@ -168,7 +170,7 @@ physics:
             module_type:         "LaserRecoTest"
             TestConfigFile:      "HitDefs-10001.txt"
             HitModul:              "LaserReco"
-            HitLabel:              "YPlaneLaserHits"
+            HitLabel:              ""
         }
     }
 
