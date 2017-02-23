@@ -6,7 +6,7 @@ art_make( BASENAME_ONLY
 	  LIBRARY_NAME  LaserObjects
           LIB_LIBRARIES larcore_Geometry_Geometry_service
                         larcore_Geometry
-			lardata_RecoBaseArt
+			lardata_ArtDataHelper
 			lardataobj_RecoBase
 			lardataobj_RawData
                 	${ROOT_BASIC_LIB_LIST}

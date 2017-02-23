@@ -6,8 +6,6 @@
 // #include "Simulation/LArG4Parameters.h"
 #include "lardataobj/RawData/RawDigit.h"
 #include "lardataobj/RawData/raw.h"
-#include "lardata/RecoBaseArt/WireCreator.h"
-#include "lardata/RecoBaseArt/HitCreator.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Wire.h"
 #include "larcore/Geometry/Geometry.h"
