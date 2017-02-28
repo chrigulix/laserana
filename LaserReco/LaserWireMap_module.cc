@@ -141,6 +141,7 @@ namespace LaserWireMap {
             {
                 UMap[fGeometry->ChannelToWire(channel).front().Wire] = Index;
             }
+            Index++;
         }
     } // LaserWireMap::analyze()
 
