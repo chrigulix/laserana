@@ -126,6 +126,7 @@ void LaserMergerTest::analyze(art::Event const &event) {
         // order should be [3, 2, 4, 0, 1]
         assert(LaserBeam->GetTime().sec == id);
         assert(LaserBeam->GetAssID() == LaserBeam->GetLaserEventID());
+        assert(LaserBeam->GetTime().sec != 6);
     }
 
 }

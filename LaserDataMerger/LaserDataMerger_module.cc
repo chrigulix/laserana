@@ -111,7 +111,7 @@ private:
     unsigned int time_s;
     unsigned int time_ms;
 
-    std::map< Long64_t, unsigned int > timemap; ///< Key value: index of event, corresponding index in laser data file
+    std::map< Long64_t, int > timemap; ///< Key value: index of event, corresponding index in laser data file
     std::vector< std::vector<double> > laser_values; ///< line by line csv container
 
     bool fReadTimeMap = false;
@@ -209,14 +209,14 @@ void LaserDataMerger::beginRun(art::Run& run)
         TFile* InputFile = new TFile(TimemapFile.c_str(), "READ");
         TTree *tree = (TTree*) InputFile->Get("tree");
 
-        unsigned int map_root;
+        int map_root;
         tree->SetBranchAddress("map", &map_root);
         Long64_t nentries = tree->GetEntries();
 
         for (Long64_t idx = 0; idx < nentries; idx++)
         {
             tree->GetEntry(idx);
-            timemap.insert(std::pair< Long64_t, unsigned int >(idx, map_root));
+            timemap.insert(std::pair< Long64_t, int >(idx, map_root));
 
             //if (fDebug)
             //{
@@ -324,7 +324,11 @@ void LaserDataMerger::produce(art::Event& event)
     }
     else if (fReadTimeMap)
     {
-        uint laser_id = timemap.at(fEvent);
+        int laser_id = timemap.at(fEvent);
+        if (laser_id < 0) {
+            if (fDebug) std::cout << "Skipping event: " << fEvent << std::endl;
+            return;
+        }
         if (fDebug) std::cout << "Event idx: " << fEvent << " Laser idx: " << laser_id << std::endl;
         
         //auto LaserAA = std::make_unique<lasercal::LaserBeam>;
