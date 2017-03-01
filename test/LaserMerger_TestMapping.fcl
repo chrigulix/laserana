@@ -6,7 +6,7 @@ process_name: LaserMergerTest
 
 services.DetectorClocksService.InheritClockConfig: false
 services.DatabaseUtil.ShouldConnect: false
-services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: false
 
 services:
 {
@@ -16,8 +16,6 @@ services:
   message:                 @local::microboone_message_services_prod_debug
   TimeTracker:             {}
   MemoryTracker:           { ignoreTotal: 1 } # default is one
-  RandomNumberGenerator:   {} #ART native random number generator
-  channelstatusservice:    @local::microboone_channelstatus_service
   			   @table::microboone_services_reco
 }
 
@@ -27,7 +25,7 @@ source:
 {
   module_type: EmptyEvent
   timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
-  maxEvents:   5          # Number of events to create
+  maxEvents:   6          # Number of events to create
   firstRun:    10002           # Run number to use for this file
   firstEvent:  0           # number of first event in the file
 }

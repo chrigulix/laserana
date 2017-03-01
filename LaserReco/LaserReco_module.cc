@@ -99,7 +99,7 @@ namespace LaserReco {
 
         detinfo::DetectorProperties const *fDetProperties;  ///< pointer to detector properties provider
 
-        std::string fFileName = "WireIndexMap.root";
+        //std::string fFileName = "WireIndexMap.root";
 
         std::vector<std::map<unsigned int, unsigned int> > WireMaps;
 
@@ -132,7 +132,7 @@ namespace LaserReco {
 
     //-----------------------------------------------------------------------
     void LaserReco::beginJob() {
-        if (!fParameterSet.WireMapGenerator) {
+/*        if (!fParameterSet.WireMapGenerator) {
             TFile *InputFile = new TFile(fFileName.c_str(), "READ");
 
             std::map<unsigned int, unsigned int> *pUMap;
@@ -153,7 +153,7 @@ namespace LaserReco {
         }
 
         // TODO: Change later
-        fLCSNumber = 2;
+        fLCSNumber = 2;*/
 
     }
 
@@ -219,8 +219,8 @@ namespace LaserReco {
         art::ValidHandle<lasercal::LaserBeam> LaserBeamHandle = event.getValidHandle<lasercal::LaserBeam>(
                 fParameterSet.GetLaserBeamTag());
 
-        if (fUseCalData) {
-
+        if (LaserBeamHandle->GetLaserID() == 9999) {
+            return;
         }
 
         // Prepairing the hit vectors for all planes
