@@ -124,8 +124,15 @@ void LaserMergerTest::analyze(art::Event const &event) {
     if (fTestConfigFile.compare("HitDefs-10002.txt") == 0) {
         std::cout << "==> Testing Mapping " << id << std::endl;
         // order should be [3, 2, 4, 0, 1]
-        assert(LaserBeam->GetTime().sec == id);
-        assert(LaserBeam->GetAssID() == LaserBeam->GetLaserEventID());
+        LaserBeam->Print();
+        if (id == 5) {
+            assert(LaserBeam->GetLaserID() == 9999);
+        }
+        else {
+            assert(LaserBeam->GetTime().sec == id);
+            assert(LaserBeam->GetAssID() == LaserBeam->GetLaserEventID());
+        }
+
     }
 
 }
