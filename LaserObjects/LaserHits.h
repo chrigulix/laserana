@@ -5,7 +5,7 @@
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Wire.h"
-#include "lardata/ArtDataHelper/HitCreator.h"
+#include "lardata/RecoBaseArt/HitCreator.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/GeometryCore.h"
 
@@ -53,21 +53,21 @@ namespace lasercal
       
       // Get all hits of a certain plane
       std::unique_ptr< std::vector<recob::Hit> > GetPlaneHits(size_t PlaneIndex);
-
+     
       // Get all hits
       std::unique_ptr< std::vector<recob::Hit> > GetHits();
-      
+
       // Remove hits without time match
       void TimeMatchFilter();
       
     protected:
+     
+    static const size_t fNumberOfPlanes = 3;
 
-      static const size_t fNumberOfPlanes = 3;
-
-      // Hit data member, it is an array for all planes cantainig vectors with all wire entries
+    // Hit data member, it is an array for all planes cantainig vectors with all wire entries
       lasercal::LaserRecoParameters fParameters;
       
-      std::array< std::vector<std::map<float, recob::Hit>>, fNumberOfPlanes > fHitMapsByPlane;
+      std::array< std::vector<std::map<float, recob::Hit>>, 3 > fHitMapsByPlane;
       const geo::GeometryCore* fGeometry;
 //       std::array<float,3> fUVYThresholds;
       lasercal::LaserROI fLaserROI;

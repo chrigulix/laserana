@@ -9,7 +9,7 @@ simple_plugin(LaserUtilsTest "module"
         LaserObjects
         larcore_Geometry_Geometry_service
         larcore_Geometry
-        lardata_ArtDataHelper
+        lardata_RecoBaseArt
         lardataobj_RecoBase
         lardataobj_RawData
         nusimdata_SimulationBase
@@ -32,7 +32,7 @@ simple_plugin(LaserHitFinderTest "module"
         LaserObjects
         larcore_Geometry_Geometry_service
         larcore_Geometry
-        lardata_ArtDataHelper
+        lardata_RecoBaseArt
         lardataobj_RecoBase
         lardataobj_RawData
         nusimdata_SimulationBase
@@ -55,7 +55,7 @@ simple_plugin(LaserObjectsTest "module"
         LaserObjects
         larcore_Geometry_Geometry_service
         larcore_Geometry
-        lardata_ArtDataHelper
+        lardata_RecoBaseArt
         lardataobj_RecoBase
         lardataobj_RawData
         nusimdata_SimulationBase
@@ -78,7 +78,7 @@ simple_plugin(LaserSpotterTest "module"
         LaserObjects
         larcore_Geometry_Geometry_service
         larcore_Geometry
-        lardata_ArtDataHelper
+        lardata_RecoBaseArt
         lardataobj_RecoBase
         lardataobj_RawData
         nusimdata_SimulationBase
@@ -101,7 +101,7 @@ simple_plugin(LaserHitGenerator "module"
         LaserObjects
         larcore_Geometry_Geometry_service
         larcore_Geometry
-        lardata_ArtDataHelper
+        lardata_RecoBaseArt
         lardataobj_RecoBase
         lardataobj_RawData
         nusimdata_SimulationBase
@@ -124,7 +124,7 @@ simple_plugin(LaserRawDigitGenerator "module"
         LaserObjects
         larcore_Geometry_Geometry_service
         larcore_Geometry
-        lardata_ArtDataHelper
+        lardata_RecoBaseArt
         lardataobj_RecoBase
         lardataobj_RawData
         nusimdata_SimulationBase
@@ -147,7 +147,7 @@ simple_plugin(LaserRawDigitGenTest "module"
         LaserObjects
         larcore_Geometry_Geometry_service
         larcore_Geometry
-        lardata_ArtDataHelper
+        lardata_RecoBaseArt
         lardataobj_RecoBase
         lardataobj_RawData
         nusimdata_SimulationBase
@@ -170,7 +170,7 @@ simple_plugin(LaserSpotterGenTest "module"
         LaserObjects
         larcore_Geometry_Geometry_service
         larcore_Geometry
-        lardata_ArtDataHelper
+        lardata_RecoBaseArt
         lardataobj_RecoBase
         lardataobj_RawData
         nusimdata_SimulationBase
@@ -193,7 +193,7 @@ simple_plugin(LaserRecoTest "module"
         LaserObjects
         larcore_Geometry_Geometry_service
         larcore_Geometry
-        lardata_ArtDataHelper
+        lardata_RecoBaseArt
         lardataobj_RecoBase
         lardataobj_RawData
         nusimdata_SimulationBase
@@ -216,7 +216,7 @@ simple_plugin(LaserMergerTest "module"
         LaserObjects
         larcore_Geometry_Geometry_service
         larcore_Geometry
-        lardata_ArtDataHelper
+        lardata_RecoBaseArt
         lardataobj_RecoBase
         lardataobj_RawData
         nusimdata_SimulationBase
@@ -239,7 +239,7 @@ simple_plugin(LaserBeamTest "module"
         LaserObjects
         larcore_Geometry_Geometry_service
         larcore_Geometry
-        lardata_ArtDataHelper
+        lardata_RecoBaseArt
         nusimdata_SimulationBase
         ${ART_FRAMEWORK_CORE}
         ${ART_FRAMEWORK_PRINCIPAL}

@@ -11,9 +11,7 @@
 
 #include "lardataobj/RawData/RawDigit.h"
 #include "lardataobj/RawData/raw.h"
-#include "lardata/ArtDataHelper/HitCreator.h"
-#include "lardata/ArtDataHelper/WireCreator.h"
-
+#include "lardata/RecoBaseArt/WireCreator.h"
 
 #include "art/Framework/Principal/Event.h"
 

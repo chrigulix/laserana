@@ -3,7 +3,7 @@ simple_plugin(PowerAna "module"
 			LaserObjects
 			larcore_Geometry_Geometry_service
                         larcore_Geometry
-			lardata_ArtDataHelper
+			lardata_RecoBaseArt
 			lardataobj_RecoBase
 			lardataobj_RawData
                         nusimdata_SimulationBase

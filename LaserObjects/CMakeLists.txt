@@ -6,7 +6,7 @@ art_make( BASENAME_ONLY
 	  LIBRARY_NAME  LaserObjects
           LIB_LIBRARIES larcore_Geometry_Geometry_service
                         larcore_Geometry
-			lardata_ArtDataHelper
+			lardata_RecoBaseArt
 			lardataobj_RecoBase
 			lardataobj_RawData
                 	${ROOT_BASIC_LIB_LIST}
@@ -23,12 +23,9 @@ art_make( BASENAME_ONLY
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
-#  DICT_LIBRARIES
-#                        LaserObjects
+  DICT_LIBRARIES
+                        LaserObjects
 )
-
-
-#art_dictionary( DICTIONARY_LIBRARIES laser_LaserObjects )
 
 install_headers()
 install_fhicl()

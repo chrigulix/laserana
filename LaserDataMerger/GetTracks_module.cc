@@ -137,11 +137,10 @@ void GetTracks::produce(art::Event& event)
 
     event.getByLabel(fTrackLabel, Tracks);
 
-	auto LaserTag = art::InputTag("LaserDataMerger","LaserBeam");
-    //try {
-        event.getByLabel(LaserTag, Laser);
+    try {
+        event.getByLabel("LaserBeam", Laser);
 
-	event_id = event.id().event();
+    	event_id = event.id().event();
         laser_entry_x = Laser->GetEntryPoint().x();
         laser_entry_y = Laser->GetEntryPoint().y();
         laser_entry_z = Laser->GetEntryPoint().z();
@@ -151,10 +150,8 @@ void GetTracks::produce(art::Event& event)
         laser_exit_z = Laser->GetExitPoint().z();
 
         fLaserTree->Fill();
-    //}
-    //catch (...){}; // pretty dangerous, but we just ignore writing the laser tree if no laser data is present.
-    recob::Track track;
-    lasercal::LaserBeam laserb;
+    }
+    catch (...){}; // pretty dangerous, but we just ignore writing the laser tree if no laser data is present.
 
 
     //auto track = tr.fXYZ;
