@@ -1,6 +1,6 @@
-#include "laser_reco.fcl"
+#include "laser_reco_laserhit.fcl"
 
-outputs.out1.fileName: "LaserReco-%04r-%04s_50kV.root"
+outputs.out1.fileName: "LaserReco-LaserHit-%04r-%04s_50kV.root"
 
 # since the 50kV and 60kV data taken corresponds to (a),
 # we set the wire bias to match (a) to match to data
