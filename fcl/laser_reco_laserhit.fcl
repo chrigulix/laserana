@@ -108,9 +108,9 @@ physics:
  reco: [
 #         wcNoiseFilter,
         LaserDataMerger,
-         digitfilter,
-         #caldata,
-         #gaushit,
+         # digitfilter,
+         # caldata,
+         # gaushit,
          laserhit,
 # 	 cluster3d #,
 	  pandoraCosmic
@@ -128,11 +128,12 @@ physics:
  stream1:   [ out1 ]
  end_paths: [ stream1 ]
 }
-physics.producers.laserhit.LaserRecoModuleLabel: "digitfilter"
+physics.producers.laserhit.LaserRecoModuleLabel: "daq"
 physics.producers.laserhit.UseROI: false
-#physics.producers.laserhit.UseCalData: true
-#physics.producers.laserhit.CalDataTag: "caldata"
+# physics.producers.laserhit.UseCalData: true
+# physics.producers.laserhit.CalDataTag: "caldata"
 
+physics.producers.LaserDataMerger.UseROI: false
 physics.producers.pandoraCosmic.HitFinderModuleLabel: "laserhit" 
 
 # physics.producers.pandoraNuKHit.Track3DKalmanHitAlg.SeedFinderAlg.SpacePointAlg.MinViews: 2
@@ -181,42 +182,7 @@ physics.producers.gaushit.MaxMultiHit:                                 4
 physics.producers.gaushit.TryNplus1Fits:                               false
 physics.producers.gaushit.Chi2NDF:                                     50.
 
-physics.producers.pandoraCosmic.GeantModuleLabel:			     "laserhit"
-physics.producers.pandoraCosmic.GeantModuleLabel:                            "largeant"
-physics.producers.pandoraCosmic.HitFinderModuleLabel:                        "fds"
-physics.producers.pandoraCosmic.ConfigFile:                                  "PandoraSettings_MicroBooNE_Cosmic.xml"
-
-
-services.message.destinations :
-{
-  STDCOUT:
-  {
-     type:      "cout"      #tells the message service to output this destination to cout
-     threshold: "DEBUG"     #tells the message service that this destination applies to WARNING and higher level messages
-     append:     true       #says to append all messages to the output
-     categories:
-     {
-       AltNuMuCCInclusiveAlg:
-       {
-         limit: -1
-         reportEvery: 1
-       }
-       Cluster3D:
-       {
-         limit: -1
-         reportEvery: 1
-       }
-       RawDigitFilterUBooNE:
-       {
-         limit: -1
-         reportEvery: 1
-       }
-       default:
-       {
-         limit: 0  #don't print anything at the infomsg level except the explicitly named categories
-         reportEvery: 0
-       }
-     }
-  }
-}
+physics.producers.pandoraCosmic.GeantModuleLabel:			           "laserhit"
+physics.producers.pandoraCosmic.GeantModuleLabel:                      "largeant"
+physics.producers.pandoraCosmic.ConfigFile:                            "PandoraSettings_MicroBooNE_Cosmic.xml"
 
