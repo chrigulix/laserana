@@ -1,0 +1,4 @@
+# Plane, Wire, CenterTick, Width, Amplitude, Offset, Multiplicity
+# event 0
+1, 2, 1000, 10, 100, 0, 1
+# no its over (keep this line I was lazy in implementing it)

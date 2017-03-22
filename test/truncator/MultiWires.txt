@@ -1,0 +1,13 @@
+# Plane, Wire, CenterTick, Width, Amplitude, Offset, Multiplicity
+# event 0
+2, 1, 1500, 2, 25, 0, 1
+2, 2, 1510, 2, 25, 0, 1
+2, 3, 1520, 2, 25, 0, 1
+2, 4, 1530, 2, 25, 0, 1
+2, 5, 1540, 2, 25, 0, 1
+2, 6, 1550, 2, 25, 0, 1
+2, 7, 1560, 2, 25, 0, 1
+2, 8, 1570, 2, 25, 0, 1
+2, 9, 1580, 2, 25, 0, 1
+2, 10, 1590, 2, 25, 0, 1
+# no its over (keep this line I was lazy in implementing it)

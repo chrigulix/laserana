@@ -390,6 +390,8 @@ cet_test( LaserReco_TestROI HANDBUILT
 #        )
 
 
+add_subdirectory(truncator)
+
 install_headers()
 install_fhicl()
 install_source()

@@ -1,0 +1,78 @@
+#include "geometry.fcl"
+#include "reco_uboone_data_minimal.fcl"
+
+process_name: LaserBeamTest
+
+services.DetectorClocksService.InheritClockConfig: false
+services.DatabaseUtil.ShouldConnect: false
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+
+services:
+{
+  ExptGeoHelperInterface:    @local::standard_geometry_helper
+  Geometry:                  @local::standard_geo
+  @table::microboone_reco_minimal_services
+}
+
+
+source:
+{
+  module_type: EmptyEvent
+  timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
+  maxEvents:   1           # Number of events to create
+  firstRun:    1           # Run number to use for this file
+  firstEvent:  0           # number of first event in the file
+}
+
+physics:
+{
+    producers:
+    {
+      LaserRawDigitGenerator: {
+        module_type: "LaserRawDigitGenerator"
+        RawDigitFile: "FullTrunc.txt"
+        NoiseAmplitude: 1
+        RawDigitLabel: "RawDigitTest"
+      }
+
+      Truncator: {
+        module_type: "Trunc"
+        DigitModuleLabel: "LaserRawDigitGenerator"
+        RawDigitLabel: "RawDigitTest"
+
+        WindowSize: 1000
+        NumTicksToDropFront: 600
+      }
+    }
+      analyzers:
+      {
+        TruncTest: {
+        module_type: "TruncTest"
+        RawDigitModul: "Truncator"
+        RawDigitLabel: ""
+        TestConfigFile: "FullTrunc.txt"
+        }
+      }
+    # define the path for analyzer modules, order does not matter.
+    # see lines starting physics.analyzers below
+    ana:  [ LaserRawDigitGenerator, Truncator]
+    test: [TruncTest]
+
+
+    # trigger_paths is a keyword and contains the paths that modify the art::event,
+    # ie filters and producers
+    # trigger_paths: [ reco ]
+
+    # end_paths: [reco]
+
+    # end_paths is a keyword and contains the paths that do not modify the art::Event,
+    # ie analyzers and output streams.  these all run simultaneously
+    # end_paths:     [ana]
+
+    trigger_paths: [ ana ]
+
+
+
+    end_paths: [ ana, test ]
+
+}
