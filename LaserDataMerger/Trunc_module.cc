@@ -11,15 +11,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDProducer.h"
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "canvas/Persistency/Common/PtrVector.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
-#include "canvas/Utilities/Exception.h"
-
-#include "art/Framework/Services/Registry/ServiceHandle.h"
 
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 
@@ -27,8 +19,6 @@
 #include "lardataobj/RawData/raw.h"
 
 #include "larcore/Geometry/Geometry.h"
-
-#include <memory>
 
 class Trunc;
 
@@ -95,26 +85,20 @@ void Trunc::produce(art::Event &event) {
     }
     raw::RawDigit::ADCvector_t tempVec;
     raw::RawDigit::ADCvector_t trunc_adc;
-    tempVec.resize(maxTimeSamples);
+    trunc_adc.resize(fWindowSize);
 
     for (const auto &rawDigit : *digitVecHandle) {
 
         raw::ChannelID_t channel = rawDigit.Channel();
+        unsigned int samples = rawDigit.Samples();
+        tempVec.resize(samples);
         raw::Uncompress(rawDigit.ADCs(), tempVec, rawDigit.Compression());
-
-        // Handle the case where the actually submitted adc size is smaller than the requested
-        if (rawDigit.NADC() <= fWindowSize) {
-            trunc_adc.resize(rawDigit.NADC());
-        }
-        else{
-            trunc_adc.resize(fWindowSize);
-        }
 
         // this is doing the actual truncation by selecting samples out of the full adc vector
         std::copy(tempVec.begin() + fNumTicksToDropFront, tempVec.begin() + fNumTicksToDropFront + fWindowSize ,
                   trunc_adc.begin());
 
-        filteredRawDigit->emplace_back(raw::RawDigit(channel, trunc_adc.size(), trunc_adc, raw::kNone));
+        filteredRawDigit->emplace_back(std::move(raw::RawDigit(channel, trunc_adc.size(), trunc_adc, raw::kNone)));
     }
     event.put(std::move(filteredRawDigit));
 }
