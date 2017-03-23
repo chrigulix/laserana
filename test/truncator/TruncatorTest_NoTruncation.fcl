@@ -1,7 +1,7 @@
 #include "geometry.fcl"
 #include "reco_uboone_data_minimal.fcl"
 
-process_name: LaserBeamTest
+process_name: TruncatorTest
 
 services.DetectorClocksService.InheritClockConfig: false
 services.DatabaseUtil.ShouldConnect: false
