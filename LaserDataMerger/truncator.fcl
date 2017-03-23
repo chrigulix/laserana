@@ -1,0 +1,14 @@
+BEGIN_PROLOG
+
+truncator:
+{
+        module_type: "Trunc"
+        DigitModuleLabel: "daq"
+        RawDigitLabel: ""
+        WindowSize: 0
+        NumTicksToDropFront: 0
+}
+
+truncator: @local::truncator
+
+END_PROLOG

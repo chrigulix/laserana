@@ -4,7 +4,7 @@
 #include "services_microboone.fcl"
 #include "reco_uboone_data_minimal.fcl"
 
-process_name: LaserDataMerger
+process_name: Truncate
 
 services:
 {
@@ -50,7 +50,7 @@ physics:
       }
   }
 
- reco: [ LaserDataMerger ]
+ reco: [ Truncator ]
 
  stream1:  [ out1 ]
 
