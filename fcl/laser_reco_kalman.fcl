@@ -42,7 +42,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "LaserReco-Kalmanhit-%04r-%04s.root"
+   fileName:    "LaserReco-Kalman-%04r-%04s.root"
    # sam_ignore:  true
    dataTier:    "reconstructed-2d"
    outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
@@ -123,8 +123,6 @@ physics.producers.laserhit.UseROI: false
 
 # Adjust the window/offset for the reduced total frame size (9600 -> 6400 ticks)
 
-
-services.DetectorPropertiesService.Efield: [0.195,0.527,0.79] # 0.195 corresponds to 50kV
 
 # services.DetectorPropertiesService.NumberTimeSamples:                  6400
 # services.DetectorPropertiesService.ReadOutWindowSize:                  6400
