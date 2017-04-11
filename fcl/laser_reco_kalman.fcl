@@ -11,6 +11,7 @@
 
 #include "merger.fcl"
 #include "laserreco.fcl"
+#include "truncator.fcl"
 
 process_name: LaserReco
 
@@ -63,6 +64,8 @@ physics:
    caldata:                      @local::microboone_calroi
    LaserDataMerger:              @local::LaserDataMerger
 
+   Trunc:                        @local::truncator
+
    # hit-finder producers
    gaushit:                      @local::microboone_gaushitfinder
    laserhit:                     @local::LaserReco
@@ -90,7 +93,7 @@ physics:
  }
  # preprocess:   [digitfilter, caldata]
  # fuzzycluster: [fuzzycluster, trackkalmanhit, stitchkalmanhit]
- reco: [
+ reco: [    Trunc,
             digitfilter,
             caldata,
             LaserDataMerger,
@@ -108,13 +111,10 @@ physics:
 # physics.producers.laserhit.LaserRecoModuleLabel: "truncator"
 physics.producers.laserhit.LaserRecoModuleLabel: "daq"
 
-physics.producers.laserhit.UseROI: false
 # physics.producers.laserhit.UseCalData: true
 # physics.producers.laserhit.CalDataTag: "caldata"
 
 # physics.producers.truncator.WindowSize: 6400
-# physics.producers.truncator.WindowSize: 2400
-
 
 # ## Here, we overwrite ALL module labels with the ones defined above.
 

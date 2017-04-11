@@ -9,6 +9,6 @@ truncator:
         NumTicksToDropFront: 0
 }
 
-truncator: @local::truncator
+Truncator: @local::truncator
 
 END_PROLOG
