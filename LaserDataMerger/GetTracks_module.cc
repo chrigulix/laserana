@@ -143,7 +143,7 @@ void GetTracks::produce(art::Event& event)
     event.getByLabel(fTrackLabel, Tracks);
 
     try {
-        event.getByLabel("LaserBeam", Laser);
+        event.getByLabel("LaserDataMerger", "LaserBeam", Laser);
 
     	event_id = event.id().event();
         laser_entry_x = Laser->GetEntryPoint().x();
@@ -159,7 +159,9 @@ void GetTracks::produce(art::Event& event)
 
         fLaserTree->Fill();
     }
-    catch (...){}; // pretty dangerous, but we just ignore writing the laser tree if no laser data is present.
+    catch (...){
+        std::cout << "Could not find laser tracks" << std::endl;
+    }; // pretty dangerous, but we just ignore writing the laser tree if no laser data is present.
 
 
     //auto track = tr.fXYZ;
