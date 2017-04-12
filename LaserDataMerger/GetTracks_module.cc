@@ -119,7 +119,7 @@ void GetTracks::beginRun(art::Run& run)
     fLaserTree->Branch("exit_y", &laser_exit_y);
     fLaserTree->Branch("exit_z", &laser_exit_z);
     fLaserTree->Branch("dir", &direction);
-    fLaserTree->Branch("dir", &position);
+    fLaserTree->Branch("pos", &position);
 
     return;
 }
