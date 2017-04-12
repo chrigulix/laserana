@@ -59,9 +59,9 @@ private:
     TTree* fTrackTree;
     TTree* fLaserTree;
 
-    std::vector<Double_t> trackx;
-    std::vector<Double_t> tracky;
-    std::vector<Double_t> trackz;
+    std::vector<float> trackx;
+    std::vector<float> tracky;
+    std::vector<float> trackz;
     unsigned int event_id;
     unsigned int track_id;
 
@@ -72,6 +72,9 @@ private:
     Double_t laser_exit_x;
     Double_t laser_exit_y;
     Double_t laser_exit_z;
+
+    TVector3 position;
+    TVector3 direction;
 
     art::InputTag fTrackLabel;
 
@@ -115,6 +118,8 @@ void GetTracks::beginRun(art::Run& run)
     fLaserTree->Branch("exit_x", &laser_exit_x);
     fLaserTree->Branch("exit_y", &laser_exit_y);
     fLaserTree->Branch("exit_z", &laser_exit_z);
+    fLaserTree->Branch("dir", &direction);
+    fLaserTree->Branch("dir", &position);
 
     return;
 }
@@ -149,6 +154,9 @@ void GetTracks::produce(art::Event& event)
         laser_exit_y = Laser->GetExitPoint().y();
         laser_exit_z = Laser->GetExitPoint().z();
 
+        direction = Laser->GetLaserDirection();
+        position = Laser->GetLaserPosition();
+
         fLaserTree->Fill();
     }
     catch (...){}; // pretty dangerous, but we just ignore writing the laser tree if no laser data is present.
@@ -165,9 +173,9 @@ void GetTracks::produce(art::Event& event)
         trackx.resize(track_size); tracky.resize(track_size); trackz.resize(track_size);
 
         for (size_t i = 0; i < track_size; ++i)  {
-            trackx.at(i) = Track.LocationAtPoint(i).x();
-            tracky.at(i) = Track.LocationAtPoint(i).y();
-            trackz.at(i) = Track.LocationAtPoint(i).z();
+            trackx.at(i) = (float) Track.LocationAtPoint(i).x();
+            tracky.at(i) = (float) Track.LocationAtPoint(i).y();
+            trackz.at(i) = (float) Track.LocationAtPoint(i).z();
         }
         fTrackTree->Fill();
         trackx.clear(); tracky.clear(); trackz.clear();
