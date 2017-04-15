@@ -11,10 +11,10 @@ merger:
       # These are all calibration values, only change them if you know what you
       # are doing!
       TickToAngle:          1                   # conversion constant for linear encoder
-      DirCalLCS1:           [0. , 10500000.]           # Direction Calibration
-      DirCalLCS2:           [-18.432 , 10500000.]           # Direction Calibration
+      DirCalLCS1:           [122. , 10200000.]           # Direction Calibration
+      DirCalLCS2:           [161.568 , 10500000.]           # Direction Calibration
       PositionLCS1:         [103. , 0., -20.]           # Position of Mirror
-      PositionLCS2:         [104.5 , 0., 1056.8]  #
+      PositionLCS2:         [103. , 9., 1068.1]  #
       EnergyMinMaxLCS1:     [8000, 12500]
       EnergyMinMaxLCS2:     [8000, 12500]
 }

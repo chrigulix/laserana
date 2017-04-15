@@ -50,7 +50,7 @@ physics:
       # are doing!
       TickToAngle:          1                   # conversion constant for linear encoder
       DirCalLCS1:           [0. , 0.]           # Direction Calibration
-      DirCalLCS2:           [-18.432 , 10500000.]       # Direction Calibration (161.568deg for straight -180deg to invert )
+      DirCalLCS2:           [161.568 , 10500000.]       # Direction Calibration (161.568deg for straight -180deg to invert )
       PositionLCS1:         [103. , 0., -20.]           # Position of Mirror
       PositionLCS2:         [103. , 0., 1056.8]  #
       EnergyMinMaxLCS1:     [8000, 12500]
@@ -84,9 +84,11 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "LaserRun-%r-%05s.root"
+   fileName:    "LaserDataMerged-%r-%05s.root"
    #sam_ignore:  true
    dataTier:    "reconstructed-2d"
+   compressionLevel: 1
+   outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
    compressionLevel: 1
  }
 }

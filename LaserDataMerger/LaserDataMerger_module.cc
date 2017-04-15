@@ -310,11 +310,11 @@ namespace LaserDataMerger {
 
         if (LCS_ID == 1) { // The downstream laser system (sitting at z = -20)
             Theta = TMath::DegToRad() * (90.0 - LinearRawToAngle(Theta_raw - fDirCalLCS1[1]));
-            Phi = TMath::DegToRad() * Phi_raw - fDirCalLCS1[0];
+            Phi = TMath::DegToRad() * (Phi_raw - fDirCalLCS1[0]);
             Position = PositionLCS1;
         } else if (LCS_ID == 2) { // The upstream laser system (sitting at z = 1020)
-            Theta = TMath::DegToRad() * (90.0 - LinearRawToAngle(Theta_raw - fDirCalLCS2[1]));
-            Phi = -TMath::DegToRad() * (Phi_raw - fDirCalLCS2[0]);
+            Theta = TMath::DegToRad() * (LinearRawToAngle(Theta_raw) - 266.60208631 + 60 + 1.161  - 2*0.68) ;
+            Phi = -TMath::DegToRad() * (180 + (Phi_raw - fDirCalLCS2[0]));
             Position = PositionLCS2;
         } else {
             std::cerr << "Laser System not recognized " << std::endl;
