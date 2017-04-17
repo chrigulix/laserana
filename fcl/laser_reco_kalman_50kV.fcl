@@ -9,3 +9,11 @@ outputs.out1.fileName: "LaserReco-Kalman-%04r-%04s_50kV.root"
 # services.user.DetectorPropertiesService.Efield: [0.195,0.367,0.767] #0.195 corresponds to 50kV
 
 services.DetectorPropertiesService.Efield: [0.195,0.527,0.79] # 0.195 corresponds to 50kV
+
+physics.producers.laserhit.UseROI: false
+
+# Truncator adjustements for 50kV
+physics.producers.Trunc.WindowSize:          5898
+physics.producers.Trunc.NumTicksToDropFront: 3200
+
+services.DetectorClocksService.TriggerOffsetTPC:                        0e3
