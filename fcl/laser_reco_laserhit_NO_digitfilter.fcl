@@ -1,0 +1,188 @@
+#include "services_microboone.fcl"
+#include "caldata_microboone.fcl"
+#include "calibration_microboone.fcl"
+
+#include "hitfindermodules_microboone.fcl"
+#include "cluster_microboone.fcl"
+#include "cosmicremovalmodules.fcl"
+#include "trackfindermodules_microboone.fcl"
+#include "pandoramodules_microboone.fcl"
+#include "wirecellmodules_microboone.fcl"
+
+#include "merger.fcl"
+#include "laserreco.fcl"
+
+process_name: Laser
+
+services:
+{
+  TFileService:            { fileName: "reco2D_hist_evd.root" }
+  message:                 @local::microboone_message_services_prod_debug
+  TimeTracker:             {}
+  MemoryTracker:           { ignoreTotal: 1 } # default is one
+  RandomNumberGenerator:   {} #ART native random number generator
+  channelstatusservice:    @local::microboone_channelstatus_service
+  			   @table::microboone_services_reco
+}
+
+# Define the services
+
+#Look at the input files
+source:
+{
+  module_type: RootInput
+  fileNames:  [ "data.root" ]
+  maxEvents:   -1       # Number of events to create
+}
+
+outputs:{}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "LaserReco-LaserHit-%04r-%04s_NO_digitfilter.root"
+   # sam_ignore:  true
+   dataTier:    "reconstructed-2d"
+   outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
+   compressionLevel: 1
+ }
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ producers:
+ {
+   # ## raw digit filter
+   digitfilter:                  @local::microboone_rawdigitfilter
+   wcNoiseFilter:                @local::microboone_wirecellnoisefilter
+
+   # ## calwire producers
+   caldata:                      @local::microboone_calroi
+
+   # ## hit-finder producers
+   gaushit:                      @local::microboone_gaushitfinder
+   laserhit:                     @local::LaserReco
+
+
+   trackkalmanhittag:            @local::microboone_cosmictracktagger
+
+   # ## Match kalman tracks to pandora cosmic PFParticles
+   trackPFParticleMatch:         @local::microboone_trackpfparticlematch
+
+   # ## pandora cosmic pfparticle
+   pandoraCosmicKHitPFPart:      @local::microboone_cosmicpfparticletagger
+   pandoraCosmicKHitRemoval:     @local::microboone_crhitremoval
+   pandoraCosmicKHit:            @local::microboone_track3Dkalmanhit
+   trackkalmanhittag:            @local::microboone_cosmictracktagger
+
+   # ## pandora cosmic pass
+   pandoraCosmic:                @local::microboone_pandora
+
+   # ## pandora core modules
+   pandoraNu:                    @local::microboone_pandora
+   pandoraNuKHit:                @local::microboone_track3Dkalmanhit
+
+   # ## Cluster3D
+   cluster3d:                    @local::microboone_cluster3d
+
+   # ## Allow for rerunning hit removal for debugging
+   crhitremoval:                 @local::microboone_crhitremoval
+
+   LaserDataMerger:    @local::LaserDataMerger
+}
+
+ filters:
+ {
+ }
+
+ analyzers:
+ {
+ }
+
+ reco: [
+#         wcNoiseFilter,
+        LaserDataMerger,
+        #  digitfilter,
+         # caldata,
+         # gaushit,
+         laserhit,
+# 	 cluster3d #,
+	  pandoraCosmic
+# 	  pandoraCosmicKHit,
+# trackkalmanhittag,
+#         pandoraCosmicKHitPFPart,
+# 	  trackPFParticleMatch,
+#         pandoraCosmicKHitRemoval,
+#         pandoraNu,
+#         pandoraNuKHit #,
+       ]
+
+ # end_path are things that do not modify art::Event, includes analyzers
+ # and output modules. all items here can be run simultaneously
+ stream1:   [ out1 ]
+ end_paths: [ stream1 ]
+}
+physics.producers.laserhit.LaserRecoModuleLabel: "daq"
+physics.producers.laserhit.UseROI: false
+# physics.producers.laserhit.UseCalData: true
+# physics.producers.laserhit.CalDataTag: "caldata"
+
+physics.producers.LaserDataMerger.UseROI: false
+physics.producers.pandoraCosmic.HitFinderModuleLabel: "laserhit" 
+
+# physics.producers.pandoraNuKHit.Track3DKalmanHitAlg.SeedFinderAlg.SpacePointAlg.MinViews: 2
+
+# ## Here, we overwrite ALL module labels with the ones defined above.
+
+# services.ChannelStatusService.ChannelStatusProvider.UseDB:           false
+# services.DetPedestalService.DetPedestalRetrievalAlg.UseDB:           false
+
+# Adjust the window/offset for the reduced total frame size (9600 -> 6400 ticks)
+services.DetectorPropertiesService.NumberTimeSamples:                  6400
+services.DetectorPropertiesService.ReadOutWindowSize:                  6400
+services.DetectorPropertiesService.InheritNumberTimeSamples:           false
+services.DetectorClocksService.InheritClockConfig:                     false
+services.DetectorClocksService.TriggerOffsetTPC:                       -1.600e3
+
+# Try these?
+services.SignalShapingServiceMicroBooNE.FieldResponseFVersion:          [ "v3.1", "v3.1"]
+services.SignalShapingServiceMicroBooNE.YZdependentResponse:            true
+services.SignalShapingServiceMicroBooNE.datadrivenResponse:             true
+services.SignalShapingServiceMicroBooNE.DefaultEField:                  0.273
+services.SignalShapingServiceMicroBooNE.DefaultTemperature:             89
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU:          true
+services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor:    [ 1.0, 1.0, 1.0]
+
+#physics.producers.wcNoiseFilter.DoNoiseFiltering:                       false
+#physics.producers.wcNoiseFilter.NumTicksToDropFront:                    0
+#physics.producers.wcNoiseFilter.WindowSize:                             9600
+
+physics.producers.digitfilter.ProcessNoise:                            true
+physics.producers.digitfilter.TruncateTicks:                           false
+physics.producers.digitfilter.RMSRejectionCutHi:                       [1000., 1000., 1000.]
+
+physics.producers.caldata.DigitModuleLabel:                            "digitfilter"
+#physics.producers.caldata.DigitModuleLabel:                            "wcNoiseFilter"
+physics.producers.caldata.Threshold:                                   [ 0, 0, 0]
+physics.producers.caldata.NumSigma:                                    [ 9, 9, 9]
+physics.producers.caldata.DodQdxCalib:                                 false
+
+
+
+physics.producers.gaushit.NumBinsToAverage:                            7
+physics.producers.gaushit.MinSig:                                      [3.25, 3.25, 3.75] #[15., 15., 15.] #
+physics.producers.gaushit.MinWidth:                                    [1.0, 1.0, 1.0]
+physics.producers.gaushit.MaxMultiHit:                                 4
+physics.producers.gaushit.TryNplus1Fits:                               false
+physics.producers.gaushit.Chi2NDF:                                     50.
+
+physics.producers.pandoraCosmic.GeantModuleLabel:			           "laserhit"
+physics.producers.pandoraCosmic.GeantModuleLabel:                      "largeant"
+physics.producers.pandoraCosmic.ConfigFile:                            "PandoraSettings_MicroBooNE_Cosmic.xml"
+
