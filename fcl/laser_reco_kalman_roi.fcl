@@ -1,0 +1,11 @@
+#include "laser_reco_kalman.fcl"
+
+outputs.out1.fileName: "LaserReco-Kalman-%04r-%04s_ROI.root"
+
+# since the 50kV and 60kV data taken corresponds to (a),
+# we set the wire bias to match (a) to match to data
+# although we are currently running at (b)
+
+# services.user.DetectorPropertiesService.Efield: [0.195,0.367,0.767] #0.195 corresponds to 50kV
+
+physics.producers.laserhit.UseROI: true
