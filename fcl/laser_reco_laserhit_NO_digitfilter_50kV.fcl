@@ -1,0 +1,11 @@
+#include "laser_reco_laserhit_NO_digitfilter.fcl"
+
+outputs.out1.fileName: "LaserReco-LaserHit-%04r-%04s_NO_digitfilter_50kV.root"
+
+# since the 50kV and 60kV data taken corresponds to (a),
+# we set the wire bias to match (a) to match to data
+# although we are currently running at (b)
+
+# services.user.DetectorPropertiesService.Efield: [0.195,0.367,0.767] #0.195 corresponds to 50kV
+
+services.DetectorPropertiesService.Efield: [0.195,0.527,0.79] # 0.195 corresponds to 50kV
