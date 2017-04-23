@@ -3,8 +3,8 @@ from lar_utils import *
 
 # This script is plotting all tracks / laserbeams that were stored in npy file
 
-tracks_filename = "data/laser-tracks-7205-70deg.npy"
-laser_filename = "data/laser-data-7205-70deg.npy"
+tracks_filename = "data/laser-tracks-3300.npy"
+laser_filename = "data/laser-data-3300.npy"
 
 tracks = np.load(tracks_filename)
 laser = np.load(laser_filename)
@@ -16,32 +16,51 @@ zx_laser_lines = []
 zy_laser_lines = []
 xy_laser_lines = []
 
+colors = []
 
-for idx, track in enumerate(tracks):
+idx = 0
+laser_pos = np.array([115, 10, 1036])
+
+laser_distance = 32
+
+for laser, track in zip(laser, tracks):
     x, y, z = track[1], track[2], track[3]
-    laser_entry = np.rec.array([laser[idx][1], laser[idx][2], laser[idx][3]],
+    laser_entry = np.rec.array([laser[1], laser[2], laser[3]],
                                dtype = [('x', 'f'), ('y', 'f'), ('z', 'f')])
-    laser_exit = np.rec.array([laser[idx][4],laser[idx][5],laser[idx][6]],
+    laser_exit = np.rec.array([laser[4],laser[5],laser[6]],
                               dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
 
     event_id = track[0]
 
-    print "Event", event_id, "Subrun", event_id / 50
-    neg = np.where(x[1:] - x[:-1] > 0)
+    #print "Event", event_id, "Subrun", event_id / 50, int(laser_exit.y)
 
     plotting_args = {"color": None, "s": 1}
-    plot_track(x[neg],y[neg],z[neg],axes, **plotting_args)
+    plot_track(x,y,z,axes, **plotting_args)
 
     # plotting lines in a bulk: so we store them here for later
     zx_laser_lines.append([(laser_entry.z, laser_entry.x),(laser_exit.z, laser_exit.x)])
     zy_laser_lines.append([(laser_entry.z, laser_entry.y), (laser_exit.z, laser_exit.y)])
     xy_laser_lines.append([(laser_entry.x, laser_entry.y), (laser_exit.x, laser_exit.y)])
 
-    if (idx + 1) % 1000 == 0:
-        plot_lines([zx_laser_lines, zy_laser_lines, xy_laser_lines], axes)
-        plt.show()
-        fig, axes = make_figure()
+    colors.append(int(laser_exit.y))
 
+    # some module stuff, so you can plot few entries
+    modulo = 1000
+    if (idx + 1) % modulo == 0:
+        start_lines = int((idx) / modulo) * modulo
+        end_lines = start_lines + modulo
+
+        print start_lines, end_lines
+
+        plot_lines([zx_laser_lines[start_lines:end_lines],
+                    zy_laser_lines[start_lines:end_lines],
+                    xy_laser_lines[start_lines:end_lines]],
+                   axes,
+                   colors=colors)
+        plt.show()
+
+        fig, axes = make_figure()
+    idx += 1
 
 plot_lines([zx_laser_lines, zy_laser_lines, xy_laser_lines], axes)
 plt.show()
