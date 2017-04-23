@@ -5,7 +5,7 @@ from scipy import interpolate
 from lar_utils import *
 
 z = np.linspace(0, 5, 100)
-x = 0.5 * np.sin(z)
+x = 2 * np.sin(z)
 
 line_p1 = [0, -1]
 line_p2 = [5., 1.]
@@ -31,7 +31,6 @@ for slope, layout in zip([slope_splines, slope_gradient], ['*-', 'o-']):
     z_inter, x_inter = calc_intersect(m_line, b_line, m, b)
 
     # plot the line itself and the connection of the intersection point and the point on the line
-    print layout
     ax = plt.plot([z_inter, z], [x_inter, x], layout, alpha=0.3)
 
 plt.axes().set_aspect('equal', 'datalim')
