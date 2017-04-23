@@ -1,4 +1,3 @@
-import root_numpy as rn
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -47,13 +46,13 @@ for filename in args.files:
         in_region = in_range > np.sqrt(np.sum(np.power(closest_point - laser, 2)))
 
         if len(z) > 500:# and in_region:# and 0.06 > m_xy > 0.04: # and  m_xz < 0.05:
-            print "event: " + str(event_id) + ", track_id: " + str(track_id)
-            print "(x,y,z) track start: " \
+            print("event: " + str(event_id) + ", track_id: " + str(track_id))
+            print("(x,y,z) track start: " \
                   + str(np.max(x)) + "/" + str(np.max(y)) + "/" + str(np.max(z)) + \
-                  ", track end: " + str(track_id)\
+                  ", track end: " + str(track_id))
                   #+ str(np.min(x)) + "/" + str(np.min(y)) + "/" + str(np.min(z)) + \
-            print "color", track_number / len(tracks)
-            plot_track(x, y, z, axes, color=float(track_number)/len(tracks))
+            print("color", track_number / len(tracks))
+            plot_track(x, y, z, axes) #color=float(track_number)/len(tracks))
 
 plt.show()
 
