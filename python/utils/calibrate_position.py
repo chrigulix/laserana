@@ -6,7 +6,7 @@ from lar_utils import *
 
 # This script is used to illustrate the position calibration of the cold laser mirror
 
-filename = "laser-tracks-7205-kahlman.npy"
+filename = "data/laser-tracks-7205-kalman-roi.npy"
 tracks = np.load(filename)
 
 get_point_on_line = lambda x, m, b: x*m + b
@@ -20,18 +20,17 @@ lines_zx = []
 lines_zy = []
 lines_xy = []
 
+mzy = []
+
 for track_number in range(len(tracks)):
     x, y, z = tracks[track_number][1], tracks[track_number][2], tracks[track_number][3]
     closest_to_boarder = np.argmax(z)
     closest_point = np.rec.array([x[closest_to_boarder], y[closest_to_boarder], z[closest_to_boarder]],
                                  dtype=[('x', 'f'),('y', 'f'), ('z', 'f')])
 
-    print closest_point.z, closest_to_boarder
-
     # handle cases where the closest point to the laser is either at the beginning or end of the track
-    offset = 100
+    offset = 200
     if closest_to_boarder < 25:
-        offset = 100
         start_idx = 0
         end_idx = offset
         idx_other_point = end_idx
@@ -58,6 +57,8 @@ for track_number in range(len(tracks)):
     m_zy, b_zy = np.polyfit(z[start_idx:end_idx], y[start_idx:end_idx], 1)
     m_xy, b_xy = np.polyfit(x[start_idx:end_idx], y[start_idx:end_idx], 1)
 
+    mzy.append(m_zy)
+
     ax_zx.plot(other_point.z, other_point.x, "*")
 
     line_zx = [(other_point.z, get_point_on_line(other_point.z, m_zx, b_zx)),
@@ -75,6 +76,7 @@ for track_number in range(len(tracks)):
 
     plot_track(x,y,z,axes)
 
+print np.rad2deg(np.arctan(np.mean(mzy))), np.std(mzy)
 
 line_zx_collection = LineCollection(lines_zx, linewidths=(0.5), linestyles='solid')
 line_zy_collection = LineCollection(lines_zy, linewidths=(0.5), linestyles='solid')
