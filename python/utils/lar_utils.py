@@ -170,6 +170,27 @@ def read_data(filename):
     return read_tracks(filename), read_laser(filename)
 
 
+def disassemble_track(track):
+    track = np.rec.array([track[1], track[2], track[3]],
+                               dtype = [('x', 'f'), ('y', 'f'), ('z', 'f')])
+    event_id = track[0]
+    return track, event_id
+
+
+def disassemble_laser(laser):
+    laser_entry = np.rec.array([laser[1], laser[2], laser[3]],
+                               dtype = [('x', 'f'), ('y', 'f'), ('z', 'f')])
+    laser_exit = np.rec.array([laser[4],laser[5],laser[6]],
+                              dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
+
+    laser_dir = np.rec.array([laser[7],laser[8],laser[9]],
+                             dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
+
+    laser_pos = np.rec.array([laser[10],laser[11],laser[12]],
+                             dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
+
+    return laser_entry, laser_exit, laser_dir, laser_pos
+
 def write_to_root(tracks, laser):
     ''' Writes tracks and laser data to a root file which is readable by the reconstruction algorithm '''
     from rootpy.vector import Vector3
