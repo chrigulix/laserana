@@ -22,11 +22,17 @@ filename = "~/laser/v06_26_02/run/Tracks-7205-789-full.root"
 
 
 
-filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-80deg.root"
+filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-70deg.root"
+#filename = "/home/data/uboone/laser/7268/tracks/Tracks-7268-s.root"
+
+#filename = "/home/data/uboone/laser/7275/tracks/Tracks-7275-klmn.root"
+#filename = "/home/data/uboone/laser/3300/tracks/Tracks-3300-90deg.root"
 #filename = '/home/data/uboone/laser/7205/tracks/Tracks-7205-80deg-kalman-roi.root'
 #filename = '~/laser/v06_26_02/run/Tracks-7205-784.root'
 
 file_postfix = '-70deg'
+laser_id = 1
+
 
 laser_tree = find_tree("Laser", filename)
 laser_branches = get_branches(filename, laser_tree, vectors=['dir', 'pos'])
@@ -34,13 +40,14 @@ laser_branches = get_branches(filename, laser_tree, vectors=['dir', 'pos'])
 track_data = rn.root2array(filename, treename=find_tree("Track", filename))
 laser_data = rn.root2array(filename, treename=find_tree("Laser", filename), branches=laser_branches)
 
-laser = np.array([115, 10, 1036])
+laser = np.array([[100, 0, 0],[115, 10, 1036]])
 in_range = 30
 
 good_idx = []
 good_events = []
 
 first_event = track_data[0][0]
+print "first event: ", first_event
 
 for entry in range(len(track_data)):
     x, y, z = track_data[entry][1], track_data[entry][2], track_data[entry][3]
@@ -50,11 +57,18 @@ for entry in range(len(track_data)):
     m_xy = abs((y[-1] - y[0]) / (z[-1] - z[0]))
 
     # get the closest point to the sides (should change if laser 1 is used (np.argmin))
-    closest = np.argmax(z)
+    if laser_id == 0:
+        closest = np.argmin(z)
+    elif laser_id == 1:
+        closest = np.argmax(z)
+    else:
+        raise ValueError("Laser ID does not exist")
+
     closest_point = np.array([x[closest], y[closest], z[closest]])
 
+
     # calculate if track is in the expected entry region (the if statement is just here for speed uo)
-    in_region = in_range > np.sqrt(np.sum(np.power(closest_point - laser, 2)))
+    in_region = in_range > np.sqrt(np.sum(np.power(closest_point - laser[laser_id], 2)))
     if not in_region:
         continue
 
@@ -67,27 +81,25 @@ for entry in range(len(track_data)):
 
     # cut values
     min_length = 500
-    m_xy_max = 0.06
-    m_xy_min = 0.04
+    m_xy_max = 1
+    m_xy_min =-1
 
-    m_xz_max = 10 #0.05 # to cut away shots towards cathode
+    m_xz_max = 0.05 #0.05 # to cut away shots towards cathode
 
     # here the actual cut happens
     if len(z) > min_length \
             and in_region \
-            and m_xy_max > m_xy > m_xy_min \
             and m_xz < m_xz_max \
-            and max_diff_x < 10 \
-            and max_diff_y < 10 \
-            and max_diff_z < 50:
+            and max_diff_x < 50 \
+            and max_diff_y < 50 \
+            and max_diff_z < 100 \
+            and m_xy_max > m_xy > m_xy_min: \
 
         #well = np.abs(np.sum(np.diff(y[1:]) - np.diff(y[:-1])))
         #if well > 0.05:
         #    print 'Here'
         #    #continue
-
         good_idx.append(entry)
-
 
         event = track_data[entry][0]
         good_events.append(event - first_event)
