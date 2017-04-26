@@ -22,7 +22,7 @@ filename = "~/laser/v06_26_02/run/Tracks-7205-789-full.root"
 
 
 
-filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-70deg.root"
+filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-90deg.root"
 #filename = "/home/data/uboone/laser/7268/tracks/Tracks-7268-s.root"
 
 #filename = "/home/data/uboone/laser/7275/tracks/Tracks-7275-klmn.root"
@@ -30,7 +30,7 @@ filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-70deg.root"
 #filename = '/home/data/uboone/laser/7205/tracks/Tracks-7205-80deg-kalman-roi.root'
 #filename = '~/laser/v06_26_02/run/Tracks-7205-784.root'
 
-file_postfix = '-70deg'
+file_postfix = '-90deg'
 laser_id = 1
 
 
@@ -81,17 +81,18 @@ for entry in range(len(track_data)):
 
     # cut values
     min_length = 500
-    m_xy_max = 1
-    m_xy_min =-1
+    m_xy_max = 5
+    m_xy_min =-5
 
     m_xz_max = 0.05 #0.05 # to cut away shots towards cathode
+    m_xz_min = -5
 
     # here the actual cut happens
     if len(z) > min_length \
             and in_region \
-            and m_xz < m_xz_max \
-            and max_diff_x < 50 \
-            and max_diff_y < 50 \
+            and m_xz_min < m_xz < m_xz_max \
+            and max_diff_x < 5 \
+            and max_diff_y < 5 \
             and max_diff_z < 100 \
             and m_xy_max > m_xy > m_xy_min: \
 
