@@ -30,7 +30,7 @@ filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-90deg.root"
 #filename = '/home/data/uboone/laser/7205/tracks/Tracks-7205-80deg-kalman-roi.root'
 #filename = '~/laser/v06_26_02/run/Tracks-7205-784.root'
 
-file_postfix = '-90deg'
+file_postfix = '-90deg-fl-full'
 laser_id = 1
 
 
@@ -41,7 +41,7 @@ track_data = rn.root2array(filename, treename=find_tree("Track", filename))
 laser_data = rn.root2array(filename, treename=find_tree("Laser", filename), branches=laser_branches)
 
 laser = np.array([[100, 0, 0],[115, 10, 1036]])
-in_range = 30
+in_range = 20
 
 good_idx = []
 good_events = []
@@ -50,7 +50,8 @@ first_event = track_data[0][0]
 print "first event: ", first_event
 
 for entry in range(len(track_data)):
-    x, y, z = track_data[entry][1], track_data[entry][2], track_data[entry][3]
+    track = track_data[entry]
+    x, y, z = track[1], track[2], track[3]
 
     # calculate some track properties for selectin laser tracks
     m_xz = (x[-1] - x[0]) / (z[-1] - z[0])
@@ -66,7 +67,6 @@ for entry in range(len(track_data)):
 
     closest_point = np.array([x[closest], y[closest], z[closest]])
 
-
     # calculate if track is in the expected entry region (the if statement is just here for speed uo)
     in_region = in_range > np.sqrt(np.sum(np.power(closest_point - laser[laser_id], 2)))
     if not in_region:
@@ -80,12 +80,12 @@ for entry in range(len(track_data)):
     max_step = np.abs(max_diff_x + max_diff_y + max_diff_z)
 
     # cut values
-    min_length = 500
+    min_length = 700
     m_xy_max = 5
     m_xy_min =-5
 
-    m_xz_max = 0.05 #0.05 # to cut away shots towards cathode
-    m_xz_min = -5
+    m_xz_max = 0.05  #0.05 # to cut away shots towards cathode
+    m_xz_min = -100 #-0.25 # for excluding other stuff
 
     # here the actual cut happens
     if len(z) > min_length \
@@ -93,13 +93,14 @@ for entry in range(len(track_data)):
             and m_xz_min < m_xz < m_xz_max \
             and max_diff_x < 5 \
             and max_diff_y < 5 \
-            and max_diff_z < 100 \
+            and max_diff_z < 30 \
             and m_xy_max > m_xy > m_xy_min: \
 
-        #well = np.abs(np.sum(np.diff(y[1:]) - np.diff(y[:-1])))
-        #if well > 0.05:
-        #    print 'Here'
-        #    #continue
+        well = np.abs(np.sum(np.diff(y[1:]) - np.diff(y[:-1])))
+        if well > 0.05:
+            print 'Here'
+            continue
+
         good_idx.append(entry)
 
         event = track_data[entry][0]
