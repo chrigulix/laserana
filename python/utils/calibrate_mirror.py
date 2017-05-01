@@ -7,8 +7,8 @@ import numpy as np
 
 # We try to find the track that goes by ring # the closest. the ring is loacted at 1036
 
-tracks_filename = "data/laser-tracks-7205.npy"
-laser_filename = "data/laser-data-7205.npy"
+tracks_filename = "data/laser-tracks-7205-fl-full.npy"
+laser_filename = "data/laser-data-7205-fl-full.npy"
 
 tracks = np.load(tracks_filename)
 lasers = np.load(laser_filename)
@@ -113,15 +113,18 @@ for pol_angle, horizontal_scan in zip(unique_polar, horizontal_scans_selection):
             exit_z = corr_z[0]
 
         # write the infor into a new npy array
-        lasers_corrected[slice_idx] = (laser[0], corr_x[1], laser[2], corr_z[1], exit_x, laser[5], exit_z, 7, 8, 9, 10, 11, 13)
+        lasers_corrected[slice_idx] = (laser[0], corr_x[1], laser[2], corr_z[1], exit_x, laser[5], exit_z, pi + apparent_angle + corr_ange, 8, 9, 10, 11, 13)
 
         plt.plot([lasers_corrected[slice_idx][3], lasers_corrected[slice_idx][6]],
                  [lasers_corrected[slice_idx][1], lasers_corrected[slice_idx][4]], 'g+--')
-    plt.show()
+    #plt.show()
 
 plt.xlim([0,1068])
 plt.ylim([0,256])
 plt.plot(unique_polar, apparent_angles)
 plt.show()
+
+print 'write to', laser_filename.strip('.npy') + "-calib.npy"
+print 'length', len(lasers_corrected)
 
 np.save(laser_filename.strip('.npy') + "-calib.npy", lasers_corrected)
