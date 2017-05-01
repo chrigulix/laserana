@@ -10,6 +10,12 @@ import matplotlib.cm as cm
 
 cmap = cm.rainbow(np.linspace(0, 1, 500))
 
+def correct(track):
+    return 'track {} is ok'.format(track)
+
+def load_tracks(file):
+    return [0,1,2,3,4,5]
+
 # Plotting
 def plot_track(x, y, z, axes, **kwargs):
 
@@ -35,7 +41,7 @@ def plot_lines(lines, axes, colors=None):
         colors = [cmap[col] for col in colors]
 
     for line_collection, ax in zip(lines, axes):
-        ax.add_collection(LineCollection(line_collection, linewidths=(0.5), linestyles='solid', colors=colors))
+        ax.add_collection(LineCollection(line_collection, linewidths=(1), linestyles='solid', colors=colors))
 
 
 def assemble_lines(laser_data):
@@ -82,12 +88,12 @@ def make_figure(tpc_limits=True):
 def set_tpc_limits(axes):
     ax_zx, ax_zy, ax_xy = axes
 
-    ax_zx.set_xlim([0, 1100])
+    ax_zx.set_xlim([0, 1036.8])
     ax_zx.set_ylim([0, 256])
     ax_zx.set_xlabel("z [cm]")
     ax_zx.set_ylabel("x [cm]")
 
-    ax_zy.set_xlim([0, 1100])
+    ax_zy.set_xlim([0, 1036.8])
     ax_zy.set_ylim([-128, 128])
     ax_zy.set_xlabel("z [cm]")
     ax_zy.set_ylabel("y [cm]")
