@@ -13,10 +13,18 @@ files_idx = [70, 80, 90]
 track_files = [base_dir + "laser-tracks-7205-" + str(idx) + "deg.npy" for idx in files_idx]
 laser_files = [base_dir + "laser-data-7205-" + str(idx) + "deg.npy" for idx in files_idx]
 
+track_files = [base_dir + "laser-tracks-7205-.npy"] #, base_dir + "laser-tracks-7205-flipped.npy"]
+laser_files = [base_dir + "laser-data-7205-calib.npy"] #, base_dir + "laser-data-7205-calib-flipped.npy"]
+
+track_files = [base_dir + "laser-tracks-7205-fl1.npy"] #, base_dir + "laser-tracks-7205-flipped.npy"]
+laser_files = [base_dir + "laser-data-7205-fl1-calib.npy"] #, base_dir + "laser-data-7205-calib-flipped.npy"]
+
+output_file = "output/laserbeams-7205.root"
+
 Vec = stl.vector(Vector3)
 track = Vec()
 
-with root_open("lasertracks-7205.root", "recreate"):
+with root_open(output_file, "recreate"):
     track_tree = Tree('tracks')
     laser_tree = Tree('lasers')
     track_tree.create_branches({'track': stl.vector(Vector3),
@@ -54,3 +62,5 @@ with root_open("lasertracks-7205.root", "recreate"):
 
         track_tree.write()
         laser_tree.write()
+
+print "tracks / laser written to " + output_file
