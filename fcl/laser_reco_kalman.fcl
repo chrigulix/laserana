@@ -12,12 +12,13 @@
 #include "merger.fcl"
 #include "laserreco.fcl"
 #include "truncator.fcl"
+#include "gettracks.fcl"
 
 process_name: LaserReco
 
 services:
 {
-  TFileService:            { fileName: "reco2D_hist_evd.root" }
+  TFileService:            { fileName: "Tracks-%04r-%03s.root" }
   message:                 @local::microboone_message_services_prod_debug
   TimeTracker:             {}
   MemoryTracker:           { ignoreTotal: 1 } # default is one
@@ -82,6 +83,8 @@ physics:
   stitchkalmanhit:                @local::microboone_trackstitcher
   stitchkalmanhitcc:              @local::microboone_trackstitcher
 
+  GetTracks:          @local::GetTracks
+
 }
 
  filters:
@@ -100,7 +103,8 @@ physics:
             laserhit,
             fuzzycluster,
             trackkalmanhit,
-            stitchkalmanhit
+            stitchkalmanhit,
+            GetTracks
        ]
 
  # end_path are things that do not modify art::Event, includes analyzers
@@ -110,6 +114,8 @@ physics:
 }
 # physics.producers.laserhit.LaserRecoModuleLabel: "truncator"
 physics.producers.laserhit.LaserRecoModuleLabel: "daq"
+
+physics.producers.GetTracks.TrackLabel: "stitchkalmanhit"
 
 # physics.producers.laserhit.UseCalData: true
 # physics.producers.laserhit.CalDataTag: "caldata"

@@ -1,0 +1,11 @@
+BEGIN_PROLOG
+
+gettracks:
+{
+      module_type:          "GetTracks"
+      TrackLabel: "pandoraCosmic"
+}
+
+GetTracks: @local::gettracks
+
+END_PROLOG
