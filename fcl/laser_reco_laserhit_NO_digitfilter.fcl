@@ -11,12 +11,13 @@
 
 #include "merger.fcl"
 #include "laserreco.fcl"
+#include "gettracks.fcl"
 
 process_name: Laser
 
 services:
 {
-  TFileService:            { fileName: "reco2D_hist_evd.root" }
+  TFileService:            { fileName: "Tracks-%04r-%03s.root" }
   message:                 @local::microboone_message_services_prod_debug
   TimeTracker:             {}
   MemoryTracker:           { ignoreTotal: 1 } # default is one
@@ -95,6 +96,7 @@ physics:
    crhitremoval:                 @local::microboone_crhitremoval
 
    LaserDataMerger:    @local::LaserDataMerger
+   GetTracks:          @local::GetTracks
 }
 
  filters:
@@ -106,21 +108,10 @@ physics:
  }
 
  reco: [
-#         wcNoiseFilter,
         LaserDataMerger,
-        #  digitfilter,
-         # caldata,
-         # gaushit,
-         laserhit,
-# 	 cluster3d #,
-	  pandoraCosmic
-# 	  pandoraCosmicKHit,
-# trackkalmanhittag,
-#         pandoraCosmicKHitPFPart,
-# 	  trackPFParticleMatch,
-#         pandoraCosmicKHitRemoval,
-#         pandoraNu,
-#         pandoraNuKHit #,
+        laserhit,
+	    pandoraCosmic
+        GetTracks
        ]
 
  # end_path are things that do not modify art::Event, includes analyzers
@@ -134,7 +125,9 @@ physics.producers.laserhit.UseROI: false
 # physics.producers.laserhit.CalDataTag: "caldata"
 
 physics.producers.LaserDataMerger.UseROI: false
-physics.producers.pandoraCosmic.HitFinderModuleLabel: "laserhit" 
+physics.producers.pandoraCosmic.HitFinderModuleLabel: "laserhit"
+
+physics.producers.GetTracks.TrackLabel: "pandoraCosmic"
 
 # physics.producers.pandoraNuKHit.Track3DKalmanHitAlg.SeedFinderAlg.SpacePointAlg.MinViews: 2
 
