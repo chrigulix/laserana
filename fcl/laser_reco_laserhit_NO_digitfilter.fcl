@@ -110,7 +110,7 @@ physics:
  reco: [
         LaserDataMerger,
         laserhit,
-	    pandoraCosmic
+	    pandoraCosmic,
         GetTracks
        ]
 
