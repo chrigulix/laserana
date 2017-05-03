@@ -11,7 +11,7 @@ import os
 # filename = "/home/matthias/data/uboone/laser/7206/tracks/Tracks-7206-233.root"
 
 # filename  ="/mnt/lheppc46/data/larsoft/userdev/maluethi/laser_v06_20_00/tests/Tracks-7205-790.root"
-# filename = "/home/matthias/Downloads/sync_gpvm/Tracks-7205-775.root"
+# filename = "/home/matthias/Downloads/sync_gpvm/Tracks-7205-90deg-pnra.root"
 # filename = "/home/matthias/data/uboone/laser/7267/tracks/90deg/Tracks-7267-785.root"
 filename = "/home/matthias/Downloads/sync_gpvm/Tracks-7267-90deg.root"
 # filename = "/home/matthias/data/uboone/laser/3300/tracks/Tracks-3300-188.root"
@@ -22,7 +22,10 @@ filename = "~/laser/v06_26_02/run/Tracks-7205-789-full.root"
 
 
 
-filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-90deg.root"
+filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-80deg.root"
+filename = "~/laser/v06_26_02/run/reco-ana/Tracks-7205-784-nodigit.root"
+
+filename = "/home/matthias/Downloads/sync_gpvm/laser-reco-7205-90deg-pnra-nd.root"
 #filename = "/home/data/uboone/laser/7268/tracks/Tracks-7268-s.root"
 
 #filename = "/home/data/uboone/laser/7275/tracks/Tracks-7275-klmn.root"
@@ -30,7 +33,7 @@ filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-90deg.root"
 #filename = '/home/data/uboone/laser/7205/tracks/Tracks-7205-80deg-kalman-roi.root'
 #filename = '~/laser/v06_26_02/run/Tracks-7205-784.root'
 
-file_postfix = '-90deg-fl-full'
+file_postfix = '-test-nd'
 laser_id = 1
 
 
@@ -96,8 +99,9 @@ for entry in range(len(track_data)):
             and max_diff_z < 30 \
             and m_xy_max > m_xy > m_xy_min: \
 
-        well = np.abs(np.sum(np.diff(y[1:]) - np.diff(y[:-1])))
-        if well > 0.05:
+        well = np.sum(np.abs(np.diff(y)))
+        if well > 200.:
+            print well
             print 'Here'
             continue
 
