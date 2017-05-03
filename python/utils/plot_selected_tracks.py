@@ -3,8 +3,10 @@ from lar_utils import *
 
 # This script is plotting all tracks / laserbeams that were stored in npy file
 
-tracks_filename = "data/laser-tracks-7205.npy"
-laser_filename = "data/laser-data-7205-calib.npy"
+
+
+tracks_filename = "data/laser-tracks-7205-test-nd.npy"
+laser_filename = "data/laser-data-7205-test-nd.npy"
 
 tracks = np.load(tracks_filename)
 laser = np.load(laser_filename)
@@ -31,8 +33,9 @@ for laser, track in zip(laser, tracks):
                               dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
 
     event_id = track[0]
+    subrun = event_id / 50
 
-    #print "Event", event_id, "Subrun", event_id / 50, int(laser_exit.y)
+    print "Event", event_id, "Subrun", subrun
 
     plotting_args = {"color": None, "s": 1}
     plot_track(x,y,z,axes, **plotting_args)
@@ -45,7 +48,7 @@ for laser, track in zip(laser, tracks):
     colors.append(int(laser_exit.y))
 
     # some module stuff, so you can plot few entries
-    modulo = 10
+    modulo = 100
     if (idx + 1) % modulo == 0:
         start_lines = int((idx) / modulo) * modulo
         end_lines = start_lines + modulo
