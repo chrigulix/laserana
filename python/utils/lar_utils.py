@@ -10,27 +10,30 @@ import matplotlib.cm as cm
 
 cmap = cm.rainbow(np.linspace(0, 1, 500))
 
+
 def correct(track):
     return 'track {} is ok'.format(track)
 
+
 def load_tracks(file):
-    return [0,1,2,3,4,5]
+    return [0, 1, 2, 3, 4, 5]
+
 
 # Plotting
 def plot_track(x, y, z, axes, **kwargs):
-
     ax_zx, ax_zy, ax_xy = axes
 
     color = None
 
     if color is None:
-        color = None #cm.viridis(1)
+        color = None  # cm.viridis(1)
     else:
         color = next(colors)
 
     ax_zx.scatter(z, x, **kwargs)
     ax_zy.scatter(z, y, **kwargs)
     ax_xy.scatter(x, y, **kwargs)
+
 
 def plot_lines(lines, axes, colors=None):
     ''' this is plotting each line collection on the respective axes, so both arguments should have the
@@ -55,27 +58,25 @@ def assemble_lines(laser_data):
         laser_exit = np.rec.array([laser[4], laser[5], laser[6]],
                                   dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
 
-        zx_laser_lines.append([(laser_entry.z, laser_entry.x),(laser_exit.z, laser_exit.x)])
+        zx_laser_lines.append([(laser_entry.z, laser_entry.x), (laser_exit.z, laser_exit.x)])
         zy_laser_lines.append([(laser_entry.z, laser_entry.y), (laser_exit.z, laser_exit.y)])
         xy_laser_lines.append([(laser_entry.x, laser_entry.y), (laser_exit.x, laser_exit.y)])
 
     return [zx_laser_lines, zy_laser_lines, xy_laser_lines]
+
 
 def make_figure(tpc_limits=True):
     fig = plt.figure(figsize=(15, 6), dpi=120)
 
     gs = gridspec.GridSpec(3, 3)
 
-    ax_zx = fig.add_subplot(gs[0,:])
-    ax_zy = fig.add_subplot(gs[1,:], sharex=ax_zx)
-    ax_xy = fig.add_subplot(gs[2,0], sharey=ax_zy)
-
-
+    ax_zx = fig.add_subplot(gs[0, :])
+    ax_zy = fig.add_subplot(gs[1, :], sharex=ax_zx)
+    ax_xy = fig.add_subplot(gs[2, 0], sharey=ax_zy)
 
     axes = [ax_zx, ax_zy, ax_xy]
     if tpc_limits:
         set_tpc_limits(axes)
-
 
     ax_xy.update_xlim = types.MethodType(sync_y_with_x, ax_xy)
     ax_zy.update_ylim = types.MethodType(sync_x_with_y, ax_zx)
@@ -84,6 +85,7 @@ def make_figure(tpc_limits=True):
     ax_xy.callbacks.connect("xlim_changed", ax_zy.update_ylim)
 
     return fig, axes
+
 
 def set_tpc_limits(axes):
     ax_zx, ax_zy, ax_xy = axes
@@ -103,6 +105,7 @@ def set_tpc_limits(axes):
     ax_xy.set_xlabel("x [cm]")
     ax_xy.set_ylabel("y [cm]")
 
+
 def sync_y_with_x(self, event):
     self.set_xlim(event.get_ylim(), emit=False)
 
@@ -117,18 +120,22 @@ def calc_line(point1, point2):
     b = point1[1] - m * point1[0]
     return m, b
 
+
 def calc_line_slope(point, slope):
     ''' Calculate two parameters of a line based on a point and its slope'''
     b = point[1] - slope * point[0]
     return slope, b
 
+
 def calc_intersect(m1, b1, m2, b2):
-    x = (b2-b1)/(m1-m2)
+    x = (b2 - b1) / (m1 - m2)
     y = m1 * x + b1
     return [x, y]
 
+
 def calc_distance(point1, point2):
-    return np.sqrt(np.power(np.abs(point1[0] - point2[0]),2) + np.power(np.abs(point1[1] - point2[1]),2))
+    return np.sqrt(np.power(np.abs(point1[0] - point2[0]), 2) + np.power(np.abs(point1[1] - point2[1]), 2))
+
 
 # reading
 def find_tree(tree_to_look_for, filename):
@@ -155,7 +162,7 @@ def get_branches(filename, treename, vectors=None):
         except:
             continue
 
-        all_branches.extend([vector+'.x()', vector+'.y()', vector+'.z()'])
+        all_branches.extend([vector + '.x()', vector + '.y()', vector + '.z()'])
 
     return all_branches
 
@@ -178,24 +185,25 @@ def read_data(filename):
 
 def disassemble_track(track):
     track = np.rec.array([track[1], track[2], track[3]],
-                               dtype = [('x', 'f'), ('y', 'f'), ('z', 'f')])
+                         dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
     event_id = track[0]
     return track, event_id
 
 
 def disassemble_laser(laser):
     laser_entry = np.rec.array([laser[1], laser[2], laser[3]],
-                               dtype = [('x', 'f'), ('y', 'f'), ('z', 'f')])
-    laser_exit = np.rec.array([laser[4],laser[5],laser[6]],
+                               dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
+    laser_exit = np.rec.array([laser[4], laser[5], laser[6]],
                               dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
 
-    laser_dir = np.rec.array([laser[7],laser[8],laser[9]],
+    laser_dir = np.rec.array([laser[7], laser[8], laser[9]],
                              dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
 
-    laser_pos = np.rec.array([laser[10],laser[11],laser[12]],
+    laser_pos = np.rec.array([laser[10], laser[11], laser[12]],
                              dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
 
     return laser_entry, laser_exit, laser_dir, laser_pos
+
 
 def write_to_root(tracks, laser):
     ''' Writes tracks and laser data to a root file which is readable by the reconstruction algorithm '''
@@ -223,15 +231,13 @@ def write_to_root(tracks, laser):
     for k in range(10):
         print k
         for i in range(1000):
-            track.push_back(Vector3(i,k,k*i))
-
-
+            track.push_back(Vector3(i, k, k * i))
 
         track_tree.track = track
         track.clear()
 
         laser_tree.entry = Vector3(0, 0, 0)
-        laser_tree.exit =  Vector3(k, k, k)
+        laser_tree.exit = Vector3(k, k, k)
 
         track_tree.fill()
         laser_tree.fill()
@@ -239,7 +245,19 @@ def write_to_root(tracks, laser):
     track_tree.write()
     laser_tree.write()
 
-
     f.close()
 
 
+def find_unique_polar(angles, digits=2):
+    ''' Finds unique entries in an array of angles '''
+    return np.unique(np.round(angles, decimals=digits))
+
+
+def find_unique_polar_idx(laser_data, precision=0.01):
+    ''' Returns all indices associate with a certain angle of the recorded laser track (can vary on the precision used) '''
+    angles = [laser[8] for laser in laser_data]
+    horizontal_scans_slices = []
+    for polar in find_unique_polar(angles):
+        horizontal_scans_slices.append(np.where((angles < polar + precision) & (angles > polar - precision)))
+
+    return horizontal_scans_slices
