@@ -2,6 +2,7 @@ import root_numpy as rn
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
+import matplotlib.patches as patches
 from matplotlib import gridspec
 
 import types
@@ -9,7 +10,7 @@ import types
 import matplotlib.cm as cm
 
 cmap = cm.rainbow(np.linspace(0, 1, 500))
-
+TPC_LIMITS = [[0, 256], [-116.38, 116.38], [0, 1036.8]]
 
 def correct(track):
     return 'track {} is ok'.format(track)
@@ -34,10 +35,28 @@ def plot_track(x, y, z, axes, **kwargs):
     ax_zy.scatter(z, y, **kwargs)
     ax_xy.scatter(x, y, **kwargs)
 
+def plot_endpoints(x, y, z, axes, laser=[], **kwargs):
+    ax_zx, ax_zy, ax_xy = axes
+
+    furthest = np.argmax(z)
+    closest = np.argmin(z)
+
+    color = None
+    if not laser:
+        ax_zx.plot([z[closest], z[furthest]], [x[closest], x[furthest]], "-*")
+        ax_zy.plot([z[closest], z[furthest]], [y[closest], y[furthest]], "-*")
+        ax_xy.plot([x[closest], x[furthest]], [y[closest], y[furthest]], "-*")
+    if laser:
+        laser_entry, laser_exit = laser
+        ax_zx.plot([z[closest], laser_exit.z], [x[closest], laser_exit.x], '-o', markevery=2, markersize=2, linewidth=0.3, alpha=0.3)
+        ax_zy.plot([z[closest], laser_exit.z], [y[closest], laser_exit.y], '-o', markevery=2, markersize=2, linewidth=0.3, alpha=0.3)
+        ax_xy.plot([x[closest], laser_exit.x], [y[closest], laser_exit.y], '-o', markevery=2, markersize=2, linewidth=0.3, alpha=0.3)
+
+
 
 def plot_lines(lines, axes, colors=None):
     ''' this is plotting each line collection on the respective axes, so both arguments should have the
-     same size.'''
+     same size. '''
     if lines is None:
         return
     if colors is not None:
@@ -65,7 +84,7 @@ def assemble_lines(laser_data):
     return [zx_laser_lines, zy_laser_lines, xy_laser_lines]
 
 
-def make_figure(tpc_limits=True):
+def make_figure(tpc_limits=True, tpc_box=False):
     fig = plt.figure(figsize=(15, 6), dpi=120)
 
     gs = gridspec.GridSpec(3, 3)
@@ -77,6 +96,9 @@ def make_figure(tpc_limits=True):
     axes = [ax_zx, ax_zy, ax_xy]
     if tpc_limits:
         set_tpc_limits(axes)
+
+    if tpc_box:
+        plot_tpc_box(axes)
 
     ax_xy.update_xlim = types.MethodType(sync_y_with_x, ax_xy)
     ax_zy.update_ylim = types.MethodType(sync_x_with_y, ax_zx)
@@ -91,19 +113,33 @@ def set_tpc_limits(axes):
     ax_zx, ax_zy, ax_xy = axes
 
     ax_zx.set_xlim([0, 1036.8])
-    ax_zx.set_ylim([0, 256])
+    ax_zx.set_ylim([0, 256.])
     ax_zx.set_xlabel("z [cm]")
     ax_zx.set_ylabel("x [cm]")
 
     ax_zy.set_xlim([0, 1036.8])
-    ax_zy.set_ylim([-128, 128])
+    ax_zy.set_ylim([-116., 116.])
     ax_zy.set_xlabel("z [cm]")
     ax_zy.set_ylabel("y [cm]")
 
     ax_xy.set_xlim([0, 256])
-    ax_xy.set_ylim([-128, 128])
+    ax_xy.set_ylim([-116., 116.])
     ax_xy.set_xlabel("x [cm]")
     ax_xy.set_ylabel("y [cm]")
+
+def plot_tpc_box(axes):
+    ax_zx, ax_zy, ax_xy = axes
+
+    box_style = {"alpha":1, "linestyle":"solid", "facecolor": None, "edgecolor":"b", "fill":False}
+
+    zx_patch = patches.Rectangle((0,0), TPC_LIMITS[2][1], TPC_LIMITS[0][1], **box_style)
+    zy_patch = patches.Rectangle((0,TPC_LIMITS[1][0]), TPC_LIMITS[2][1], 2*TPC_LIMITS[1][1], **box_style)
+    xy_patch = patches.Rectangle((0,TPC_LIMITS[1][0]), TPC_LIMITS[0][1], 2*TPC_LIMITS[1][1], **box_style)
+
+    ax_zx.add_patch(zx_patch)
+    ax_zy.add_patch(zy_patch)
+    ax_xy.add_patch(xy_patch)
+
 
 
 def sync_y_with_x(self, event):
