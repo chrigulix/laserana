@@ -31,7 +31,7 @@ for filename in args.files:
 
         print("event: " + str(event_id) + ", track_id: " + str(track_id))
         print("(x,y,z) track start: " + str(np.max(x)) + "/" + str(np.max(y)) + "/" + str(np.max(z)) +
-              ", track end: " + str(track_id))
+              ", track end: " + str(np.min(x)) + "/" + str(np.min(y)) + "/" + str(np.min(z)))
 
         print("color", track_number / len(tracks))
         plot_track(x, y, z, axes)
