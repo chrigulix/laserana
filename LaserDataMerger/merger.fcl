@@ -15,7 +15,7 @@ merger:
       DirCalLCS2:           [161.568 , 10500000.]           # Direction Calibration
       PositionLCS1:         [103. , 9., -35.]           # Position of Mirror
       # PositionLCS2:         [103. , 9., 1068.1]
-      PositionLCS2:         [101.95. , 8.04, 1075.05]  #
+      PositionLCS2:         [101.95 , 8.04, 1075.05]  #
       EnergyMinMaxLCS1:     [8000, 12500]
       EnergyMinMaxLCS2:     [8000, 12500]
 }
