@@ -16,6 +16,7 @@
 #include "art/Framework/Core/EDProducer.h"
 
 #include "art/Framework/Principal/Event.h"
+#include "canvas/Utilities/Exception.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
@@ -213,13 +214,12 @@ namespace LaserReco {
         // This is the handle to the raw data of this event (simply a pointer to std::vector<raw::RawDigit>)
 
         art::ValidHandle<std::vector<raw::RawDigit> > DigitVecHandle = event.getValidHandle<std::vector<raw::RawDigit>>(fParameterSet.RawDigitTag);
-
         art::Handle<std::vector<recob::Wire> > WireVecHandle;
 
-        art::ValidHandle<lasercal::LaserBeam> LaserBeamHandle = event.getValidHandle<lasercal::LaserBeam>(
+        art::ValidHandle<lasercal::LaserBeam> LaserBeam = event.getValidHandle<lasercal::LaserBeam>(
                 fParameterSet.GetLaserBeamTag());
 
-        if (LaserBeamHandle->GetLaserID() == 9999) {
+        if (LaserBeam->GetLaserID() == 9999) {
             return;
         }
 
@@ -241,11 +241,11 @@ namespace LaserReco {
 
         if (fUseCalData){
             event.getByLabel(fCalDataTag, WireVecHandle);
-            AllLaserHits = lasercal::LaserHits(WireVecHandle, fParameterSet, *LaserBeamHandle);
+            AllLaserHits = lasercal::LaserHits(WireVecHandle, fParameterSet, *LaserBeam);
         }
         else {
             auto Wires = lasercal::GetWires(DigitVecHandle, fParameterSet, fPedestalStubtract);
-            AllLaserHits = lasercal::LaserHits(Wires, fParameterSet, *LaserBeamHandle);
+            AllLaserHits = lasercal::LaserHits(Wires, fParameterSet, *LaserBeam);
         }
         // Create Laser Hits out of Wires
 
