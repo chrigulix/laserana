@@ -255,6 +255,7 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
     float Peak = -9999;
     int PeakTime = -9999;
     int HitIdx = 0;
+    float PseudoArea = 0;
 
     // Extract Channel ID and raw signal from Wire object
     raw::ChannelID_t Channel = SingleWire.Channel();
@@ -267,8 +268,9 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
 
     // loop over wire
     for (unsigned int sample = 0; sample < Signal.size(); sample++) {
-        if (Signal.at(sample) <= fParameters.UHitThreshold) {
+        if (Signal.at(sample) <= fParameters.UHitThreshold) { // we expect a negatvie signal
             // If we go over the threshold the first time, save the time tick
+            PseudoArea += abs(Signal.at(sample));
             if (!BelowThreshold) {
                 HitStart = sample;
                 BelowThreshold = true;
@@ -296,8 +298,8 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
                                                  fabs(HitStart - HitEnd) / 2,
                                                  Peak,
                                                  sqrt(Peak),
-                                                 100.,
-                                                 100.,
+                                                 PseudoArea, // HitIntegral
+                                                 1.,         // Sigma HitIntegral
                                                  1,
                                                  HitIdx,
                                                  1.,
@@ -312,6 +314,7 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
                 }
                 HitIdx++;
             }
+            PseudoArea = 0; // reset area
         }
     }
     return LaserHits;
@@ -338,6 +341,7 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
     int DipTime = -9999;
     float HitTime = -9999;
     int HitIdx = 0;
+    float PseudoArea = 0;
 
     // Set all flags to false
     bool AboveThreshold = false;
@@ -352,6 +356,7 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
     // loop over wire
     for (unsigned int sample = 0; sample < Signal.size(); sample++) {
         if (!BelowThreshold && Signal.at(sample) >= fParameters.VHitThreshold) {
+            PseudoArea += abs(Signal.at(sample));
             // If we go over the threshold the first time, save the time tick
             if (!AboveThreshold) {
                 AboveThreshold = true;
@@ -402,7 +407,8 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
                                                  Peak - Dip,
                                                  sqrt(Peak - Dip),
                                                  100.,
-                                                 100.,
+                                                 PseudoArea, // HitIntegral
+                                                 1.,         // Sigma HitIntegral
                                                  1,
                                                  HitIdx,
                                                  1.,
@@ -418,6 +424,7 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
 
                 HitIdx++;
             }
+            PseudoArea = 0;
         }
     }
     return LaserHits;
@@ -443,6 +450,7 @@ std::map<float, recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wi
     float Peak = -9999;
     int PeakTime = -9999;
     int HitIdx = 0;
+    float PseudoArea = 0;
 
     // Extract Channel ID and raw signal from Wire object
     raw::ChannelID_t Channel = SingleWire.Channel();
@@ -455,6 +463,7 @@ std::map<float, recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wi
     // loop over wire
     for (unsigned int sample = 0; sample < Signal.size(); sample++) {
         if (Signal.at(sample) >= fParameters.YHitThreshold) {
+            PseudoArea += abs(Signal.at(sample));
             //std::cout << "----------- HERE ------------ c:" << sample << " " << Signal.at(sample) << std::endl;
             // If we go over the threshold the first time, save the time tick
             if (!AboveThreshold) {
@@ -483,8 +492,8 @@ std::map<float, recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wi
                                                  fabs(HitStart - HitEnd) / 2,
                                                  Peak,
                                                  sqrt(Peak),
-                                                 100.,
-                                                 100.,
+                                                 PseudoArea,
+                                                 1.,
                                                  1,
                                                  HitIdx,
                                                  1.,
@@ -500,6 +509,7 @@ std::map<float, recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wi
 
                 HitIdx++;
             }
+            PseudoArea = 0;
         }
     }
     return LaserHits;
