@@ -10,9 +10,10 @@ class MetaData(Base):
         self.tree = "Events"
 
         self.product = "EventAuxiliary"
-        self.bracket = ".id_."
-
-        self.branch = self.product + self.bracket
+        self.branch = self.product
 
     def id(self):
-        return [self.gen_string("event_")] # very dirty hack because it does not handle strings only case
+        return [self.gen_string(".id_.event_")] # very dirty hack because it does not handle strings only case
+
+    def time(self):
+        return [self.gen_string(".time_.", arguments=['timeLow_', 'timeHigh_'])]
