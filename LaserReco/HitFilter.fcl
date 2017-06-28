@@ -1,0 +1,52 @@
+## 
+##  A "minimal" Reconstruction for uboone data
+##
+#include "reco_uboone_data_minimal.fcl"
+
+process_name: LaserHitReco
+
+services:
+{
+  scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
+  # Load the service that manages root files for histograms.
+  RandomNumberGenerator:   {} #ART native random number generator
+  @table::microboone_reco_minimal_services
+  message: @local::standard_info
+}
+
+services.DetectorClocksService.InheritClockConfig: false
+services.DatabaseUtil.ShouldConnect: false
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: true
+
+source:
+{
+  module_type: RootInput
+  maxEvents:  1        # Number of events to create
+}
+
+physics:
+{
+ producers:
+  {
+    HitFilter:
+    {
+      module_type:         "HitFilter"
+    }
+  }
+
+ reco: [ HitFilter ]
+ stream1:  [ out1 ]
+ trigger_paths: [reco]
+}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "%ifb_filtered.root"
+ }
+}
+
+
+
