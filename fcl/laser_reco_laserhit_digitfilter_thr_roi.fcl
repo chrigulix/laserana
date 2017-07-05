@@ -1,0 +1,8 @@
+#include "laser_reco_laserhit_digitfilter_exp.fcl"
+
+outputs.out1.fileName: "LaserReco-LaserHit-%04r-%04s_digitfilter-thr-roi.root"
+
+physics.producers.laserhit.UseROI:              true
+physics.producers.laserhit.HitBoxSize:          25
+
+physics.producers.laserhit.HighAmplThreshold:   400

@@ -1,6 +1,6 @@
-#include "laser_reco_laserhit_digitfilter_exp_roi.fcl"
+#include "laser_reco_laserhit_digitfilter_thr_roi.fcl"
 
-outputs.out1.fileName: "LaserReco-LaserHit-%04r-%04s_digitfilter-exp_roi_50kV.root"
+outputs.out1.fileName: "LaserReco-LaserHit-%04r-%04s_digitfilter-thr-roi_50kV.root"
 
 # since the 50kV and 60kV data taken corresponds to (a),
 # we set the wire bias to match (a) to match to data
