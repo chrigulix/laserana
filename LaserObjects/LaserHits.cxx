@@ -285,8 +285,8 @@ std::map<float, recob::Hit> lasercal::LaserHits::UPlaneHitFinder(const recob::Wi
             HitEnd = sample;
             BelowThreshold = false;
 
-            if ((fabs(Peak) / (float) (HitEnd - HitStart) > fParameters.UAmplitudeToWidthRatio ||
-                 fabs(Peak) > fParameters.HighAmplitudeThreshold)
+            if (fabs(Peak) / (float) (HitEnd - HitStart) > fParameters.UAmplitudeToWidthRatio
+                && fabs(Peak) < fParameters.HighAmplitudeThreshold
                 && HitEnd - HitStart > fParameters.UHitWidthThreshold) {
                 // Create hit
                 auto RecoHit = recob::HitCreator(SingleWire,
@@ -390,12 +390,10 @@ std::map<float, recob::Hit> lasercal::LaserHits::VPlaneHitFinder(const recob::Wi
             BelowThreshold = false;
             Handover_flag = false;
 
-            if (((Peak - Dip) / (float) (HitEnd - HitStart) > fParameters.VAmplitudeToWidthRatio ||
-                 Peak - Dip > fParameters.HighAmplitudeThreshold)
+            if ((Peak - Dip) / (float) (HitEnd - HitStart) > fParameters.VAmplitudeToWidthRatio
+                && Peak - Dip < fParameters.HighAmplitudeThreshold
                 && HitEnd - HitStart > fParameters.VHitWidthThreshold
-                && (Peak / (float) (DipTime - PeakTime) > fParameters.VAmplitudeToRMSRatio ||
-                    Peak - Dip > fParameters.HighAmplitudeThreshold)
-                && DipTime - PeakTime > fParameters.VRMSThreshold) {
+                && Peak / (float) (DipTime - PeakTime) > fParameters.VAmplitudeToRMSRatio) {
                 // Create hit
                 auto RecoHit = recob::HitCreator(SingleWire,
                                                  fGeometry->ChannelToWire(Channel).front(),
@@ -479,8 +477,12 @@ std::map<float, recob::Hit> lasercal::LaserHits::YPlaneHitFinder(const recob::Wi
         } else if (AboveThreshold && (Signal.at(sample) < fParameters.YHitThreshold || Signal.size() - 1 == sample)) {
             HitEnd = sample;
             AboveThreshold = false;
-            if ((Peak / (float) (HitEnd - HitStart) > fParameters.YAmplitudeToWidthRatio ||
-                 Peak > fParameters.HighAmplitudeThreshold)
+
+            // std::cout << "DEBUG: peak to width " << Peak / (float) (HitEnd - HitStart)<< " limit: " << fParameters.YAmplitudeToWidthRatio << std::endl;
+            // std::cout << "DEBUG: peak " << Peak << " limit: " << fParameters.HighAmplitudeThreshold << std::endl;
+            // std::cout << "DEBUG: width " << HitEnd - HitStart<< " limit: " << fParameters.YHitWidthThreshold << std::endl;
+
+            if ((Peak / (float) (HitEnd - HitStart) > fParameters.YAmplitudeToWidthRatio && Peak < fParameters.HighAmplitudeThreshold)
                 && HitEnd - HitStart > fParameters.YHitWidthThreshold) {
                 // Create hit
                 auto RecoHit = recob::HitCreator(SingleWire,

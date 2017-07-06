@@ -89,6 +89,15 @@ void LaserRecoTest::analyze(art::Event const &event) {
         else{
             //assert(CheckHits(LaserHits, hit_def) == -1);
         }
+    } else if  (fTestConfigFile.compare("HitDefs-10004.txt") == 0) {
+        std::cout << " ==> Testing High Threshold cut" << std::endl;
+        if (id == 0) {
+            assert(CheckHits(LaserHits, hit_def) != -1);
+        }
+        else {
+            assert(CheckHits(LaserHits, hit_def) == -1);
+        }
+
     }
     else {
         assert(CheckHits(LaserHits, hit_def) == -1);
@@ -121,6 +130,8 @@ int LaserRecoTest::CheckHits(art::ValidHandle<std::vector<recob::Hit>> reco_hits
     for (uint hit = 0; hit < reco_hits->size(); hit++) {
         int wire_reco = reco_hits->at(hit).WireID().Wire;
         int reco_peak_time = (int) reco_hits->at(hit).PeakTime();
+
+        std::cout << "DEBUG INFO: hit ampl: " << reco_hits->at(hit).PeakAmplitude() << std::endl;
 
         int idx_def = -1;
         // search for the associate wire in the wire def array

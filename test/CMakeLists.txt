@@ -355,6 +355,12 @@ cet_test( LaserReco_TestROI HANDBUILT
         DATAFILES ./reco/WireIndexMap.root ./reco/HitDefs-10003.txt ./reco/Run-10003.txt ./reco/TimeMap-10003.root
         )
 
+cet_test( LaserReco_TestHighThreshold HANDBUILT
+        TEST_EXEC lar
+        TEST_ARGS -c LaserReco_TestHighThreshold.fcl
+        DATAFILES ./reco/WireIndexMap.root ./reco/HitDefs-10004.txt ./reco/Run-10004.txt ./reco/TimeMap-10004.root
+        )
+
 
 #cet_test( LaserBeamTest LIBRARIES LaserObjects )
 
