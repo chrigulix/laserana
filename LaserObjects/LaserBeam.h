@@ -27,10 +27,13 @@
 //#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 //#endif
 
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
+#include <vector>
+
+
 #ifndef LASERBEAM_H
 #define LASERBEAM_H
 
-#include "larcore/Geometry/Geometry.h"
 
 namespace lasercal
 {
