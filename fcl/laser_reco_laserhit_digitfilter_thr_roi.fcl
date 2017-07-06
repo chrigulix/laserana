@@ -5,4 +5,4 @@ outputs.out1.fileName: "LaserReco-LaserHit-%04r-%04s_digitfilter-thr-roi.root"
 physics.producers.laserhit.UseROI:              true
 physics.producers.laserhit.HitBoxSize:          25
 
-physics.producers.laserhit.HighAmplThreshold:   400
+physics.producers.laserhit.HighAmplThreshold:   1500
