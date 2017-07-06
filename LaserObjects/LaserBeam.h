@@ -6,30 +6,31 @@
  */
 
 /// C/C++ standard library
-#include <iostream>
-#include <vector>
-#include <string>
+//#include <iostream>
+//#include <vector>
+//#include <string>
 
 /// Root library
-#include <TH3.h>
+//#include <TH3.h>
 #include <TVector3.h>
-#include <TF1.h>
+//#include <TF1.h>
 
 // TODO: Fix class compilation if including GeometryCore.h and others!!!
 
 /// LArSoft
-#ifndef __GCCXML__
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "larcore/Geometry/Geometry.h"
+//#ifndef __GCCXML__
+//#include "art/Framework/Services/Registry/ServiceHandle.h"
+//#include "larcore/Geometry/Geometry.h"
 //#include "larcore/Geometry/GeometryCore.h"
 //#include "larcore/Geometry/BoxBoundedGeo.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
-#endif
-
+//#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+//#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
+//#endif
 
 #ifndef LASERBEAM_H
 #define LASERBEAM_H
+
+#include "larcore/Geometry/Geometry.h"
 
 namespace lasercal
 {

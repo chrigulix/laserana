@@ -1,5 +1,20 @@
 #include "LaserBeam.h"
 
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/GeometryCore.h"
+#include "larcore/Geometry/BoxBoundedGeo.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
+
+#include <iostream>
+#include <vector>
+#include <string>
+
+/// Root library
+#include <TH3.h>
+#include <TF1.h>
+
 lasercal::LaserBeam::LaserBeam()
 {
 }
