@@ -21,8 +21,8 @@
 #ifndef __GCCXML__
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "larcore/Geometry/Geometry.h"
-#include "larcore/Geometry/GeometryCore.h"
-#include "larcore/Geometry/BoxBoundedGeo.h"
+//#include "larcore/Geometry/GeometryCore.h"
+//#include "larcore/Geometry/BoxBoundedGeo.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #endif

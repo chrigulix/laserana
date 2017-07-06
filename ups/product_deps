@@ -32,17 +32,17 @@ flcdir  product_dir     fcl
 # Add the dependent product and version
 
 product          version
-larsoft		v06_26_02
-gcc		v4_9_3a
+larsoft		v06_40_00
+gcc	        v6_3_0	
 cetbuildtools   v5_01_03       -       only_for_build
 end_product_list
 
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes". 
 qualifier	larsoft	 	gcc	notes
-e10:debug	e10:debug	-nq-
-e10:opt		e10:opt		-nq-
-e10:prof	e10:prof		-nq-
+e14:debug	e14:debug	-nq-
+e14:opt		e14:opt		-nq-
+e14:prof	e14:prof		-nq-
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:

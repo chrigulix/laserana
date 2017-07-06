@@ -18,9 +18,9 @@ simple_plugin(LaserUtilsTest "module"
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        art_Persistency_Common canvas_Persistency_Common
-        art_Persistency_Provenance canvas_Persistency_Provenance
-        art_Utilities canvas_Utilities
+        art_Persistency_Common canvas
+        art_Persistency_Provenance canvas
+        art_Utilities canvas
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -41,9 +41,9 @@ simple_plugin(LaserHitFinderTest "module"
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        art_Persistency_Common canvas_Persistency_Common
-        art_Persistency_Provenance canvas_Persistency_Provenance
-        art_Utilities canvas_Utilities
+        art_Persistency_Common canvas
+        art_Persistency_Provenance canvas
+        art_Utilities canvas
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -64,9 +64,9 @@ simple_plugin(LaserObjectsTest "module"
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        art_Persistency_Common canvas_Persistency_Common
-        art_Persistency_Provenance canvas_Persistency_Provenance
-        art_Utilities canvas_Utilities
+        art_Persistency_Common canvas
+        art_Persistency_Provenance canvas
+        art_Utilities canvas
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -87,9 +87,9 @@ simple_plugin(LaserSpotterTest "module"
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        art_Persistency_Common canvas_Persistency_Common
-        art_Persistency_Provenance canvas_Persistency_Provenance
-        art_Utilities canvas_Utilities
+        art_Persistency_Common canvas
+        art_Persistency_Provenance canvas
+        art_Utilities canvas
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -110,9 +110,9 @@ simple_plugin(LaserHitGenerator "module"
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        art_Persistency_Common canvas_Persistency_Common
-        art_Persistency_Provenance canvas_Persistency_Provenance
-        art_Utilities canvas_Utilities
+        art_Persistency_Common canvas
+        art_Persistency_Provenance canvas
+        art_Utilities canvas
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -133,9 +133,9 @@ simple_plugin(LaserRawDigitGenerator "module"
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        art_Persistency_Common canvas_Persistency_Common
-        art_Persistency_Provenance canvas_Persistency_Provenance
-        art_Utilities canvas_Utilities
+        art_Persistency_Common canvas
+        art_Persistency_Provenance canvas
+        art_Utilities canvas
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -156,9 +156,9 @@ simple_plugin(LaserRawDigitGenTest "module"
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        art_Persistency_Common canvas_Persistency_Common
-        art_Persistency_Provenance canvas_Persistency_Provenance
-        art_Utilities canvas_Utilities
+        art_Persistency_Common canvas
+        art_Persistency_Provenance canvas
+        art_Utilities canvas
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -179,9 +179,9 @@ simple_plugin(LaserSpotterGenTest "module"
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        art_Persistency_Common canvas_Persistency_Common
-        art_Persistency_Provenance canvas_Persistency_Provenance
-        art_Utilities canvas_Utilities
+        art_Persistency_Common canvas
+        art_Persistency_Provenance canvas
+        art_Utilities canvas
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -202,9 +202,9 @@ simple_plugin(LaserRecoTest "module"
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        art_Persistency_Common canvas_Persistency_Common
-        art_Persistency_Provenance canvas_Persistency_Provenance
-        art_Utilities canvas_Utilities
+        art_Persistency_Common canvas
+        art_Persistency_Provenance canvas
+        art_Utilities canvas
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
@@ -225,9 +225,9 @@ simple_plugin(LaserMergerTest "module"
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-        art_Persistency_Common canvas_Persistency_Common
-        art_Persistency_Provenance canvas_Persistency_Provenance
-        art_Utilities canvas_Utilities
+        art_Persistency_Common canvas
+        art_Persistency_Provenance canvas
+        art_Utilities canvas
         ${MF_MESSAGELOGGER}
         ${MF_UTILITIES}
         ${CETLIB}
