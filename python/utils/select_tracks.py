@@ -6,34 +6,12 @@ import glob
 from lar_utils import *
 import os
 
-# filename = "/home/matthias/Downloads/sync_gpvm/Tracks-7205-790-grid.root"
-# filename = "/home/matthias/Downloads/sync_gpvm/Tracks-7206-90deg.root"
-# filename = "/home/matthias/data/uboone/laser/7206/tracks/Tracks-7206-233.root"
 
-# filename  ="/mnt/lheppc46/data/larsoft/userdev/maluethi/laser_v06_20_00/tests/Tracks-7205-790.root"
-# filename = "/home/matthias/Downloads/sync_gpvm/Tracks-7205-90deg-pnra.root"
-# filename = "/home/matthias/data/uboone/laser/7267/tracks/90deg/Tracks-7267-785.root"
-filename = "/home/matthias/Downloads/sync_gpvm/Tracks-7267-90deg.root"
-# filename = "/home/matthias/data/uboone/laser/3300/tracks/Tracks-3300-188.root"
+filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-exp-pnra.root"
+filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-roi.root"
+#filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-785.root"
 
-filename = "~/laser/v06_26_02/run/Tracks-7205-790-gaushit.root"
-filename = "~/laser/v06_26_02/run/Tracks-7205-789-full.root"
-# filename  ="/mnt/lheppc46/data/larsoft/userdev/maluethi/laser_v06_20_00/tests/Tracks-7205-790.root"
-
-
-
-filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-80deg.root"
-filename = "~/laser/v06_26_02/run/reco-ana/Tracks-7205-784-nodigit.root"
-
-filename = "/home/matthias/Downloads/sync_gpvm/laser-reco-7205-90deg-pnra-nd.root"
-#filename = "/home/data/uboone/laser/7268/tracks/Tracks-7268-s.root"
-
-#filename = "/home/data/uboone/laser/7275/tracks/Tracks-7275-klmn.root"
-#filename = "/home/data/uboone/laser/3300/tracks/Tracks-3300-90deg.root"
-#filename = '/home/data/uboone/laser/7205/tracks/Tracks-7205-80deg-kalman-roi.root'
-#filename = '~/laser/v06_26_02/run/Tracks-7205-784.root'
-
-file_postfix = '-test-nd'
+file_postfix = '-test-roi'
 laser_id = 1
 
 
@@ -43,11 +21,16 @@ laser_branches = get_branches(filename, laser_tree, vectors=['dir', 'pos'])
 track_data = rn.root2array(filename, treename=find_tree("Track", filename))
 laser_data = rn.root2array(filename, treename=find_tree("Laser", filename), branches=laser_branches)
 
+laser_event_id = np.array([laser[0] for laser in laser_data])
+
 laser = np.array([[100, 0, 0],[115, 10, 1036]])
-in_range = 20
+
+in_entry_range = 15
+in_exit_range = 20
 
 good_idx = []
 good_events = []
+good_laser_idx = []
 
 first_event = track_data[0][0]
 print "first event: ", first_event
@@ -55,6 +38,7 @@ print "first event: ", first_event
 for entry in range(len(track_data)):
     track = track_data[entry]
     x, y, z = track[1], track[2], track[3]
+    event_id = track_data[entry][0]
 
     # calculate some track properties for selectin laser tracks
     m_xz = (x[-1] - x[0]) / (z[-1] - z[0])
@@ -62,16 +46,19 @@ for entry in range(len(track_data)):
 
     # get the closest point to the sides (should change if laser 1 is used (np.argmin))
     if laser_id == 0:
-        closest = np.argmin(z)
+        entry_index = np.argmin(z)
+        exit_index = np.argmax(z)
     elif laser_id == 1:
-        closest = np.argmax(z)
+        entry_index = np.argmax(z)
+        exit_index = np.argmin(z)
     else:
         raise ValueError("Laser ID does not exist")
 
-    closest_point = np.array([x[closest], y[closest], z[closest]])
+    entry_point = np.array([x[entry_index], y[entry_index], z[entry_index]])
+    exit_point = np.array([x[exit_index], y[exit_index], z[exit_index]])
 
     # calculate if track is in the expected entry region (the if statement is just here for speed uo)
-    in_region = in_range > np.sqrt(np.sum(np.power(closest_point - laser[laser_id], 2)))
+    in_region = in_entry_range > np.sqrt(np.sum(np.power(entry_point - laser[laser_id], 2)))
     if not in_region:
         continue
 
@@ -83,12 +70,12 @@ for entry in range(len(track_data)):
     max_step = np.abs(max_diff_x + max_diff_y + max_diff_z)
 
     # cut values
-    min_length = 700
+    min_length = 500
     m_xy_max = 5
-    m_xy_min =-5
+    m_xy_min = -5
 
-    m_xz_max = 0.05  #0.05 # to cut away shots towards cathode
-    m_xz_min = -100 #-0.25 # for excluding other stuff
+    m_xz_max = 10000 #0.05  # 0.05 # to cut away shots towards cathode
+    m_xz_min = -1000 #-0.25 # for excluding other stuff
 
     # here the actual cut happens
     if len(z) > min_length \
@@ -99,17 +86,32 @@ for entry in range(len(track_data)):
             and max_diff_z < 30 \
             and m_xy_max > m_xy > m_xy_min: \
 
-        well = np.sum(np.abs(np.diff(y)))
-        if well > 200.:
-            print well
-            print 'Here'
+
+        laser_idx = np.where(laser_event_id == event_id)[0].tolist()[0]
+        print "laser idx", laser_idx
+
+        # do some smoothnes cuts
+        delta_y_range = 0.5
+        laser_entry, laser_exit, laser_dir, laser_pos = disassemble_laser(laser_data[laser_idx])
+        delta_y_expected = np.abs(laser_exit.y - laser_entry.y)
+
+        delta_y = np.sum(np.abs(np.diff(y)))
+        if (delta_y > (1. + delta_y_range) * delta_y_expected) or (delta_y < (1. - delta_y_range) * delta_y_expected):
+            print 'Not somooth enough, expected:', delta_y_expected, ", computed: ", delta_y
+            continue
+
+        in_exit_region = in_exit_range > np.sqrt(np.sum(np.power(list(laser_exit.tolist()) - exit_point, 2)))
+
+        if not in_exit_region:
+            print "Not in exit range"
             continue
 
         good_idx.append(entry)
 
-        event = track_data[entry][0]
-        good_events.append(event - first_event)
-        print "Event", event, entry, event - first_event
+        good_laser_idx.append(laser_idx)
+
+        good_events.append(event_id)
+        print "Event", event_id, entry, event_id - first_event
 
         plt_zx = plt.subplot(311)
         plt.scatter(z, x)  # , c=m_xz*100)
@@ -126,8 +128,10 @@ for entry in range(len(track_data)):
         plt.xlim([0, 256])
         plt.ylim([-128, 128])
 
-plt.show()
+#plt.show()
 
+
+print good_laser_idx
 # if not any(track_data[good_idx]['event'] == laser_data[good_event]['event']):
 #    raise(IndexError('Track and laser data idx disagreement'))
 
@@ -141,7 +145,7 @@ track_filename = 'laser-tracks-' + id
 laser_filename = "laser-data-" + id
 
 np.save("data/" + track_filename, track_data[good_idx])
-np.save("data/" + laser_filename, laser_data[good_events])
+np.save("data/" + laser_filename, laser_data[good_laser_idx])
 
 print "saved tracks to " + track_filename
 print "saved laser to " + laser_filename
