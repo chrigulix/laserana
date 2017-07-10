@@ -24,6 +24,7 @@ class MergerIO(object):
         self.OutFile = os.path.join(self.OutFilePath, self.OutFilename)
 
     def read_laser(self):
+        """" Returns array in the form [laser_idx, time_seconds, time_useconds] """
         self.log.info("reading laser data from " + self.LaserFile)
 
         # Read only time_s, time_ns, event-ID

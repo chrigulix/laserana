@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
 from mpl_toolkits.mplot3d import Axes3D
 
-from datadefs.lar_data import *
+from lardefs.lar_data import *
 
 
 def crop_view(limits, hits):

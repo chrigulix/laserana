@@ -9,7 +9,7 @@ class Laser():
 
         self.n_cols = 15
 
-        self.laser_id = laser_id
+        self.laser_id = int(laser_id)
 
         self.col_id = 0
         self.col_status = 1

@@ -1,4 +1,4 @@
-from datadefs.lar_data import *
+from lardefs.lar_data import *
 import matplotlib.pyplot as plt
 
 filename = "/home/matthias/workspace/laser/runs/test_reco/test.root"

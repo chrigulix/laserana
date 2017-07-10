@@ -60,7 +60,8 @@ class Merger():
         self.offsets = []
 
         # define the mapping of the laser array to the event array
-        self.map = -1 * np.zeros((int(self.LastEvent) + 1, 1)).astype(int)
+        self.idx_map = -100 * np.ones((int(self.LastEvent) + 1, 2)).astype(int)
+        self.map = np.iinfo(np.uint32).max * np.ones(self.NMax, dtype=int)
 
         self.preprocess()
 
@@ -105,18 +106,17 @@ class Merger():
         for idx in range(self.NEvent):
             # loop over entries in event time array
 
-            search_size = 200
+            search_size = 500
             for idy in range(search_size):
                 #print idx, idy, self.EventArray[1, idx], self.LaserArray[1, idx + idy]
 
-                #self.log.debug("Event Time: " + str(self.EventArray[1, idx]))
-                #self.log.debug("Laser Time: " + str(self.LaserArray[1, idx + idy]))
                 if self.check_time(self.EventArray[1, idx], self.LaserArray[1, idx + idy]):
-                    self.map[int(self.EventArray[0, idx])] = self.LaserArray[0, idx + idy]
+
+                    self.idx_map[idx, :] = idx, idx + idy
 
                     if idy > self.idx_offset:
                         self.idx_offset += 1
-                        self.offsets = np.append(self.offsets, idx)
+                        self.offsets.append(idx)
 
                     break
 
@@ -124,9 +124,9 @@ class Merger():
                     self.log.info("Could not find corresponding time. Something is very wrong.")
                     self.log.info("Aborting ...")
                     np.set_printoptions(precision=3)
-                    print "Event / Laser"
-                    print self.EventArray[:,:5]
-                    print self.LaserArray[:,:5]
+                    print "Event / Laser @ ", idx, idy
+                    print self.EventArray[:,idx:idx+5]
+                    print self.LaserArray[:,idx:idx+5]
                     exit(-1)
 
                     # print idx, self.map[idx]
@@ -136,7 +136,9 @@ class Merger():
         self.log.info("Found " + str(self.idx_offset) + " jumps, they are at:")
         self.log.info(str(self.offsets))
 
-        self.delta = self.map
+        self.delta = self.EventArray[1, self.idx_map[:, 0]] - np.transpose(self.LaserArray[1, self.idx_map[:, 1]]).flatten()
+        self.map[self.EventArray[0, self.idx_map[:, 0]].astype(int)] = np.transpose(self.LaserArray[0, self.idx_map[:, 1]]).astype(int)
+
 
     def write(self):
         self.io.write_map(self.map)
@@ -169,7 +171,7 @@ class Merger():
         # plot time deltas of laser vs daq triggers
         fig3, ax3 = plt.subplots()
         plt.title("Time Difference: DAQ-Laser", fontsize=size)
-        plt.plot(1000 * self.delta, "r-*")
+        plt.plot(self.delta, "r-*")
         plt.xlabel("Event ID", fontsize=size)
         plt.xticks(fontsize=size)
         plt.ylabel("Time-Difference [ms]", fontsize=size)
@@ -177,12 +179,16 @@ class Merger():
         plt.grid()
         plt.show()
 
+        fig3, ax3 = plt.subplots()
+        plt.plot(np.diff(self.map))
+        plt.ylim([-10,10])
+        plt.show()
 
 if __name__ == '__main__':
     merger = Merger(int(sys.argv[1]))
     merger.log.level == logging.ERROR
+    print "here"
     merger.align()
-    print merger.map[39501]
     merger.plot()
     merger.write()
 
