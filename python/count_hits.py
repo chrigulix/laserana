@@ -1,6 +1,6 @@
-from datadefs.lar_data import *
+from lardefs.lar_data import *
 import matplotlib.pyplot as plt
-from datadefs.metadata import *
+from lardefs.metadata import *
 
 from matplotlib import cm
 

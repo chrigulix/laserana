@@ -1,7 +1,7 @@
 
-from datadefs.lar_data import *
+from lardefs.lar_data import *
 import matplotlib.pyplot as plt
-from datadefs.metadata import *
+from lardefs.metadata import *
 
 
 
@@ -15,7 +15,7 @@ def my_metric(x, y):
 import hdbscan
 plot_kwds = {'alpha' : 0.5, 's' : 80, 'linewidths':0}
 
-filename = "~/data/uboone/laser/7205/hits/90deg/LaserHit-7205-0790.root"
+filename = "~/laser/v06_26_02/run/reco-ana/LaserReco-LaserHit-7267-0790_digitfilter-exp.root"
 data = LarData(filename)
 meta = MetaData()
 #data.get_info()
