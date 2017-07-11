@@ -24,13 +24,6 @@ def load_tracks(file):
 def plot_track(x, y, z, axes, **kwargs):
     ax_zx, ax_zy, ax_xy = axes
 
-    color = None
-
-    if color is None:
-        color = None  # cm.viridis(1)
-    else:
-        color = next(colors)
-
     ax_zx.scatter(z, x, **kwargs)
     ax_zy.scatter(z, y, **kwargs)
     ax_xy.scatter(x, y, **kwargs)
@@ -41,7 +34,6 @@ def plot_endpoints(x, y, z, axes, laser=[], **kwargs):
     furthest = np.argmax(z)
     closest = np.argmin(z)
 
-    color = None
     if not laser:
         ax_zx.plot([z[closest], z[furthest]], [x[closest], x[furthest]], "-*")
         ax_zy.plot([z[closest], z[furthest]], [y[closest], y[furthest]], "-*")
