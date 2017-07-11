@@ -48,9 +48,15 @@ def plot_endpoints(x, y, z, axes, laser=[], **kwargs):
         ax_xy.plot([x[closest], x[furthest]], [y[closest], y[furthest]], "-*")
     if laser:
         laser_entry, laser_exit = laser
-        ax_zx.plot([z[closest], laser_exit.z], [x[closest], laser_exit.x], '-o', markevery=2, markersize=2, linewidth=0.3, alpha=0.3)
-        ax_zy.plot([z[closest], laser_exit.z], [y[closest], laser_exit.y], '-o', markevery=2, markersize=2, linewidth=0.3, alpha=0.3)
-        ax_xy.plot([x[closest], laser_exit.x], [y[closest], laser_exit.y], '-o', markevery=2, markersize=2, linewidth=0.3, alpha=0.3)
+        ax_zx.plot([z[closest], laser_exit.z], [x[closest], laser_exit.x], '-o', markevery=2, markersize=2, linewidth=0.3, alpha=0.6)
+        ax_zy.plot([z[closest], laser_exit.z], [y[closest], laser_exit.y], '-o', markevery=2, markersize=2, linewidth=0.3, alpha=0.6)
+        ax_xy.plot([x[closest], laser_exit.x], [y[closest], laser_exit.y], '-o', markevery=2, markersize=2, linewidth=0.3, alpha=0.6)
+
+        if z[closest] > TPC_LIMITS[2][1] or z[closest] < TPC_LIMITS[2][0]:
+            print "z: outside"
+
+        if y[closest] > TPC_LIMITS[1][1] or y[closest] < TPC_LIMITS[1][0]:
+            print " ------- y: outside ---------"
 
 
 
@@ -85,7 +91,7 @@ def assemble_lines(laser_data):
 
 
 def make_figure(tpc_limits=True, tpc_box=False):
-    fig = plt.figure(figsize=(15, 6), dpi=120)
+    fig = plt.figure(figsize=(8, 5.), dpi=160)
 
     gs = gridspec.GridSpec(3, 3)
 
