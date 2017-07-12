@@ -8,8 +8,9 @@ import os
 
 
 filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-exp-pnra.root"
-filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-roi.root"
-#filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-785.root"
+#filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-roi.root"
+filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-exp-roi.root"
+#filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-roi.root"
 
 file_postfix = '-test-roi'
 laser_id = 1
@@ -26,7 +27,7 @@ laser_event_id = np.array([laser[0] for laser in laser_data])
 laser = np.array([[100, 0, 0],[115, 10, 1036]])
 
 in_entry_range = 15
-in_exit_range = 20
+in_exit_range = 50
 
 good_idx = []
 good_events = []
@@ -88,7 +89,6 @@ for entry in range(len(track_data)):
 
 
         laser_idx = np.where(laser_event_id == event_id)[0].tolist()[0]
-        print "laser idx", laser_idx
 
         # do some smoothnes cuts
         delta_y_range = 0.5
@@ -106,12 +106,14 @@ for entry in range(len(track_data)):
             print "Not in exit range"
             continue
 
-        good_idx.append(entry)
+        if not endpoint_inside([x, y, z]):
+            continue
 
+        good_idx.append(entry)
         good_laser_idx.append(laser_idx)
 
         good_events.append(event_id)
-        print "Event", event_id, entry, event_id - first_event
+        print "Event", event_id, laser_idx, entry, event_id - first_event
 
         plt_zx = plt.subplot(311)
         plt.scatter(z, x)  # , c=m_xz*100)
