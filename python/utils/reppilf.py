@@ -33,8 +33,10 @@ def get_z_vector():
     return z
 
 
-tracks_filename = "data/laser-tracks-7205-fl-re.npy"
-laser_filename = "data/laser-data-7205-fl-re-calib.npy"
+tracks_filename = "data/laser-tracks-7205-test-roi.npy"
+laser_filename = "data/laser-data-7205-test-roi.npy"
+
+interp = False
 
 tracks = np.load(tracks_filename)
 lasers = np.load(laser_filename)
@@ -79,29 +81,35 @@ for idx in range(len(tracks)):
 
     print "Event", event_id, "Subrun", event_id / 50
     # neg = np.where(x[1:] - x[:-1] > 0)
+    if interp:
+        order = 6
+        zx_p10 = np.polyfit(z, x, order)
+        zy_p10 = np.polyfit(z, y, order)
+        xy_p10 = np.polyfit(y, x, order)
 
-    order = 6
-    zx_p10 = np.polyfit(z, x, order)
-    zy_p10 = np.polyfit(z, y, order)
-    xy_p10 = np.polyfit(y, x, order)
+        z_full = np.linspace(0, 1036, 1036)
+        y_full = np.linspace(-128, 128, 256)
 
-    z_full = np.linspace(0, 1036, 1036)
-    y_full = np.linspace(-128, 128, 256)
+        zz = np.arange(0, np.max(z), 0.3)
+        zz = np.arange(np.min(z), 1036, 0.3)
+        print np.max(z)
 
-    zz = get_z_vector()
+        end_idx = np.where(zz < (np.amax(z)) - np.random.rand() * 10)
 
-    end_idx = np.where(zz < (np.amax(z)) - np.random.rand() * 10)
+        zz = zz[end_idx]
 
-    zz = get_z_vector()[end_idx]
+        axes[0].plot(zz,np.polyval(zx_p10, zz),"ro")
+        axes[1].plot(zz, np.polyval(zy_p10, zz), "ro")
+        axes[2].plot(np.polyval(xy_p10, y), y, "ro")
+        plt.plot()
 
-    #axes[0].plot(zz,np.polyval(zx_p10, zz),"ro")
-    #axes[1].plot(zz, np.polyval(zy_p10, zz), "ro")
-    #axes[2].plot(np.polyval(xy_p10, y), y, "ro")
-    plt.plot()
-
-    x = np.polyval(zx_p10, zz)
-    y = np.polyval(zy_p10, zz)
-    z = zz
+        x = np.polyval(zx_p10, zz)
+        y = np.polyval(zy_p10, zz)
+        z = zz
+    else:
+        axes[0].plot(z, x,"ro")
+        axes[1].plot(z, y, "ro")
+        axes[2].plot(x, z, "ro")
 
     tracks[idx] = (event_id + 86, x, y, z, track[4])
     lasers[idx][1] = laser_entry.x
@@ -129,9 +137,9 @@ plt.show()
 
 print laser[0]
 
-np.save(tracks_filename.strip('.npy') + '-flipped.npy', tracks)
-np.save(laser_filename.strip('.npy') + '-flipped.npy', lasers)
+np.save(tracks_filename.strip('.npy') + '-flipped1.npy', tracks)
+np.save(laser_filename.strip('.npy') + '-flipped1.npy', lasers)
 
 print 'output written to:'
-print tracks_filename.strip('.npy') + '-flipped.npy'
-print laser_filename.strip('.npy') + '-flipped.npy'
+print tracks_filename.strip('.npy') + '-flipped1.npy'
+print laser_filename.strip('.npy') + '-flipped1.npy'
