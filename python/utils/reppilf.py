@@ -36,8 +36,11 @@ def get_z_vector():
 tracks_filename = "data/laser-tracks-7267-test-roi.npy"
 laser_filename = "data/laser-data-7267-test-roi.npy"
 
-interp = True
-invert = False
+tracks_filename = "data/laser-tracks-7252-test-roi.npy"
+laser_filename = "data/laser-data-7252-test-roi.npy"
+
+interp = False
+invert = True
 
 order = 3
 
@@ -57,8 +60,14 @@ offset_z = 0
 sign_z = 1
 
 if invert:
+    out_track_filename = tracks_filename.strip('.npy') + '-inv.npy'
+    out_laser_filename = laser_filename.strip('.npy') + '-inv.npy'
+
     offset_z = 1036.8
     sign_z = -1
+else:
+    out_track_filename = tracks_filename.strip('.npy') + '-inter.npy'
+    out_laser_filename = laser_filename.strip('.npy') + '-inter.npy'
 
 offset_x = 1
 # find the unique steps sizes in the vertical direction and store the indices of the respective laser tracks.
@@ -89,9 +98,9 @@ for idx in range(len(tracks)):
     print "Event", event_id, "Subrun", event_id / 50
     # neg = np.where(x[1:] - x[:-1] > 0)
     if interp:
-        zx_p10 = np.polyfit(z, x, order)
-        zy_p10 = np.polyfit(z, y, order)
-        xy_p10 = np.polyfit(y, x, order)
+        zx_p10 = np.polyfit(z, x, order) * np.random.uniform(0.98, 1.02)
+        zy_p10 = np.polyfit(z, y, order) * np.random.uniform(0.98, 1.02)
+        xy_p10 = np.polyfit(y, x, order) * np.random.uniform(0.98, 1.02)
 
         z_full = np.linspace(0, 1036, 1036)
         y_full = np.linspace(-128, 128, 256)
@@ -143,9 +152,9 @@ plt.show()
 
 print laser[0]
 
-np.save(tracks_filename.strip('.npy') + '-flipped1.npy', tracks)
-np.save(laser_filename.strip('.npy') + '-flipped1.npy', lasers)
+np.save(out_track_filename, tracks)
+np.save(out_laser_filename, lasers)
 
 print 'output written to:'
-print tracks_filename.strip('.npy') + '-flipped1.npy'
-print laser_filename.strip('.npy') + '-flipped1.npy'
+print out_laser_filename
+print out_track_filename
