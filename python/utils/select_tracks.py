@@ -9,12 +9,15 @@ import os
 
 filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-exp-pnra.root"
 #filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-roi.root"
-filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-exp-roi.root"
-#filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-roi.root"
+#filename = "/home/data/uboone/laser/7205/tracks/Tracks-7205-exp-roii.root"
+filename = "/home/data/uboone/laser/7252/tracks/Tracks-7252.root"
+filename = "/home/data/uboone/laser/7267/tracks/Tracks-7267-roi.root"
 
 file_postfix = '-test-roi'
 laser_id = 1
 
+plotting = False
+modulo = 500
 
 laser_tree = find_tree("Laser", filename)
 laser_branches = get_branches(filename, laser_tree, vectors=['dir', 'pos'])
@@ -23,15 +26,20 @@ track_data = rn.root2array(filename, treename=find_tree("Track", filename))
 laser_data = rn.root2array(filename, treename=find_tree("Laser", filename), branches=laser_branches)
 
 laser_event_id = np.array([laser[0] for laser in laser_data])
+track_event_id = np.array([track[0] for track in track_data])
 
-laser = np.array([[100, 0, 0],[115, 10, 1036]])
+print np.max(laser_event_id), np.max(track_event_id)
+
+laser = np.array([[100, 0, 0],[110, 10, 1036]])
 
 in_entry_range = 15
-in_exit_range = 50
+in_exit_range = 250
 
 good_idx = []
 good_events = []
 good_laser_idx = []
+
+hmm = []
 
 first_event = track_data[0][0]
 print "first event: ", first_event
@@ -59,8 +67,14 @@ for entry in range(len(track_data)):
     exit_point = np.array([x[exit_index], y[exit_index], z[exit_index]])
 
     # calculate if track is in the expected entry region (the if statement is just here for speed uo)
+    laser_idx = np.where(laser_event_id == event_id)[0].tolist()[0]
+    laser_entry, laser_exit, laser_dir, laser_pos = disassemble_laser(laser_data[laser_idx])
+
     in_region = in_entry_range > np.sqrt(np.sum(np.power(entry_point - laser[laser_id], 2)))
-    if not in_region:
+    in_entry_region = in_entry_range > np.sqrt(np.sum(np.power(list(laser_entry.tolist()) - entry_point, 2)))
+
+
+    if not in_entry_region:
         continue
 
     # cut properties considering the smoothness of the tracks
@@ -75,7 +89,7 @@ for entry in range(len(track_data)):
     m_xy_max = 5
     m_xy_min = -5
 
-    m_xz_max = 10000 #0.05  # 0.05 # to cut away shots towards cathode
+    m_xz_max = 0.05  # 0.05 # to cut away shots towards cathode
     m_xz_min = -1000 #-0.25 # for excluding other stuff
 
     # here the actual cut happens
@@ -88,11 +102,11 @@ for entry in range(len(track_data)):
             and m_xy_max > m_xy > m_xy_min: \
 
 
-        laser_idx = np.where(laser_event_id == event_id)[0].tolist()[0]
+        print laser_event_id[laser_idx]
 
         # do some smoothnes cuts
         delta_y_range = 0.5
-        laser_entry, laser_exit, laser_dir, laser_pos = disassemble_laser(laser_data[laser_idx])
+
         delta_y_expected = np.abs(laser_exit.y - laser_entry.y)
 
         delta_y = np.sum(np.abs(np.diff(y)))
@@ -107,6 +121,20 @@ for entry in range(len(track_data)):
             continue
 
         if not endpoint_inside([x, y, z]):
+            print "endpoint outside"
+            continue
+
+        fit = np.polyfit(z, y, 1)
+        corrected = y - np.polyval(fit, z)
+        hist, bin_edges = np.histogram(corrected, 100)
+        gradient = np.gradient(corrected)
+
+        plt.plot(z, corrected)
+
+        if (len(good_idx) + 1) % modulo == 0:
+            plt.show()
+
+        if np.argmax(gradient > 0.35):
             continue
 
         good_idx.append(entry)
@@ -115,23 +143,25 @@ for entry in range(len(track_data)):
         good_events.append(event_id)
         print "Event", event_id, laser_idx, entry, event_id - first_event
 
-        plt_zx = plt.subplot(311)
-        plt.scatter(z, x)  # , c=m_xz*100)
-        plt.xlim([0, 1100])
-        plt.ylim([0, 256])
+        if plotting:
+            plt_zx = plt.subplot(311)
+            plt.scatter(z, x)  # , c=m_xz*100)
+            plt.xlim([0, 1100])
+            plt.ylim([0, 256])
 
-        plt_zy = plt.subplot(312)
-        plt.scatter(z, y)
-        plt.xlim([0, 1100])
-        plt.ylim([-128, 128])
+            plt_zy = plt.subplot(312)
+            plt.scatter(z, y)
 
-        plt_xy = plt.subplot(313)
-        plt.scatter(x, y)
-        plt.xlim([0, 256])
-        plt.ylim([-128, 128])
+            plt.xlim([0, 1100])
+            plt.ylim([-128, 128])
 
-#plt.show()
+            plt_xy = plt.subplot(313)
+            plt.scatter(x, y)
+            plt.xlim([0, 256])
+            plt.ylim([-128, 128])
 
+            if (len(good_idx) + 1) % modulo == 0:
+                plt.show()
 
 print good_laser_idx
 # if not any(track_data[good_idx]['event'] == laser_data[good_event]['event']):
