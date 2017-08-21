@@ -6,11 +6,15 @@ import matplotlib.patches as patches
 from matplotlib import gridspec
 
 import types
+from collections import namedtuple
 
 import matplotlib.cm as cm
 
 cmap = cm.rainbow(np.linspace(0, 1, 500))
 TPC_LIMITS = [[0, 256], [-116.38, 116.38], [0, 1036.8]]
+box = namedtuple("box", "x_min x_max y_min y_max z_min z_max")
+
+TPC = box(TPC_LIMITS[0][0], TPC_LIMITS[0][1], TPC_LIMITS[1][0], TPC_LIMITS[1][1], TPC_LIMITS[2][0], TPC_LIMITS[2][1])
 
 def correct(track):
     return 'track {} is ok'.format(track)
@@ -34,6 +38,9 @@ def plot_endpoints(x, y, z, axes, laser=[], **kwargs):
     furthest = np.argmax(z)
     closest = np.argmin(z)
 
+    last_point = [el[furthest] for el in [x,y,z]]
+    first_point = [el[closest] for el in [x,y,z]]
+
     if not laser:
         ax_zx.plot([z[closest], z[furthest]], [x[closest], x[furthest]], "-*")
         ax_zy.plot([z[closest], z[furthest]], [y[closest], y[furthest]], "-*")
@@ -44,11 +51,9 @@ def plot_endpoints(x, y, z, axes, laser=[], **kwargs):
         ax_zy.plot([z[closest], laser_exit.z], [y[closest], laser_exit.y], '-o', markevery=2, markersize=2, linewidth=0.3, alpha=0.6)
         ax_xy.plot([x[closest], laser_exit.x], [y[closest], laser_exit.y], '-o', markevery=2, markersize=2, linewidth=0.3, alpha=0.6)
 
-        if z[closest] > TPC_LIMITS[2][1] or z[closest] < TPC_LIMITS[2][0]:
-            print "z: outside"
+        if not in_tpc(first_point):
+            print "outside"
 
-        if y[closest] > TPC_LIMITS[1][1] or y[closest] < TPC_LIMITS[1][0]:
-            print " ------- y: outside ---------"
 
 
 
@@ -169,6 +174,27 @@ def calc_intersect(m1, b1, m2, b2):
 
 def calc_distance(point1, point2):
     return np.sqrt(np.power(np.abs(point1[0] - point2[0]), 2) + np.power(np.abs(point1[1] - point2[1]), 2))
+
+
+def endpoint_inside(laser_track):
+    x, y, z = laser_track
+
+    closest = np.argmin(z)
+    first_point = [el[closest] for el in [x,y,z]]
+    return in_tpc(first_point)
+
+
+def in_tpc(point, ignore_x=True):
+    x, y, z = point
+
+    if not ignore_x and (x > TPC.x_max or x < TPC.x_min):
+        return False
+    elif y > TPC.y_max or y < TPC.y_min:
+        return False
+    elif z > TPC.z_max or z < TPC.z_min:
+        return False
+    else:
+        return True
 
 
 # reading
