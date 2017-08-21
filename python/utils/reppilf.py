@@ -37,7 +37,7 @@ tracks_filename = "data/laser-tracks-7267-test-roi.npy"
 laser_filename = "data/laser-data-7267-test-roi.npy"
 
 tracks_filename = "data/laser-tracks-7252-test-roi.npy"
-laser_filename = "data/laser-data-7252-test-roi.npy"
+laser_filename = "data/laser-data-7252-test-roi-calib2.npy"
 
 interp = False
 invert = True
