@@ -2,9 +2,9 @@ import numpy as np
 
 # this script merges multiple .npy files into one into the specified output files
 
-track_filenames = ['data/laser-tracks-7205-70deg-fl-full.npy', 'data/laser-tracks-7205-80deg-fl-full.npy', 'data/laser-tracks-7205-90deg-fl-full.npy']
-laser_filenames = ['data/laser-data-7205-70deg-fl-full.npy', 'data/laser-data-7205-80deg-fl-full.npy', 'data/laser-data-7205-90deg-fl-full.npy']
-output_filename = ['data/laser-tracks-7205-fl-full.npy', 'data/laser-data-7205-fl-full.npy']
+track_filenames = ['data/laser-tracks-7252-test-roi-inv.npy', 'data/laser-tracks-7267-test-roi.npy']
+laser_filenames = ['data/laser-data-7252-test-roi-inv.npy', 'data/laser-data-7267-test-roi.npy']
+output_filename = ['data/laser-tracks-7267-7268-test-roi.npy', 'data/laser-data-7267-7268-test-roi.npy']
 
 # track_filenames = ["data/laser-tracks-7205-fl1.npy", "data/laser-tracks-7205-fl-re-flipped.npy"]
 # laser_filenames = ["data/laser-data-7205-fl1-calib.npy", "data/laser-data-7205-fl-re-calib-flipped.npy"]
