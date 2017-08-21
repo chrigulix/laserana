@@ -8,18 +8,21 @@ import numpy as np
 # you can specify a base directory and the
 
 base_dir = "/home/matthias/workspace/laserana/python/utils/data/"
-files_idx = [70, 80, 90]
+side = "downstream"
 
-track_files = [base_dir + "laser-tracks-7205-" + str(idx) + "deg.npy" for idx in files_idx]
-laser_files = [base_dir + "laser-data-7205-" + str(idx) + "deg.npy" for idx in files_idx]
+downsample = 1
 
-track_files = [base_dir + "laser-tracks-7205-.npy"] #, base_dir + "laser-tracks-7205-flipped.npy"]
-laser_files = [base_dir + "laser-data-7205-calib.npy"] #, base_dir + "laser-data-7205-calib-flipped.npy"]
+track_filenames = ["laser-tracks-7267-test-roi.npy"]
+laser_filenames = ["laser-data-7267-test-roi-calib2.npy"]
 
-track_files = [base_dir + "laser-tracks-7205-fl1.npy"] #, base_dir + "laser-tracks-7205-flipped.npy"]
-laser_files = [base_dir + "laser-data-7205-fl1-calib.npy"] #, base_dir + "laser-data-7205-calib-flipped.npy"]
+#track_filenames = ["laser-tracks-7267-test-roi.npy"]
+#laser_filenames = ["laser-data-7267-test-roi.npy"]
 
-output_file = "output/laserbeams-7205.root"
+track_paths = [base_dir + filename for filename in track_filenames]
+laser_paths = [base_dir + filename for filename in laser_filenames]
+
+sides = {"upstream": 1, "downstream": 2}
+output_file = "output/laserbeams-7267-calib1.root"
 
 Vec = stl.vector(Vector3)
 track = Vec()
@@ -30,9 +33,10 @@ with root_open(output_file, "recreate"):
     track_tree.create_branches({'track': stl.vector(Vector3),
                                 'event': 'I'})
     laser_tree.create_branches({'entry': Vector3,
-                                'exit': Vector3})
+                                'exit': Vector3,
+                                'side': 'I'}) # 1: upstream, 2: down
 
-    for track_file, laser_file in zip(track_files, laser_files):
+    for track_file, laser_file in zip(track_paths, laser_paths):
         track_data = np.load(track_file)
         laser_data = np.load(laser_file)
 
@@ -46,8 +50,8 @@ with root_open(output_file, "recreate"):
             laser_exit = np.rec.array([laser_data[event][4], laser_data[event][5], laser_data[event][6]],
                                       dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
 
-            for idx in range(len(x)):
-                track.push_back(Vector3(x[idx], y[idx], z[idx]))
+            for idx in range(len(x)/downsample):
+                track.push_back(Vector3(x[idx*downsample], y[idx*downsample], z[idx*downsample]))
 
             track_tree.track = track
             track_tree.event = int(evt)
@@ -56,6 +60,7 @@ with root_open(output_file, "recreate"):
             # create some stupid laser positions
             laser_tree.entry = Vector3(laser_entry.x, laser_entry.y, laser_entry.z)
             laser_tree.exit = Vector3(laser_exit.x, laser_exit.y, laser_exit.z)
+            laser_tree.side = sides[side]
 
             track_tree.fill()
             laser_tree.fill()
