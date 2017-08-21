@@ -2,7 +2,7 @@
 from lar_utils import *
 import matplotlib.pyplot as plt
 
-laser_filename = "data/laser-data-7267-pnra.npy"
+laser_filename = "data/laser-data-7252-test-roi.npy"
 laser_data = np.load(laser_filename)
 
 slices = find_unique_polar_idx(laser_data)
