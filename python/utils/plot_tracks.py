@@ -24,10 +24,10 @@ for filename in args.files:
         event_id, track_id = tracks[track_number][0], tracks[track_number][4]
 
         if event_id + 1 != current_event:
-            fig, axes = make_figure()
+            plt.show()
+            fig, axes = make_figure(tpc_box=True)
             axes[0].set_title("Event " + str(event_id-1))
             current_event = event_id + 1
-            plt.show()
 
         print("event: " + str(event_id) + ", track_id: " + str(track_id))
         print("(x,y,z) track start: " + str(np.max(x)) + "/" + str(np.max(y)) + "/" + str(np.max(z)) +
@@ -35,5 +35,4 @@ for filename in args.files:
 
         print("color", track_number / len(tracks))
         plot_track(x, y, z, axes)
-
 
