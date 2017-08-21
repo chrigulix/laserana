@@ -29,12 +29,13 @@ def get_tpc_intersection(point, direction):
 
 # We try to find the track that goes by ring # the closest. the ring is loacted at 1036
 
-tracks_filename = "data/laser-tracks-7267-pnra.npy"
-laser_filename =  "data/laser-data-7267-pnra.npy"
+tracks_filename = "data/laser-tracks-7252-test-roi.npy"
+laser_filename = "data/laser-data-7252-test-roi.npy"
+
 
 # set this to true to only plot the tracks and calculate the correction angle. No recalculation of
 # entry and exit points
-plot_tracks = True
+plot_tracks = False
 
 tracks = np.load(tracks_filename)
 lasers = np.load(laser_filename)
@@ -43,11 +44,12 @@ lasers = np.load(laser_filename)
 lasers_corrected = np.zeros(lasers.shape, dtype=lasers[0].dtype)
 
 closest_list = []
-laser_pos = [103., 9., 1068.1]
+laser_pos = [103., 7.6, 1073.1]
 
 # the rings are physically located on this line & some definitions for the true angle
 #rings = [103.5, 0, 1032.] # for 7205
 rings = [101.7, 0, 1036.8] # for 7267
+rings = [97, 0, 1036.8] # for 7267
 
 delta_z = laser_pos[2] - 1032.
 delta_x = laser_pos[0] - 102.
@@ -110,17 +112,17 @@ for pol_angle, horizontal_scan in zip(unique_polar, horizontal_scans_selection):
     apparent_angle = np.arctan(closest_laser_dir.x/closest_laser_dir.z)
     apparent_angles.append(apparent_angle)
 
-    corr_ange = angle - apparent_angle
-    corr_angles.append(corr_ange)
+    corr_ange_x = 0.0075 # angle - apparent_angle
+    corr_angles.append(corr_ange_x)
 
     print "true angle:    ", angle
     print "apparant angle:", apparent_angle
-    print "correction angle:", corr_ange
-    print "where to go: ", apparent_angle + corr_ange
+    print "correction angle:", corr_ange_x
+    print "where to go: ", apparent_angle + corr_ange_x
     print laser_entry, laser_exit
 
 
-    new_x = np.tan(np.pi + apparent_angle + corr_ange) * closest_laser_dir.z
+    new_x = np.tan(np.pi + apparent_angle + corr_ange_x) * closest_laser_dir.z
 
     new_dir = closest_laser_dir.copy()
     new_dir.x = new_x
@@ -128,7 +130,7 @@ for pol_angle, horizontal_scan in zip(unique_polar, horizontal_scans_selection):
     entry2, exit2 = get_tpc_intersection(laser_pos, new_dir)
 
     # calculate intersection points for corrected tracks, just for the fun
-    laser_ray = Ray((laser_pos[2], laser_pos[0]), angle=pi + apparent_angle + corr_ange)
+    laser_ray = Ray((laser_pos[2], laser_pos[0]), angle=pi + apparent_angle + corr_ange_x)
     intersection = tpc_xz.intersect(laser_ray)
 
     corr_x = [pt.evalf().x for pt in intersection]
@@ -156,17 +158,23 @@ for pol_angle, horizontal_scan in zip(unique_polar, horizontal_scans_selection):
 
     # now lets actually corrrect. We write the new entry/exit points into a
     for idx, laser in enumerate(lasers[horizontal_scan]):
+        print laser[0]
         slice_idx = horizontal_scan[0][idx]
         laser_dir = np.rec.array([laser['dir.x()'],
                                   laser['dir.y()'],
                                   laser['dir.z()']],
                                   dtype=[('x', 'f'), ('y', 'f'), ('z', 'f')])
 
+        corr_ange_x = 0.0075
+        corr_ange_y = 0.0109
 
-        apparent_angle = np.arctan(laser_dir.x / laser_dir.z)
-        new_x = np.tan(np.pi + apparent_angle + corr_ange) * laser_dir.z
+        apparent_angle_x = np.arctan(laser_dir.x / laser_dir.z)
+        apparent_angle_y = np.arctan(laser_dir.y / laser_dir.z)
+        new_x = np.tan(np.pi + apparent_angle_x + corr_ange_x) * laser_dir.z
+        new_y = np.tan(np.pi + apparent_angle_y - corr_ange_y) * laser_dir.z
         new_dir = laser_dir.copy()
         new_dir.x = new_x
+        new_dir.y = new_y
 
         new_entry, new_exit = get_tpc_intersection(laser_pos, new_dir)
 
@@ -176,13 +184,13 @@ for pol_angle, horizontal_scan in zip(unique_polar, horizontal_scans_selection):
         plt.plot([lasers_corrected[slice_idx][3], lasers_corrected[slice_idx][6]],
                  [lasers_corrected[slice_idx][1], lasers_corrected[slice_idx][4]], 'g+--')
 
-        plt.plot([laser[3], laser[6]],
-                 [laser[1], laser[4]], 'r*--')
+        #plt.plot([laser[3], laser[6]],
+        #         [laser[1], laser[4]], 'r*--')
 
     event_ids = [laser['event'] for laser in lasers[horizontal_scan]]
     plt.subplot(212)
-    plt.plot(event_ids)
-    plt.show()
+    plt.plot(event_ids, "*")
+    #plt.show()
 
 #plt.xlim([0,1068])
 #plt.ylim([0,256])
@@ -197,5 +205,5 @@ if plot_tracks:
     plt.legend()
     plt.show()
 
-print 'write to', laser_filename.strip('.npy') + "-calib.npy"
-np.save(laser_filename.strip('.npy') + "-calib.npy", lasers_corrected)
+print 'write to', laser_filename.strip('.npy') + "-calib2.npy"
+np.save(laser_filename.strip('.npy') + "-calib2.npy", lasers_corrected)
