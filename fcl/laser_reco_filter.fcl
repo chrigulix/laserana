@@ -11,12 +11,13 @@
 
 #include "merger.fcl"
 #include "laserreco.fcl"
+#include "gettracks.fcl"
 
-process_name: LaserReco
+process_name: Laser
 
 services:
 {
-  TFileService:            { fileName: "reco2D_hist_evd.root" }
+  TFileService:            { fileName: "Tracks-%04r-%03s-exp.root" }
   message:                 @local::microboone_message_services_prod_debug
   TimeTracker:             {}
   MemoryTracker:           { ignoreTotal: 1 } # default is one
@@ -27,7 +28,7 @@ services:
 
 # Define the services
 
-# Look at the input files
+#Look at the input files
 source:
 {
   module_type: RootInput
@@ -42,7 +43,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "LaserReco-LaserHit-%04r-%04s.root"
+   fileName:    "LaserReco-LaserHit-%04r-%04s_digitfilter-exp.root"
    # sam_ignore:  true
    dataTier:    "reconstructed-2d"
    outputCommands: ["keep *_*_*_*",  "drop raw::RawDigits_*_*_*", "drop raw::OpDetWaveforms_*_*_*", "drop raw::BeamInfo_*_*_*"]
@@ -95,6 +96,8 @@ physics:
    crhitremoval:                 @local::microboone_crhitremoval
 
    LaserDataMerger:    @local::LaserDataMerger
+   GetTracks:          @local::GetTracks
+}
 
  filters:
  {
@@ -105,22 +108,11 @@ physics:
  }
 
  reco: [
-#         wcNoiseFilter,
         LaserDataMerger,
-         # digitfilter,
-         Trunc,
-         # caldata,
-         # gaushit,
-         laserhit,
-# 	 cluster3d #,
-	  pandoraCosmic
-# 	  pandoraCosmicKHit,
-# trackkalmanhittag,
-#         pandoraCosmicKHitPFPart,
-# 	  trackPFParticleMatch,
-#         pandoraCosmicKHitRemoval,
-#         pandoraNu,
-#         pandoraNuKHit #,
+        digitfilter,
+        laserhit,
+	    pandoraCosmic,
+        GetTracks
        ]
 
  # end_path are things that do not modify art::Event, includes analyzers
@@ -128,22 +120,17 @@ physics:
  stream1:   [ out1 ]
  end_paths: [ stream1 ]
 }
-# physics.producers.laserhit.LaserRecoModuleLabel: "truncator"
-physics.producers.laserhit.LaserRecoModuleLabel: "Trunc"
-
+physics.producers.laserhit.LaserRecoModuleLabel: "digitfilter"
 physics.producers.laserhit.UseROI: false
+physics.producers.laserhit.UHitWidthThreshold: 5.
+physics.producers.laserhit.UHitPeakThreshold: -18.
+
 # physics.producers.laserhit.UseCalData: true
 # physics.producers.laserhit.CalDataTag: "caldata"
 
 physics.producers.LaserDataMerger.UseROI: false
 physics.producers.pandoraCosmic.HitFinderModuleLabel: "laserhit"
-
-
-
-# physics.producers.truncator.WindowSize: 6400
-# physics.producers.truncator.WindowSize: 2400
-
-
+physics.producers.GetTracks.TrackLabel: "pandoraCosmic"
 
 # physics.producers.pandoraNuKHit.Track3DKalmanHitAlg.SeedFinderAlg.SpacePointAlg.MinViews: 2
 
@@ -153,43 +140,24 @@ physics.producers.pandoraCosmic.HitFinderModuleLabel: "laserhit"
 # services.DetPedestalService.DetPedestalRetrievalAlg.UseDB:           false
 
 # Adjust the window/offset for the reduced total frame size (9600 -> 6400 ticks)
-# services.DetectorPropertiesService.NumberTimeSamples:                  6400
-# services.DetectorPropertiesService.ReadOutWindowSize:                  6400
-# services.DetectorPropertiesService.InheritNumberTimeSamples:           false
+services.DetectorPropertiesService.NumberTimeSamples:                  6400
+services.DetectorPropertiesService.ReadOutWindowSize:                  6400
+services.DetectorPropertiesService.InheritNumberTimeSamples:           false
 services.DetectorClocksService.InheritClockConfig:                     false
-services.DetectorClocksService.TriggerOffsetTPC:                       -0.0e3
+services.DetectorClocksService.TriggerOffsetTPC:                       -1.600e3
 
 # Try these?
 services.SignalShapingServiceMicroBooNE.FieldResponseFVersion:          [ "v3.1", "v3.1"]
 services.SignalShapingServiceMicroBooNE.YZdependentResponse:            true
 services.SignalShapingServiceMicroBooNE.datadrivenResponse:             true
-# services.SignalShapingServiceMicroBooNE.DefaultEField:                  0.273
+services.SignalShapingServiceMicroBooNE.DefaultEField:                  0.273
 services.SignalShapingServiceMicroBooNE.DefaultTemperature:             89
 services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU:          true
 services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor:    [ 1.0, 1.0, 1.0]
 
-#physics.producers.wcNoiseFilter.DoNoiseFiltering:                       false
-#physics.producers.wcNoiseFilter.NumTicksToDropFront:                    0
-#physics.producers.wcNoiseFilter.WindowSize:                             9600
-
 physics.producers.digitfilter.ProcessNoise:                            true
-physics.producers.digitfilter.TruncateTicks:                           true
+physics.producers.digitfilter.TruncateTicks:                           false
 physics.producers.digitfilter.RMSRejectionCutHi:                       [1000., 1000., 1000.]
-
-physics.producers.caldata.DigitModuleLabel:                            "digitfilter"
-# physics.producers.caldata.DigitModuleLabel:                            "wcNoiseFilter"
-physics.producers.caldata.Threshold:                                   [ 0, 0, 0]
-physics.producers.caldata.NumSigma:                                    [ 9, 9, 9]
-physics.producers.caldata.DodQdxCalib:                                 false
-
-
-
-physics.producers.gaushit.NumBinsToAverage:                            7
-physics.producers.gaushit.MinSig:                                      [3.25, 3.25, 3.75] # [15., 15., 15.] #
-physics.producers.gaushit.MinWidth:                                    [1.0, 1.0, 1.0]
-physics.producers.gaushit.MaxMultiHit:                                 4
-physics.producers.gaushit.TryNplus1Fits:                               false
-physics.producers.gaushit.Chi2NDF:                                     50.
 
 physics.producers.pandoraCosmic.GeantModuleLabel:			           "laserhit"
 physics.producers.pandoraCosmic.GeantModuleLabel:                      "largeant"
