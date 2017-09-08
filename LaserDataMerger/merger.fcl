@@ -12,7 +12,7 @@ merger:
       # are doing!
       TickToAngle:          1                   # conversion constant for linear encoder
       DirCalLCS1:           [122. , 10200000.]           # Direction Calibration
-      DirCalLCS2:           [161.568 , 10500000.]           # Direction Calibration
+      DirCalLCS2:           [161.9584 , 10402809.]           # Direction Calibration
       PositionLCS1:         [103. , 9., -35.]           # Position of Mirror
       # PositionLCS2:         [103. , 9., 1068.1]
       PositionLCS2:         [101.95 , 8.04, 1075.05]  #
