@@ -314,7 +314,7 @@ namespace LaserDataMerger {
             Position = PositionLCS1;
         } else if (LCS_ID == 2) { // The upstream laser system (sitting at z = 1020)
             //Theta = TMath::DegToRad() * (LinearRawToAngle(Theta_raw) - 266.60208631 + 60 + 1.161  - 2*0.68) ;
-            Theta = TMath::DegToRad() * (LinearRawToAngle(Theta_raw) - 297.3080594455559);
+            Theta = TMath::DegToRad() * (LinearRawToAngle(Theta_raw) - 207.69487762388422);
             Phi = -TMath::DegToRad() * (180 + (Phi_raw - fDirCalLCS2[0]));
             Position = PositionLCS2;
         } else {
