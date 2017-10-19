@@ -1,0 +1,4 @@
+# config for laser simulation. Puts the laser in a position where symmerty of alser tracks is acheived.
+#include "laser_reco_kalman.fcl"
+
+physics.producers.LaserDataMerger.PositionLCS2:         [120 , 0, 1075]
