@@ -1,0 +1,7 @@
+# config for laser simulation. Puts the laser in a position where symmerty of alser tracks is acheived.
+#include "laser_reco_laserhit_digitfilter_exp.fcl"
+
+physics.producers.LaserDataMerger.PositionLCS2:         [120 , 0, 1075]
+
+physics.producers.laserhit.UseCalData: true
+physics.producers.laserhit.CalDataTag: "caldata"
