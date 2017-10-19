@@ -10,6 +10,7 @@
 #include "wirecellmodules_microboone.fcl"
 
 #include "merger.fcl"
+#include "gettracks.fcl"
 
 process_name: Laser
 
@@ -92,6 +93,7 @@ physics:
    crhitremoval:                 @local::microboone_crhitremoval
 
    LaserDataMerger:    @local::LaserDataMerger
+   GetTracks:          @local::GetTracks
 }
 
  filters:
@@ -109,7 +111,8 @@ physics:
          caldata,
          gaushit,
 # 	 cluster3d #,
-	  pandoraCosmic #,
+	  pandoraCosmic,
+	   GetTracks # ,
 # 	  pandoraCosmicKHit,
 # trackkalmanhittag,
 #         pandoraCosmicKHitPFPart,
