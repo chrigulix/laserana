@@ -9,6 +9,8 @@
 
 // LArSoft includes
 #include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/MCBase/MCTrack.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
 
 // Framework includes
 #include "art/Framework/Core/EDProducer.h"
@@ -89,6 +91,7 @@ private:
     // fhicl input parameters
     art::InputTag fTrackLabel;
     bool fGetTrue;
+    bool fGetMC;
 
 }; // class GetTracks
 
@@ -151,16 +154,47 @@ void GetTracks::reconfigure(fhicl::ParameterSet const& parameterSet)
 {
     fTrackLabel = parameterSet.get<art::InputTag>("TrackLabel");
     fGetTrue = parameterSet.get<bool>("GetTrue", false);
+    fGetMC = parameterSet.get<bool>("GetMC", true);
 }
 
 //-----------------------------------------------------------------------
 
 void GetTracks::produce(art::Event& event)
 {
+    art::Handle<std::vector<simb::MCTruth>> MCTruth;
+    art::Handle<std::vector<simb::MCParticle>> MCParticles;
+
     art::Handle<std::vector<recob::Track> > Tracks;
     art::Handle<lasercal::LaserBeam>  Laser;
 
-    event.getByLabel(fTrackLabel, Tracks);
+    event_id = (unsigned int) event.id().event();
+
+    if (fGetMC) {
+        try {
+            event.getByLabel("largeant", "", MCParticles);
+
+            for (auto const &mcpart : *MCParticles) {
+                simb::MCTrajectory traj = mcpart.Trajectory();
+                size_t track_size = mcpart.NumberTrajectoryPoints();
+                true_trackx.resize(track_size), true_tracky.resize(track_size), true_trackz.resize(track_size);
+
+                if (mcpart.PdgCode() == 13) { // Only look at muons
+                    for (uint idx = 0; idx < track_size; idx++) {
+                        true_trackx.at(idx) = traj.X(idx);
+                        true_tracky.at(idx) = traj.Y(idx);
+                        true_trackz.at(idx) = traj.Z(idx);
+                    }
+                }
+                fTrueTree->Fill();
+                trackx.clear();
+                tracky.clear();
+                trackz.clear();
+            }
+        }
+        catch (...) {
+            std::cout << "Could not find mctruth information" << std::endl;
+        }
+    }
 
     try {
         event.getByLabel("LaserDataMerger", "LaserBeam", Laser);
@@ -184,10 +218,10 @@ void GetTracks::produce(art::Event& event)
     }; // pretty dangerous, but we just ignore writing the laser tree if no laser data is present.
 
 
+    event.getByLabel(fTrackLabel, Tracks);
     //auto track = tr.fXYZ;
     for (auto const &Track : *Tracks) {
 
-        event_id, true_event_id = (unsigned int) event.id().event();
         track_id, true_track_id = Track.ID();
 
         size_t track_size = Track.NumberTrajectoryPoints();
