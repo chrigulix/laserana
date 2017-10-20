@@ -29,6 +29,7 @@
 // Laser Module Classes
 #include "LaserObjects/LaserBeam.h"
 
+#include "larevt/SpaceChargeServices/SpaceChargeService.h"
 
 namespace GetTracks
 {
@@ -58,12 +59,21 @@ private:
     // All this goes into the root tree
     TTree* fTrackTree;
     TTree* fLaserTree;
+    TTree* fTrueTree;
 
+    // reco track
     std::vector<float> trackx;
     std::vector<float> tracky;
     std::vector<float> trackz;
     unsigned int event_id;
     unsigned int track_id;
+
+    // true track
+    std::vector<float> true_trackx;
+    std::vector<float> true_tracky;
+    std::vector<float> true_trackz;
+    unsigned int true_event_id;
+    unsigned int true_track_id;
 
     Double_t laser_entry_x;
     Double_t laser_entry_y;
@@ -76,7 +86,9 @@ private:
     TVector3 position;
     TVector3 direction;
 
+    // fhicl input parameters
     art::InputTag fTrackLabel;
+    bool fGetTrue;
 
 }; // class GetTracks
 
@@ -110,6 +122,13 @@ void GetTracks::beginRun(art::Run& run)
     fTrackTree->Branch("z", &trackz);
     fTrackTree->Branch("track_id", &track_id);
 
+    fTrueTree = tfs->make<TTree>("True", "Tracks");
+    fTrueTree->Branch("event", &event_id);
+    fTrueTree->Branch("x", &trackx);
+    fTrueTree->Branch("y", &tracky);
+    fTrueTree->Branch("z", &trackz);
+    fTrueTree->Branch("track_id", &track_id);
+
     fLaserTree = tfs->make<TTree>("Laser", "Laser");
     fLaserTree->Branch("event", &event_id);
     fLaserTree->Branch("entry_x", &laser_entry_x);
@@ -131,6 +150,7 @@ void GetTracks::endJob()
 void GetTracks::reconfigure(fhicl::ParameterSet const& parameterSet)
 {
     fTrackLabel = parameterSet.get<art::InputTag>("TrackLabel");
+    fGetTrue = parameterSet.get<bool>("GetTrue", false);
 }
 
 //-----------------------------------------------------------------------
@@ -167,20 +187,35 @@ void GetTracks::produce(art::Event& event)
     //auto track = tr.fXYZ;
     for (auto const &Track : *Tracks) {
 
-        event_id = (unsigned int) event.id().event();
-        track_id = Track.ID();
+        event_id, true_event_id = (unsigned int) event.id().event();
+        track_id, true_track_id = Track.ID();
 
         size_t track_size = Track.NumberTrajectoryPoints();
 
         trackx.resize(track_size); tracky.resize(track_size); trackz.resize(track_size);
+        if (fGetTrue) true_trackx.resize(track_size); true_tracky.resize(track_size); true_trackz.resize(track_size);
 
         for (size_t i = 0; i < track_size; ++i)  {
-            trackx.at(i) = (float) Track.LocationAtPoint(i).x();
-            tracky.at(i) = (float) Track.LocationAtPoint(i).y();
-            trackz.at(i) = (float) Track.LocationAtPoint(i).z();
+            double x = Track.LocationAtPoint(i).x();
+            double y = Track.LocationAtPoint(i).y();
+            double z = Track.LocationAtPoint(i).z();
+
+            trackx.at(i) = (float) x;
+            tracky.at(i) = (float) y;
+            trackz.at(i) = (float) z;
+
+            if (fGetTrue)
+            {
+                auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
+                auto offset = SCE->GetPosOffsets(x,y,z);
+                true_trackx.at(i) = (float) offset[0] + x;
+                true_tracky.at(i) = (float) offset[1] + y;
+                true_trackz.at(i) = (float) offset[2] + z;
+            }
         }
         fTrackTree->Fill();
         trackx.clear(); tracky.clear(); trackz.clear();
+
     }
  }
     DEFINE_ART_MODULE(GetTracks)

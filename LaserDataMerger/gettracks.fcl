@@ -4,6 +4,7 @@ gettracks:
 {
       module_type:          "GetTracks"
       TrackLabel: "pandoraCosmic"
+      GetTrue: false
 }
 
 GetTracks: @local::gettracks
