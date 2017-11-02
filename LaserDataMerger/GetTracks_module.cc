@@ -90,8 +90,11 @@ private:
 
     // fhicl input parameters
     art::InputTag fTrackLabel;
-    bool fGetTrue;
+
+    bool fGetTracks;
+    bool fGetLaser;
     bool fGetMC;
+    bool fGetTrue = false;
 
 }; // class GetTracks
 
@@ -127,9 +130,9 @@ void GetTracks::beginRun(art::Run& run)
 
     fTrueTree = tfs->make<TTree>("True", "Tracks");
     fTrueTree->Branch("event", &event_id);
-    fTrueTree->Branch("x", &trackx);
-    fTrueTree->Branch("y", &tracky);
-    fTrueTree->Branch("z", &trackz);
+    fTrueTree->Branch("x", &true_trackx);
+    fTrueTree->Branch("y", &true_tracky);
+    fTrueTree->Branch("z", &true_trackz);
     fTrueTree->Branch("track_id", &track_id);
 
     fLaserTree = tfs->make<TTree>("Laser", "Laser");
@@ -153,8 +156,9 @@ void GetTracks::endJob()
 void GetTracks::reconfigure(fhicl::ParameterSet const& parameterSet)
 {
     fTrackLabel = parameterSet.get<art::InputTag>("TrackLabel");
-    fGetTrue = parameterSet.get<bool>("GetTrue", false);
-    fGetMC = parameterSet.get<bool>("GetMC", true);
+    fGetTracks = parameterSet.get<bool>("GetTracks", true);
+    fGetLaser = parameterSet.get<bool>("GetLaser", true);
+    fGetMC = parameterSet.get<bool>("GetMC", false);
 }
 
 //-----------------------------------------------------------------------
@@ -174,21 +178,21 @@ void GetTracks::produce(art::Event& event)
             event.getByLabel("largeant", "", MCParticles);
 
             for (auto const &mcpart : *MCParticles) {
-                simb::MCTrajectory traj = mcpart.Trajectory();
-                size_t track_size = mcpart.NumberTrajectoryPoints();
-                true_trackx.resize(track_size), true_tracky.resize(track_size), true_trackz.resize(track_size);
-
                 if (mcpart.PdgCode() == 13) { // Only look at muons
+                    simb::MCTrajectory traj = mcpart.Trajectory();
+                    size_t track_size = mcpart.NumberTrajectoryPoints();
+                    true_trackx.resize(track_size), true_tracky.resize(track_size), true_trackz.resize(track_size);
+
                     for (uint idx = 0; idx < track_size; idx++) {
                         true_trackx.at(idx) = traj.X(idx);
                         true_tracky.at(idx) = traj.Y(idx);
                         true_trackz.at(idx) = traj.Z(idx);
                     }
+                    fTrueTree->Fill();
+                    true_trackx.clear();
+                    true_tracky.clear();
+                    true_trackz.clear();
                 }
-                fTrueTree->Fill();
-                trackx.clear();
-                tracky.clear();
-                trackz.clear();
             }
         }
         catch (...) {
@@ -196,60 +200,69 @@ void GetTracks::produce(art::Event& event)
         }
     }
 
-    try {
-        event.getByLabel("LaserDataMerger", "LaserBeam", Laser);
+    if (fGetLaser) {
+        try {
+            event.getByLabel("LaserDataMerger", "LaserBeam", Laser);
 
-    	event_id = event.id().event();
-        laser_entry_x = Laser->GetEntryPoint().x();
-        laser_entry_y = Laser->GetEntryPoint().y();
-        laser_entry_z = Laser->GetEntryPoint().z();
+            event_id = event.id().event();
+            laser_entry_x = Laser->GetEntryPoint().x();
+            laser_entry_y = Laser->GetEntryPoint().y();
+            laser_entry_z = Laser->GetEntryPoint().z();
 
-        laser_exit_x = Laser->GetExitPoint().x();
-        laser_exit_y = Laser->GetExitPoint().y();
-        laser_exit_z = Laser->GetExitPoint().z();
+            laser_exit_x = Laser->GetExitPoint().x();
+            laser_exit_y = Laser->GetExitPoint().y();
+            laser_exit_z = Laser->GetExitPoint().z();
 
-        direction = Laser->GetLaserDirection();
-        position = Laser->GetLaserPosition();
+            direction = Laser->GetLaserDirection();
+            position = Laser->GetLaserPosition();
 
-        fLaserTree->Fill();
-    }
-    catch (...){
-        std::cout << "Could not find laser tracks" << std::endl;
-    }; // pretty dangerous, but we just ignore writing the laser tree if no laser data is present.
-
-
-    event.getByLabel(fTrackLabel, Tracks);
-    //auto track = tr.fXYZ;
-    for (auto const &Track : *Tracks) {
-
-        track_id, true_track_id = Track.ID();
-
-        size_t track_size = Track.NumberTrajectoryPoints();
-
-        trackx.resize(track_size); tracky.resize(track_size); trackz.resize(track_size);
-        if (fGetTrue) true_trackx.resize(track_size); true_tracky.resize(track_size); true_trackz.resize(track_size);
-
-        for (size_t i = 0; i < track_size; ++i)  {
-            double x = Track.LocationAtPoint(i).x();
-            double y = Track.LocationAtPoint(i).y();
-            double z = Track.LocationAtPoint(i).z();
-
-            trackx.at(i) = (float) x;
-            tracky.at(i) = (float) y;
-            trackz.at(i) = (float) z;
-
-            if (fGetTrue)
-            {
-                auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
-                auto offset = SCE->GetPosOffsets(x,y,z);
-                true_trackx.at(i) = (float) offset[0] + x;
-                true_tracky.at(i) = (float) offset[1] + y;
-                true_trackz.at(i) = (float) offset[2] + z;
-            }
+            fLaserTree->Fill();
         }
-        fTrackTree->Fill();
-        trackx.clear(); tracky.clear(); trackz.clear();
+        catch (...) {
+            std::cout << "Could not find laser tracks" << std::endl;
+        }; // pretty dangerous, but we just ignore writing the laser tree if no laser data is present.
+    }
 
+    if (fGetTracks) {
+        event.getByLabel(fTrackLabel, Tracks);
+        //auto track = tr.fXYZ;
+        for (auto const &Track : *Tracks) {
+
+            track_id, true_track_id = Track.ID();
+
+            size_t track_size = Track.NumberTrajectoryPoints();
+
+            trackx.resize(track_size);
+            tracky.resize(track_size);
+            trackz.resize(track_size);
+            if (fGetTrue) true_trackx.resize(track_size);
+            true_tracky.resize(track_size);
+            true_trackz.resize(track_size);
+
+            for (size_t i = 0; i < track_size; ++i) {
+                double x = Track.LocationAtPoint(i).x();
+                double y = Track.LocationAtPoint(i).y();
+                double z = Track.LocationAtPoint(i).z();
+
+                trackx.at(i) = (float) x;
+                tracky.at(i) = (float) y;
+                trackz.at(i) = (float) z;
+
+                //if (fGetTrue)
+                //{
+                //    auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
+                //    auto offset = SCE->GetPosOffsets(x,y,z);
+                //    true_trackx.at(i) = (float) offset[0] + x;
+                //    true_tracky.at(i) = (float) offset[1] + y;
+                //    true_trackz.at(i) = (float) offset[2] + z;
+                //}
+            }
+            fTrackTree->Fill();
+            trackx.clear();
+            tracky.clear();
+            trackz.clear();
+
+        }
     }
  }
     DEFINE_ART_MODULE(GetTracks)

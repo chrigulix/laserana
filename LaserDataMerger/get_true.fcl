@@ -35,7 +35,9 @@ physics:
     {
         module_type:          "GetTracks"
         TrackLabel:           "pandoraCosmic"
-        GetTrue: false
+        GetTracks: false
+        GetLaser: false
+        GetMC: true
     }
   }
 
