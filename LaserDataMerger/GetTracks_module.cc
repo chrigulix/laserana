@@ -178,7 +178,7 @@ void GetTracks::produce(art::Event& event)
             event.getByLabel("largeant", "", MCParticles);
 
             for (auto const &mcpart : *MCParticles) {
-                if (mcpart.PdgCode() == 13) { // Only look at muons
+                //if (mcpart.PdgCode() == 13) { // Only look at muons
                     simb::MCTrajectory traj = mcpart.Trajectory();
                     size_t track_size = mcpart.NumberTrajectoryPoints();
                     true_trackx.resize(track_size), true_tracky.resize(track_size), true_trackz.resize(track_size);
@@ -192,7 +192,7 @@ void GetTracks::produce(art::Event& event)
                     true_trackx.clear();
                     true_tracky.clear();
                     true_trackz.clear();
-                }
+                //}
             }
         }
         catch (...) {
