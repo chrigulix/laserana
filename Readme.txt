@@ -1,1 +1,1 @@
-This is the new v05_08_00 branch, wich will be merged as soon as checked.
+This is the new v06_26_02 branch, wich will be merged as soon as checked.
