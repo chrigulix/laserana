@@ -19,7 +19,9 @@ art_make( MODULE_LIBRARIES
 			${MF_UTILITIES}
 			${CETLIB}
 			${ROOT_BASIC_LIB_LIST}
-              BASENAME_ONLY
+		    larsim_MCCheater_BackTracker_service
+
+		BASENAME_ONLY
 )
 
 install_headers()
