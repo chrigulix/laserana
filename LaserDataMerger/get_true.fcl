@@ -3,6 +3,7 @@
 ##
 
 #include "services_microboone.fcl"
+#include "mccheatermodules.fcl"
 
 process_name: GetTracks
 
@@ -39,11 +40,12 @@ physics:
         GetLaser: false
         GetMC: true
     }
+    backtrack:    @local::standard_backtrackerloader
   }
 
  # define the producer and filter modules for this path, order matters,
  # filters reject all following items.  see lines starting physics.producers below
- reco: [ GetTracks ]
+ reco: [ backtrack, GetTracks ]
 
  # define the output stream, there could be more than one if using filters
  # stream1:  [ out1 ]
