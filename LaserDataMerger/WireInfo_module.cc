@@ -91,6 +91,20 @@ namespace WireInfo {
         geo::TPCID::TPCID_t tpc = 0;
         geo::CryostatID::CryostatID_t cryostat = 0;
 
+        TVector3 pt(0, 60.8, 125.7);
+        std::cout << "Nearest point to x: " << pt.x() << " y: " << pt.y() << " z: " << pt.z() << std::endl;
+        for (uint plane = 0; plane < 3; plane++) {
+            auto wire = fGeometry->NearestWire(pt, plane);
+            std::cout << " plane: " << plane << " wire: " << wire << std::endl;
+        }
+        double a[6];
+        fGeometry->CryostatBoundaries(a);
+        auto len = fGeometry->DetLength();
+        auto wid = fGeometry->DetHalfWidth();
+        auto hih = fGeometry->DetHalfHeight();
+
+        std::cout << "dims: " << " " << a[0]<< " "  << a[1]<< " "  << a[2]<< " "  << a[3]<< " "  << a[4]<< " "  << a[5]<< " "  << std::endl;
+
         for (auto wire : fWires) {
 
             auto planeid = geo::PlaneID(cryostat, tpc, wire.first);
