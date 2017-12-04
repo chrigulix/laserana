@@ -1,4 +1,9 @@
 # config for laser simulation. Puts the laser in a position where symmerty of alser tracks is acheived.
 #include "laser_reco.fcl"
 
+# Producing symmetric track in y
 physics.producers.LaserDataMerger.PositionLCS2:         [120 , 0, 1075]
+physics.producers.LaserDataMerger.PositionLCS1:         [120 , 0,  -35]
+
+# Direction Calibration for simulation
+physics.producers.LaserDataMerger.DirCalLCS1:           [0. , 0.]

@@ -6,4 +6,4 @@ physics.producers.LaserDataMerger.PositionLCS2:         [120 , 0, 1075]
 physics.producers.LaserDataMerger.PositionLCS1:         [120 , 0,  -35]
 
 # Direction Calibration for simulation
-physics.producers.LaserDataMerger.DirCalLCS1:           [0. , 0.]     
+physics.producers.LaserDataMerger.DirCalLCS1:           [0. , 0.]
