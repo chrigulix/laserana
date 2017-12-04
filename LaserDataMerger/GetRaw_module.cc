@@ -122,15 +122,6 @@ void GetRaw::beginRun(art::Run& run)
     fRawTree->Branch("plane", &plane);
     fRawTree->Branch("raw", &RawDigit);
 
-    fHitTree = tfs->make<TTree>("HitTree", "Tracks");
-    fHitTree->Branch("start_ticks", &start_ticks);
-    fHitTree->Branch("end_ticks", &end_ticks);
-    fHitTree->Branch("peak_times", &peak_times);
-    fHitTree->Branch("peak_amps", &peak_amps);
-    fHitTree->Branch("channel", &hit_channel);
-
-    fCalTree = tfs->make<TTree>("CalTree", "Tracks");
-    fCalTree->Branch("clawire", &calwire);
 
     return;
 }
@@ -141,9 +132,7 @@ void GetRaw::endJob()
 
 void GetRaw::reconfigure(fhicl::ParameterSet const& parameterSet)
 {
-    fRawLabel = parameterSet.get<art::InputTag>("RawLabel", "digitfilter");
-    fHitLabel = parameterSet.get<art::InputTag>("HitLabel", "daq");
-    fCalLabel = parameterSet.get<art::InputTag>("CalLabel", "caldata");
+    fRawLabel = parameterSet.get<art::InputTag>("RawLabel", "daq");
     fChannels = parameterSet.get<std::vector<unsigned int> >("Channels");
 }
 
@@ -152,49 +141,19 @@ void GetRaw::reconfigure(fhicl::ParameterSet const& parameterSet)
 void GetRaw::produce(art::Event& event)
 {
     art::Handle<std::vector<raw::RawDigit> > Raw;
-    art::Handle<std::vector<recob::Hit> > Hits;
-    art::Handle<std::vector<recob::Wire> > CalWires;
 
     event.getByLabel(fRawLabel, Raw);
-    event.getByLabel(fHitLabel, Hits);
-    event.getByLabel(fCalLabel, CalWires);
 
 
     //auto track = tr.fXYZ;
     for (auto const &Digit : *Raw) {
         auto test = raw::RawDigit();
-        auto hitt = recob::Hit();
-        auto calw = recob::Wire();
-
-        std::vector<recob::Hit> hits;
-
-        hitt.Channel();
-        calw.SignalROI();
-
 
         Channel = Digit.Channel();
 
         if(std::find(fChannels.begin(), fChannels.end(), Channel) != fChannels.end()) {
 
             auto WireID = fGeometry->ChannelToWire(Channel);
-
-            // find all hits in the channel
-            for (auto const &Hit : *Hits) {
-                if (Hit.Channel() == Channel) {
-                    start_ticks.push_back(Hit.StartTick());
-                    end_ticks.push_back(Hit.EndTick());
-                    peak_times.push_back(Hit.PeakTime());
-                    peak_amps.push_back(Hit.PeakAmplitude());
-                    hit_channel = Hit.Channel();
-                }
-            }
-            for (auto const &CalWire : *CalWires) {
-                if (CalWire.Channel() == Channel) {
-                    calwire = CalWire.Signal();
-                }
-            }
-
-            std::cout << "start: " << start_ticks.front() << std::endl;
 
             plane = WireID.front().Plane;
             wire = WireID.front().Wire;
@@ -205,19 +164,9 @@ void GetRaw::produce(art::Event& event)
             event_id = (unsigned int) event.id().event();
             RawDigit = Digit.ADCs();
             fRawTree->Fill();
-            fHitTree->Fill();
-            fCalTree->Fill();
         }
         RawDigit.clear();
 
-        hits.clear();
-
-        start_ticks.clear();
-        end_ticks.clear();
-        peak_times.clear();
-        peak_amps.clear();
-
-        calwire.clear();
     }
  }
     DEFINE_ART_MODULE(GetRaw)
