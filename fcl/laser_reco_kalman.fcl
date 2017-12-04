@@ -96,11 +96,11 @@ physics:
  }
  # preprocess:   [digitfilter, caldata]
  # fuzzycluster: [fuzzycluster, trackkalmanhit, stitchkalmanhit]
- reco: [    Trunc,
+ reco: [
             digitfilter,
             caldata,
             LaserDataMerger,
-            laserhit,
+            gaushit,
             fuzzycluster,
             trackkalmanhit,
             stitchkalmanhit,
@@ -164,14 +164,14 @@ physics.producers.gaushit.TryNplus1Fits:                               false
 physics.producers.gaushit.Chi2NDF:                                     50.
 
 # Track finder overrites
-physics.producers.pandoraCosmic.GeantModuleLabel:			           "laserhit"
+physics.producers.pandoraCosmic.GeantModuleLabel:			           "gaushit"
 physics.producers.pandoraCosmic.GeantModuleLabel:                      "largeant"
 physics.producers.pandoraCosmic.ConfigFile:                            "PandoraSettings_MicroBooNE_Cosmic.xml"
 
-physics.producers.fuzzycluster.HitsModuleLabel:                     "laserhit"
+physics.producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
 physics.producers.fuzzycluster.CalDataModuleLabel:                  "caldata"
 
-physics.producers.trackkalmanhit.HitModuleLabel:                    "laserhiet"
+physics.producers.trackkalmanhit.HitModuleLabel:                    "gaushit"
 physics.producers.trackkalmanhit.ClusterModuleLabel:                "fuzzycluster"
 
 physics.producers.stitchkalmanhit.TrackModuleLabel:                 "trackkalmanhit"
