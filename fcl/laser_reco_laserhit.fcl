@@ -11,6 +11,8 @@
 
 #include "merger.fcl"
 #include "laserreco.fcl"
+#include "truncator.fcl"
+#include "gettracks.fcl"
 
 process_name: LaserReco
 
