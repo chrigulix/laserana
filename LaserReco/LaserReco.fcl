@@ -10,7 +10,6 @@ services:
   scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService:            { fileName: "LaserHits.root" }
-  Timing:                  {}
   RandomNumberGenerator:   {} #ART native random number generator
   @table::microboone_reco_minimal_services
   message: @local::standard_info
