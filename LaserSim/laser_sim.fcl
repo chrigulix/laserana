@@ -1,0 +1,82 @@
+#include "services_microboone.fcl"
+#include "singles_microboone.fcl"
+#include "largeantmodules_microboone.fcl"
+#include "detsimmodules_microboone.fcl"
+#include "mccheatermodules.fcl"
+
+process_name: LasesSim
+
+services:
+{
+  scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
+  # Load the service that manages root files for histograms.
+  TFileService:            { fileName: "Bla.root" }
+  RandomNumberGenerator: {}
+  Timing: {}
+  message: @local::standard_debug
+  @table::microboone_full_services
+}
+
+# source is now a root file
+source:
+{
+  module_type: EmptyEvent
+  timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
+  maxEvents:   2           # Number of events to create
+  firstRun:    1           # Run number to use for this file
+  firstEvent:  1           # number of first event in the file
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+ producers:
+  {
+    LaserSim:
+    {
+        module_type:          "LaserSim"
+        TrackLabel:           "bla"
+    }
+       # triggersim:   @local::ubtrigger_dark_bnb
+       largeant:  @local::microboone_largeant
+       daq:       @local::microboone_simwire
+  }
+
+ # define the producer and filter modules for this path, order matters,
+ # filters reject all following items.  see lines starting physics.producers below
+ sim: [ LaserSim, daq ]
+
+ # define the output stream, there could be more than one if using filters
+ stream1:  [ out1 ]
+
+ # trigger_paths is a keyword and contains the paths that modify the art::event,
+ # ie filters and producers
+ trigger_paths: [sim]
+
+ # analysis : [TimeMapProducer]
+
+ # end_paths is a keyword and contains the paths that do not modify the art::Event,
+ # ie analyzers and output streams.  these all run simultaneously
+ # end_paths:     [analysis]
+}
+
+# block to define where the output goes.  if you defined a filter in the physics
+# block and put it in the trigger_paths then you need to put a SelectEvents: {SelectEvents: [XXX]}
+# entry in the output stream you want those to go to, where XXX is the label of the filter module(s)
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "RawGen.root"
+   #sam_ignore:  true
+   dataTier:    "reconstructed-2d"
+   compressionLevel: 1
+ }
+}
+
+physics.producers.daq.DriftEModuleLabel: "LaserSim"
+
+# Adjust the window/offset for the reduced total frame size (9600 -> 6400 ticks)
