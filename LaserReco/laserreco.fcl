@@ -32,7 +32,7 @@ laserreco:
       # Y-Plane hit thresholds
       YHitPeakThreshold:       10.0
       YAmplitudeToWidthRatio:  1.5
-      YHitWidthThreshold:      6
+      YHitWidthThreshold:      2
 }
 
 LaserReco: @local::laserreco
