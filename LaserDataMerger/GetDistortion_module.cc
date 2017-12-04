@@ -125,7 +125,7 @@ void GetDistortion::beginRun(art::Run& run)
 
                     std::cout << "pos: " << xbin*x_step << "/" << y_min + (ybin * y_step) << "/" << zbin * z_step  << " dis: " << Dispacement[0] << "/" << Dispacement[1] << "/" << Dispacement[2] << std::endl;
                     // Fill interpolated grid points into histograms
-                    RecoDisplacement[coord].SetBinContent(xbin+1,ybin+1,zbin+1, Dispacement[coord] * CLHEP::cm);
+                    RecoDisplacement[coord].SetBinContent(xbin+1,ybin+1,zbin+1, Dispacement[coord]);
                 } // end coordinate loop
             } // end zbin loop
         } // end ybin loop
