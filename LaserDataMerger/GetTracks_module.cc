@@ -10,7 +10,10 @@
 // LArSoft includes
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/MCBase/MCTrack.h"
+#include "lardataobj/Simulation/SimChannel.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
+
+#include "larsim/MCCheater/BackTracker.h"
 
 // Framework includes
 #include "art/Framework/Core/EDProducer.h"
@@ -165,11 +168,48 @@ void GetTracks::reconfigure(fhicl::ParameterSet const& parameterSet)
 
 void GetTracks::produce(art::Event& event)
 {
+
     art::Handle<std::vector<simb::MCTruth>> MCTruth;
     art::Handle<std::vector<simb::MCParticle>> MCParticles;
 
     art::Handle<std::vector<recob::Track> > Tracks;
     art::Handle<lasercal::LaserBeam>  Laser;
+
+/*
+
+    art::Handle< std::vector<recob::Hit> > hitcol;
+    event.getByLabel("laserhit", hitcol);
+
+    // make a vector of them - we aren't writing anything out to a file
+    // so no need for a art::PtrVector here
+    std::vector< art::Ptr<recob::Hit> > hits;
+    art::fill_ptr_vector(hits, hitcol);
+
+    // loop over the hits and figure out which particle contributed to each one
+    std::vector< art::Ptr<recob::Hit> >::iterator itr = hits.begin();
+
+    art::ServiceHandle<cheat::BackTracker> bt;
+
+    std::cout << "SIZE: " << hits.size() << std::endl;
+    std::cout << "SIZE: " << hitcol->size() << std::endl;
+
+    int i = 0;
+    while( itr != hits.end() ) {
+        std::vector<double> xyz = bt->HitToXYZ(*itr);
+        true_trackx.push_back((float) xyz[0]);
+        true_tracky.push_back((float) xyz[1]);
+        true_trackz.push_back((float) xyz[2]);
+        //std::cout << "offsets: [" << xyz[0] << ", " << xyz[1] << ", " << xyz[2] << "]" << std::endl;
+        itr++;
+        i++;
+    }
+    std::cout << "SIZE: " << i << std::endl;
+    fTrueTree->Fill();
+    true_trackx.clear();
+    true_tracky.clear();
+    true_trackz.clear();
+*/
+
 
     event_id = (unsigned int) event.id().event();
 
@@ -177,8 +217,9 @@ void GetTracks::produce(art::Event& event)
         try {
             event.getByLabel("largeant", "", MCParticles);
 
+
             for (auto const &mcpart : *MCParticles) {
-                //if (mcpart.PdgCode() == 13) { // Only look at muons
+                if (mcpart.PdgCode() == 13) { // Only look at muons
                     simb::MCTrajectory traj = mcpart.Trajectory();
                     size_t track_size = mcpart.NumberTrajectoryPoints();
                     true_trackx.resize(track_size), true_tracky.resize(track_size), true_trackz.resize(track_size);
@@ -187,12 +228,14 @@ void GetTracks::produce(art::Event& event)
                         true_trackx.at(idx) = traj.X(idx);
                         true_tracky.at(idx) = traj.Y(idx);
                         true_trackz.at(idx) = traj.Z(idx);
+
+                        std::cout << "[" << traj.X(idx) << ", " << traj.Y(idx) << ", " << traj.Z(idx) << "]" <<std::endl;
                     }
                     fTrueTree->Fill();
                     true_trackx.clear();
                     true_tracky.clear();
                     true_trackz.clear();
-                //}
+                }
             }
         }
         catch (...) {
@@ -235,9 +278,11 @@ void GetTracks::produce(art::Event& event)
             trackx.resize(track_size);
             tracky.resize(track_size);
             trackz.resize(track_size);
-            if (fGetTrue) true_trackx.resize(track_size);
-            true_tracky.resize(track_size);
-            true_trackz.resize(track_size);
+            if (fGetTrue) {
+                true_trackx.resize(track_size);
+                true_tracky.resize(track_size);
+                true_trackz.resize(track_size);
+            }
 
             for (size_t i = 0; i < track_size; ++i) {
                 double x = Track.LocationAtPoint(i).x();
@@ -248,20 +293,28 @@ void GetTracks::produce(art::Event& event)
                 tracky.at(i) = (float) y;
                 trackz.at(i) = (float) z;
 
-                //if (fGetTrue)
-                //{
-                //    auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
-                //    auto offset = SCE->GetPosOffsets(x,y,z);
-                //    true_trackx.at(i) = (float) offset[0] + x;
-                //    true_tracky.at(i) = (float) offset[1] + y;
-                //    true_trackz.at(i) = (float) offset[2] + z;
-                //}
+                if (fGetTrue)
+                {
+                    auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
+                    auto offset = SCE->GetPosOffsets(x,y,z);
+                    std::cout << "offsets: [" << offset[0] << ", " << offset[1] << ", " << offset[2] << "]" << std::endl;
+
+                    true_trackx.at(i) = (float) (x - offset[0]);
+                    true_tracky.at(i) = (float) (y - offset[1]);
+                    true_trackz.at(i) = (float) (z - offset[2]);
+                }
             }
             fTrackTree->Fill();
             trackx.clear();
             tracky.clear();
             trackz.clear();
 
+            if (fGetTrue) {
+                fTrueTree->Fill();
+                true_trackx.clear();
+                true_tracky.clear();
+                true_trackz.clear();
+            }
         }
     }
  }
