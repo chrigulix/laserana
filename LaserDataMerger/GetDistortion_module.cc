@@ -122,7 +122,11 @@ void GetDistortion::beginRun(art::Run& run)
                 // Loop over all coordinates
                 for(unsigned coord = 0; coord < 3; coord++)
                 {
-
+                    // you have to multiply the x component by -1 because of uboone coordinate system conventions
+                    // discussed in some meeting...
+                    if (coord == 0) {
+                        Dispacement[0] *= -1.;
+                    }
                     std::cout << "pos: " << xbin*x_step << "/" << y_min + (ybin * y_step) << "/" << zbin * z_step  << " dis: " << Dispacement[0] << "/" << Dispacement[1] << "/" << Dispacement[2] << std::endl;
                     // Fill interpolated grid points into histograms
                     RecoDisplacement[coord].SetBinContent(xbin+1,ybin+1,zbin+1, Dispacement[coord]);
