@@ -309,7 +309,7 @@ namespace LaserDataMerger {
         TVector2 CalibratedAngles;
 
         if (LCS_ID == 1) { // The downstream laser system (sitting at z = -20)
-            Theta = TMath::DegToRad() * (LinearRawToAngle(Theta_raw) - fDirCalLCS2[1]);
+            Theta = TMath::DegToRad() * (LinearRawToAngle(Theta_raw) - fDirCalLCS1[1]);
             Phi = TMath::DegToRad() * (Phi_raw - fDirCalLCS1[0]);
             Position = PositionLCS1;
         } else if (LCS_ID == 2) { // The upstream laser system (sitting at z = 1020)
@@ -317,7 +317,7 @@ namespace LaserDataMerger {
             //Theta = TMath::DegToRad() * (LinearRawToAngle(Theta_raw) - 207.69487762388422);
             //Phi = -TMath::DegToRad() * (180 + (Phi_raw - fDirCalLCS2[0]));
 
-            Theta = TMath::DegToRad() * (90.0 - LinearRawToAngle(Theta_raw - fDirCalLCS2[1]));
+            Theta = TMath::DegToRad() * (90.0 - LinearRawToAngle(Theta_raw - fDirCalLCS2[1]) - 207.69487762388422);
             Phi = -TMath::DegToRad() * (Phi_raw - fDirCalLCS2[0]);
             Position = PositionLCS2;
         } else {
@@ -329,8 +329,8 @@ namespace LaserDataMerger {
             time_ms = (unsigned int) event.time().timeLow();
 
             std::cout << "Positions from entry: " << laser_id << std::endl;
-            std::cout << "rot: (raw / calib): " << Theta_raw << " / " << Theta << std::endl;
-            std::cout << "lin: (raw / calib): " << Phi_raw << " / " << Phi << std::endl;
+            std::cout << "lin: (raw / calib): " << Theta_raw << " / " << Theta << std::endl;
+            std::cout << "rot: (raw / calib): " << Phi_raw << " / " << Phi << std::endl;
             std::cout << "Event Time (low): " << time_s << std::endl;
             std::cout << "Event Time (hig): " << time_ms << std::endl;
         }
