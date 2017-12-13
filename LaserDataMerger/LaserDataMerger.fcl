@@ -3,6 +3,7 @@
 ##
 #include "services_microboone.fcl"
 #include "reco_uboone_data_minimal.fcl"
+#include "merger.fcl"
 
 process_name: LaserDataMerger
 
@@ -41,21 +42,7 @@ physics:
 
  producers:
   {
-    LaserDataMerger: 
-    {
-      module_type:          "LaserDataMerger"
-      ReadTimeMap:          true
-      GenerateTimeInfo:     false
-      # These are all calibration values, only change them if you know what you
-      # are doing!
-      TickToAngle:          1                   # conversion constant for linear encoder
-      DirCalLCS1:           [0. , 0.]           # Direction Calibration
-      DirCalLCS2:           [161.568 , 10500000.]       # Direction Calibration (161.568deg for straight -180deg to invert )
-      PositionLCS1:         [103. , 0., -20.]           # Position of Mirror
-      PositionLCS2:         [103. , 0., 1056.8]  #
-      EnergyMinMaxLCS1:     [8000, 12500]
-      EnergyMinMaxLCS2:     [8000, 12500]     
-    }
+        LaserDataMerger:    @local::LaserDataMerger
   }
 
  #define the producer and filter modules for this path, order matters, 
