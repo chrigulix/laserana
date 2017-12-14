@@ -171,6 +171,7 @@ void GetTracks::produce(art::Event& event)
 
     art::Handle<std::vector<simb::MCTruth>> MCTruth;
     art::Handle<std::vector<simb::MCParticle>> MCParticles;
+    art::Handle<std::vector<sim::MCTrack>> MCTrack;
 
     art::Handle<std::vector<recob::Track> > Tracks;
     art::Handle<lasercal::LaserBeam>  Laser;
@@ -211,25 +212,26 @@ void GetTracks::produce(art::Event& event)
 */
 
 
+
     event_id = (unsigned int) event.id().event();
 
     if (fGetMC) {
         try {
-            event.getByLabel("largeant", "", MCParticles);
+            event.getByLabel("mcreco", "", MCTrack);
 
 
-            for (auto const &mcpart : *MCParticles) {
-                if (mcpart.PdgCode() == 13) { // Only look at muons
-                    simb::MCTrajectory traj = mcpart.Trajectory();
-                    size_t track_size = mcpart.NumberTrajectoryPoints();
+            for (auto const &mctrack : *MCTrack) {
+                if (mctrack.PdgCode() == 13) { // Only look at muons
+                    size_t track_size = mctrack.size();
                     true_trackx.resize(track_size), true_tracky.resize(track_size), true_trackz.resize(track_size);
 
                     for (uint idx = 0; idx < track_size; idx++) {
-                        true_trackx.at(idx) = traj.X(idx);
-                        true_tracky.at(idx) = traj.Y(idx);
-                        true_trackz.at(idx) = traj.Z(idx);
+                        auto pt = mctrack.at(idx);
+                        true_trackx.at(idx) = pt.X(idx);
+                        true_tracky.at(idx) = pt.Y(idx);
+                        true_trackz.at(idx) = pt.Z(idx);
 
-                        std::cout << "[" << traj.X(idx) << ", " << traj.Y(idx) << ", " << traj.Z(idx) << "]" <<std::endl;
+                        std::cout << "[" << pt.X(idx) << ", " << pt.Y(idx) << ", " << pt.Z(idx) << "]" <<std::endl;
                     }
                     fTrueTree->Fill();
                     true_trackx.clear();
