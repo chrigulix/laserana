@@ -103,7 +103,7 @@ private:
     bool fGetTracks;
     bool fGetLaser;
     bool fGetMC;
-    bool fGetTrue = false;
+    bool fGetTrue = true;
     bool fPerfectTrack = true;
 
 }; // class GetTracks
