@@ -212,9 +212,6 @@ void GetTracks::produce(art::Event& event)
     true_trackz.clear();
 */
 
-    sim::MCTrack tt;
-    auto p = tt.at(2);
-    p.X()
 
     event_id = (unsigned int) event.id().event();
 
@@ -230,11 +227,11 @@ void GetTracks::produce(art::Event& event)
 
                     for (uint idx = 0; idx < track_size; idx++) {
                         auto pt = mctrack->at(idx);
-                        true_trackx.at(idx) = pt.X(idx);
-                        true_tracky.at(idx) = pt.Y(idx);
-                        true_trackz.at(idx) = pt.Z(idx);
+                        true_trackx.at(idx) = pt.X();
+                        true_tracky.at(idx) = pt.Y();
+                        true_trackz.at(idx) = pt.Z();
 
-                        std::cout << "[" << pt.X(idx) << ", " << pt.Y(idx) << ", " << pt.Z(idx) << "]" <<std::endl;
+                        std::cout << "[" << pt.X() << ", " << pt.Y() << ", " << pt.Z() << "]" <<std::endl;
                     }
                     fTrueTree->Fill();
                     true_trackx.clear();
