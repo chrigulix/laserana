@@ -365,7 +365,7 @@ void GetTracks::produce(art::Event& event)
 
     std::pair<double, double> GetTracks::get_line(std::pair<double, double> pt1, std::pair<double, double> pt2) {
         double m, b;
-        m = pt2.second - pt1.second / (pt2.first - pt1.first);
+        m = (pt2.second - pt1.second) / (pt2.first - pt1.first);
         b = pt1.second - m * pt1.first;
         return std::make_pair(m, b);
     }
