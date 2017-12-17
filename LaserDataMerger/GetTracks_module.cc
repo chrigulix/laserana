@@ -297,7 +297,11 @@ void GetTracks::produce(art::Event& event)
                         double x = pt(z, zx_line);
                         double y = pt(z, zy_line);
 
+                        auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
+                        auto offset = SCE->GetPosOffsets(x,y,z);
+
                         std::cout << " at: " << z << ", " << x << ", " << y << std::endl;
+                        std::cout << " of: [" << offset[0] << ", " << offset[1] << ", " << offset[2] << "]" << std::endl;
 
                     }
                     std::cout << "End: ";
