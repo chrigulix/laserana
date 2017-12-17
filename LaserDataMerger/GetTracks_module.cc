@@ -280,18 +280,22 @@ void GetTracks::produce(art::Event& event)
 
                 if (laser_entry_z > laser_exit_z) {
                     // seems that we are going backwards
+
+                    // construct the points based on entry and exit
                     auto zx_entry = std::make_pair(laser_entry_z, laser_entry_x);
                     auto zx_exit =  std::make_pair(laser_exit_z, laser_exit_x);
 
                     auto zy_entry = std::make_pair(laser_entry_z, laser_entry_y);
                     auto zy_exit = std::make_pair(laser_exit_z, laser_exit_y);
 
+                    // calculate the line parameters for the two planes
                     std::pair<double, double> zx_line = get_line(zx_entry, zx_exit);
                     std::pair<double, double> zy_line = get_line(zy_entry, zy_exit);
 
                     std::cout << "zx line: " << zx_line.first << " " << zx_line.second << std::endl;
                     std::cout << "zy line: " << zy_line.first << " " << zy_line.second << std::endl;
 
+                    // now we loop over the range in z to obtain all tracks
                     for (Double_t z = laser_entry_z; z > laser_exit_z; z += - stepsize) {
 
                         double x = pt(z, zx_line);
@@ -303,9 +307,17 @@ void GetTracks::produce(art::Event& event)
                         std::cout << " at: " << z << ", " << x << ", " << y << std::endl;
                         std::cout << " of: [" << offset[0] << ", " << offset[1] << ", " << offset[2] << "]" << std::endl;
 
+                        true_trackx.push_back(x - (-offset[0])); // This is convention beacause of the uboone coordinate system
+                        true_tracky.push_back(y  - offset[1]);
+                        true_trackz.push_back(z - offset[2]);
                     }
                     std::cout << "End: ";
                     Laser->GetExitPoint().Print();
+
+                    fTrueTree->Fill();
+                    true_trackx.clear();
+                    true_tracky.clear();
+                    true_trackz.clear();
 
                 }
 
