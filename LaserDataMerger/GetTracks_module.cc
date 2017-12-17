@@ -362,7 +362,7 @@ void GetTracks::produce(art::Event& event)
 
     double GetTracks::pt(double x, std::pair<double, double> line) {
         double y;
-        y = line.first * x - line.second;
+        y = line.first * x + line.second;
         return y;
     }
 
