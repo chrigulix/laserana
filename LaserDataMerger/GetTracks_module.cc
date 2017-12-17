@@ -267,9 +267,12 @@ void GetTracks::produce(art::Event& event)
                 Double_t stepsize = 0.3;
                 Double_t dz = laser_exit_z - laser_entry_z;
                 std::cout << "going from: " << laser_entry_z << " to: " << laser_exit_z << std::endl;
-                for (Double_t z = laser_entry_z ; z < laser_exit_z; z +=  dz/abs(dz) * stepsize) {
-                    std::cout << " at: " << z << std::endl;
 
+                if (laser_entry_z > laser_exit_z) {
+                    for (Double_t z = laser_entry_z; z > laser_exit_z; z += - stepsize) {
+                        std::cout << " at: " << z << std::endl;
+
+                    }
                 }
 
 
