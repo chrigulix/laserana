@@ -317,7 +317,7 @@ namespace LaserDataMerger {
             //Theta = TMath::DegToRad() * (LinearRawToAngle(Theta_raw) - 207.69487762388422);
             //Phi = -TMath::DegToRad() * (180 + (Phi_raw - fDirCalLCS2[0]));
 
-            Theta = TMath::DegToRad() * (LinearRawToAngle(Theta_raw) - 207.69487762388422);
+            Theta = TMath::DegToRad() * (LinearRawToAngle(Theta_raw) - 209.26564732780798);
             Phi = -TMath::DegToRad() * (Phi_raw - fDirCalLCS2[0]);
             Position = PositionLCS2;
         } else {
