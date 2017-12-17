@@ -270,12 +270,7 @@ void GetTracks::produce(art::Event& event)
             fLaserTree->Fill();
 
             if (fPerfectTrack) {
-                Double_t stepsize = 0.3;
-
-                std::cout << "Start: ";
-                Laser->GetEntryPoint().Print();
-
-                std::cout << "going from: " << laser_entry_z << " to: " << laser_exit_z << std::endl;
+                Double_t stepsize = 0.3; ///< Stepsize of track production in mm
 
                 double start_z;
                 double end_z;
@@ -299,33 +294,40 @@ void GetTracks::produce(art::Event& event)
                 std::pair<double, double> zx_line = get_line(zx_entry, zx_exit);
                 std::pair<double, double> zy_line = get_line(zy_entry, zy_exit);
 
-                std::cout << "zx line: " << zx_line.first << " " << zx_line.second << std::endl;
-                std::cout << "zy line: " << zy_line.first << " " << zy_line.second << std::endl;
+                if (DEBUG) {
+                    std::cout << "zx line: " << zx_line.first << " " << zx_line.second << std::endl;
+                    std::cout << "zy line: " << zy_line.first << " " << zy_line.second << std::endl;
+                }
+
 
                 // now we loop over the range in z to obtain all tracks
                 for (Double_t z = start_z; z < end_z; z += stepsize) {
 
+                    // get the points on the planes for the corresponding z
                     double x = pt(z, zx_line);
                     double y = pt(z, zy_line);
 
+                    // Now get the space chage distortions
                     auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
                     auto offset = SCE->GetPosOffsets(x,y,z);
 
-                    std::cout << " at: " << z << ", " << x << ", " << y << std::endl;
-                    std::cout << " of: [" << offset[0] << ", " << offset[1] << ", " << offset[2] << "]" << std::endl;
+                    if (DEBUG) {
+                        std::cout << " at: " << z << ", " << x << ", " << y << std::endl;
+                        std::cout << " of: [" << offset[0] << ", " << offset[1] << ", " << offset[2] << "]"
+                                  << std::endl;
+                    }
 
+                    // Apply the correction and store it to the vector
                     true_trackx.push_back(x + (-offset[0])); // This is convention beacause of the uboone coordinate system
                     true_tracky.push_back(y  + offset[1]);
                     true_trackz.push_back(z + offset[2]);
                 }
-                std::cout << "End: ";
-                Laser->GetExitPoint().Print();
 
+                // Fill it in.
                 fTrueTree->Fill();
                 true_trackx.clear();
                 true_tracky.clear();
                 true_trackz.clear();
-
             }
         }
         catch (...) {
