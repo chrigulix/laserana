@@ -98,6 +98,7 @@ private:
     bool fGetLaser;
     bool fGetMC;
     bool fGetTrue = false;
+    bool fPerfectTrack = true;
 
 }; // class GetTracks
 
@@ -211,7 +212,9 @@ void GetTracks::produce(art::Event& event)
     true_trackz.clear();
 */
 
-
+    sim::MCTrack tt;
+    auto p = tt.at(2);
+    p.X()
 
     event_id = (unsigned int) event.id().event();
 
@@ -226,7 +229,7 @@ void GetTracks::produce(art::Event& event)
                     true_trackx.resize(track_size), true_tracky.resize(track_size), true_trackz.resize(track_size);
 
                     for (uint idx = 0; idx < track_size; idx++) {
-                        auto pt = mctrack.at(idx);
+                        auto pt = mctrack->at(idx);
                         true_trackx.at(idx) = pt.X(idx);
                         true_tracky.at(idx) = pt.Y(idx);
                         true_trackz.at(idx) = pt.Z(idx);
@@ -262,6 +265,19 @@ void GetTracks::produce(art::Event& event)
             position = Laser->GetLaserPosition();
 
             fLaserTree->Fill();
+
+            if (fPerfectTrack) {
+                Double_t stepsize = 0.3;
+                Double_t dz = laser_exit_z - laser_entry_z;
+                std::cout << "going from: " << laser_entry_z << " to: " << laser_exit_z << std::endl;
+                for (Double_t z = laser_entry_z ; z < laser_exit_z; z +=  dz/abs(dz) * stepsize) {
+                    std::cout << " at: " << z << std::endl;
+
+                }
+
+
+
+            }
         }
         catch (...) {
             std::cout << "Could not find laser tracks" << std::endl;
