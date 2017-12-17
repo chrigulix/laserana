@@ -55,7 +55,13 @@ public:
 
     // The analysis routine, called once per event. 
     virtual void produce(art::Event& event) override;
-   
+
+    // return the y value at x for a line defined by m and b supplied by line
+    double pt(double x, std::pair<double, double> line);
+
+    // calculate the line parameters based on two points
+    std::pair<double, double> get_line(std::pair<double, double> pt1, std::pair<double, double> pt2);
+
 
 private:
 
@@ -269,8 +275,22 @@ void GetTracks::produce(art::Event& event)
                 std::cout << "going from: " << laser_entry_z << " to: " << laser_exit_z << std::endl;
 
                 if (laser_entry_z > laser_exit_z) {
+                    // seems that we are going backwards
+                    auto zx_entry = std::make_pair(laser_entry_z, laser_entry_x);
+                    auto zx_exit =  std::make_pair(laser_exit_z, laser_exit_x);
+
+                    auto zy_entry = std::make_pair(laser_entry_z, laser_entry_y);
+                    auto zy_exit = std::make_pair(laser_exit_z, laser_exit_y);
+
+                    std::pair<double, double> zx_line = get_line(zx_entry, zx_exit);
+                    std::pair<double, double> zy_line = get_line(zy_entry, zy_exit);
+
                     for (Double_t z = laser_entry_z; z > laser_exit_z; z += - stepsize) {
-                        std::cout << " at: " << z << std::endl;
+
+                        double x = pt(z, zx_line);
+                        double y = pt(z, zy_line);
+
+                        std::cout << " at: " << z << ", " << x << ", " << y << std::endl;
 
                     }
                 }
@@ -336,6 +356,19 @@ void GetTracks::produce(art::Event& event)
         }
     }
  }
+
+    double GetTracks::pt(double x, std::pair<double, double> line) {
+        double y;
+        y = line.first * x - line.second;
+        return y;
+    }
+
+    std::pair<double, double> get_line(std::pair<double, double> pt1, std::pair<double, double> pt2) {
+        double m, b;
+        m = pt2.second - pt1.second / (pt2.first - pt1.first);
+        b = pt1.second - m * pt1.first;
+        return std::make_pair(m, b);
+    }
     DEFINE_ART_MODULE(GetTracks)
 } // namespace GetTracks
 
