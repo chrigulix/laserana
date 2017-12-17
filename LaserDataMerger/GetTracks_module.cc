@@ -272,6 +272,10 @@ void GetTracks::produce(art::Event& event)
             if (fPerfectTrack) {
                 Double_t stepsize = 0.3;
                 Double_t dz = laser_exit_z - laser_entry_z;
+
+                std::cout << "Start: ";
+                Laser->GetEntryPoint().Print();
+
                 std::cout << "going from: " << laser_entry_z << " to: " << laser_exit_z << std::endl;
 
                 if (laser_entry_z > laser_exit_z) {
@@ -296,6 +300,9 @@ void GetTracks::produce(art::Event& event)
                         std::cout << " at: " << z << ", " << x << ", " << y << std::endl;
 
                     }
+                    std::cout << "End: ";
+                    Laser->GetExitPoint().Print();
+
                 }
 
 
