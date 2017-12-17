@@ -226,7 +226,7 @@ void GetTracks::produce(art::Event& event)
                     true_trackx.resize(track_size), true_tracky.resize(track_size), true_trackz.resize(track_size);
 
                     for (uint idx = 0; idx < track_size; idx++) {
-                        auto pt = mctrack.at(idx);
+                        auto pt = mctrack->at(idx);
                         true_trackx.at(idx) = pt.X();
                         true_tracky.at(idx) = pt.Y();
                         true_trackz.at(idx) = pt.Z();
