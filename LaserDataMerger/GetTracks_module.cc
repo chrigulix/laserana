@@ -102,8 +102,8 @@ private:
 
     bool fGetTracks;
     bool fGetLaser;
-    bool fGetMC;
-    bool fGetTrue = true;
+    bool fGetMC = true;
+    bool fGetTrue = false;
     bool fPerfectTrack = true;
 
 }; // class GetTracks
@@ -284,6 +284,9 @@ void GetTracks::produce(art::Event& event)
 
                     std::pair<double, double> zx_line = get_line(zx_entry, zx_exit);
                     std::pair<double, double> zy_line = get_line(zy_entry, zy_exit);
+
+                    std::cout << "zx line: " << zx_line.first << " " << zx_line.second << std::endl;
+                    std::cout << "zy line: " << zy_line.first << " " << zy_line.second << std::endl;
 
                     for (Double_t z = laser_entry_z; z > laser_exit_z; z += - stepsize) {
 
