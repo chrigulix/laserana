@@ -307,9 +307,9 @@ void GetTracks::produce(art::Event& event)
                         std::cout << " at: " << z << ", " << x << ", " << y << std::endl;
                         std::cout << " of: [" << offset[0] << ", " << offset[1] << ", " << offset[2] << "]" << std::endl;
 
-                        true_trackx.push_back(x - (-offset[0])); // This is convention beacause of the uboone coordinate system
-                        true_tracky.push_back(y  - offset[1]);
-                        true_trackz.push_back(z - offset[2]);
+                        true_trackx.push_back(x + (-offset[0])); // This is convention beacause of the uboone coordinate system
+                        true_tracky.push_back(y  + offset[1]);
+                        true_trackz.push_back(z + offset[2]);
                     }
                     std::cout << "End: ";
                     Laser->GetExitPoint().Print();
