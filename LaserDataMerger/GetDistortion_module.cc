@@ -65,10 +65,10 @@ private:
     geo::GeometryCore const *sGeometry;
 
 
-    TVector3 DetectorMin = {0, -116.25, 0};
-    TVector3 DetectorMax = {256.04, 166.25, 1036.8};
+    std::vector MinimumCoord = {0, -116.25, 0};
+    std::vector MaximumCoord = {256.04, 166.25, 1036.8};
 
-    std::vector<unsigned int> DetectorResolution = {26,26,101};
+    std::vector<unsigned int> Resolution = {26,26,101};
 
 }; // class GetDistortion
 
@@ -92,30 +92,39 @@ void GetDistortion::beginJob()
 void GetDistortion::beginRun(art::Run& run)
 {
 
-    double x_step = (DetectorMax.X() - DetectorMin.X()) / DetectorResolution[0];
-    double y_step = (DetectorMax.Y() - DetectorMin.Y()) / DetectorResolution[1];
-    double z_step = (DetectorMax.Z() - DetectorMin.Z()) / DetectorResolution[2];
-    double y_min = DetectorMin.Y();
+    std::vector Unit = {0, 0, 0};
+    Unit[0] = (MaximumCoord[0] - MinimumCoord[0]) / (Resolution[0] - 1);
+    Unit[1] = (MaximumCoord[1] - MinimumCoord[1]) / (Resolution[1] - 1);
+    Unit[2] = (MaximumCoord[2] - MinimumCoord[2]) / (Resolution[2] - 1);
 
-
+    double x_step = Unit[0];
+    double y_step = Unit[1];
+    double z_step = Unit[2];
+    auto y_min = MinimumCoord[1];
 
     // Initialize all TH3F
-    std::vector<float> MinimumCoord = {-5.1208, -120.9, -5.184};    // These seem to be wrong, I copied them from our field calibration
-    std::vector<float> MaximumCoord = {10.2416, -106.95, 10.368};   // These seem to be wrong, I copied them from our field calibration
-
     std::vector<TH3F> RecoDisplacement;
-    RecoDisplacement.push_back(TH3F("Reco_Displacement_X","Reco Displacement X",DetectorResolution[0],MinimumCoord[0],MaximumCoord[0],DetectorResolution[1],MinimumCoord[1],MaximumCoord[1],DetectorResolution[2],MinimumCoord[2],MaximumCoord[2]));
-    RecoDisplacement.push_back(TH3F("Reco_Displacement_Y","Reco Displacement Y",DetectorResolution[0],MinimumCoord[0],MaximumCoord[0],DetectorResolution[1],MinimumCoord[1],MaximumCoord[1],DetectorResolution[2],MinimumCoord[2],MaximumCoord[2]));
-    RecoDisplacement.push_back(TH3F("Reco_Displacement_Z","Reco Displacement Z",DetectorResolution[0],MinimumCoord[0],MaximumCoord[0],DetectorResolution[1],MinimumCoord[1],MaximumCoord[1],DetectorResolution[2],MinimumCoord[2],MaximumCoord[2]));
+    RecoDisplacement.push_back(TH3F("Reco_Displacement_X", "Reco Displacement X",
+                                    Resolution[0], MinimumCoord[0] - Unit[0] * 0.5, MaximumCoord[0] + Unit[0] * 0.5,
+                                    Resolution[1], MinimumCoord[1] - Unit[1] * 0.5, MaximumCoord[1] + Unit[1] * 0.5,
+                                    Resolution[2], MinimumCoord[2] - Unit[2] * 0.5, MaximumCoord[2] + Unit[2] * 0.5));
+    RecoDisplacement.push_back(TH3F("Reco_Displacement_Y", "Reco Displacement Y",
+                                    Resolution[0], MinimumCoord[0] - Unit[0] * 0.5, MaximumCoord[0] + Unit[0] * 0.5,
+                                    Resolution[1], MinimumCoord[1] - Unit[1] * 0.5, MaximumCoord[1] + Unit[1] * 0.5,
+                                    Resolution[2], MinimumCoord[2] - Unit[2] * 0.5, MaximumCoord[2] + Unit[2] * 0.5));
+    RecoDisplacement.push_back(TH3F("Reco_Displacement_Z", "Reco Displacement Z",
+                                    Resolution[0], MinimumCoord[0] - Unit[0] * 0.5, MaximumCoord[0] + Unit[0] * 0.5,
+                                    Resolution[1], MinimumCoord[1] - Unit[1] * 0.5, MaximumCoord[1] + Unit[1] * 0.5,
+                                    Resolution[2], MinimumCoord[2] - Unit[2] * 0.5, MaximumCoord[2] + Unit[2] * 0.5));
 
     // Loop over all xbins
-    for(unsigned xbin = 0; xbin < DetectorResolution[0]; xbin++)
+    for(unsigned xbin = 0; xbin < Resolution[0]; xbin++)
     {
         // Loop over all ybins
-        for(unsigned ybin = 0; ybin < DetectorResolution[1]; ybin++)
+        for(unsigned ybin = 0; ybin < Resolution[1]; ybin++)
         {
             // Loop over all zbins
-            for(unsigned zbin = 0; zbin < DetectorResolution[2]; zbin++)
+            for(unsigned zbin = 0; zbin < Resolution[2]; zbin++)
             {
                 auto x = xbin*x_step;
                 auto y = y_min + (ybin*y_step);
