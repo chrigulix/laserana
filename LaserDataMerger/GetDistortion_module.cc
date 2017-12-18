@@ -64,6 +64,10 @@ private:
     spacecharge::SpaceCharge const* sSpaceCharge;
     geo::GeometryCore const *sGeometry;
 
+
+    TVector3 DetectorMin = {0, -116.25, 0};
+    TVector3 DetectorMax = {256.04, 166.25, 1036.8};
+
     std::vector<unsigned int> DetectorResolution = {26,26,101};
 
 }; // class GetDistortion
@@ -87,17 +91,13 @@ void GetDistortion::beginJob()
 
 void GetDistortion::beginRun(art::Run& run)
 {
-    auto y_max = sGeometry->DetHalfHeight();
-    auto y_min = - y_max;
-    double y_step = (y_max - y_min) / DetectorResolution[1];
 
-    auto x_max = 2.0 * sGeometry->DetHalfWidth();
-    auto x_min = 0;
-    double x_step = (x_max - x_min) / DetectorResolution[0];
+    double x_step = (DetectorMax.X() - DetectorMin.X()) / DetectorResolution[0];
+    double y_step = (DetectorMax.Y() - DetectorMin.Y()) / DetectorResolution[1];
+    double z_step = (DetectorMax.Z() - DetectorMin.Z()) / DetectorResolution[2];
+    double y_min = DetectorMin.Y();
 
-    double z_min = 0.;
-    auto z_max = sGeometry->DetLength();
-    double z_step = (z_max - z_min) / DetectorResolution[2];
+
 
     // Initialize all TH3F
     std::vector<float> MinimumCoord = {-5.1208, -120.9, -5.184};    // These seem to be wrong, I copied them from our field calibration
@@ -117,7 +117,11 @@ void GetDistortion::beginRun(art::Run& run)
             // Loop over all zbins
             for(unsigned zbin = 0; zbin < DetectorResolution[2]; zbin++)
             {
-                auto Dispacement = sSpaceCharge->GetPosOffsets(xbin*x_step, y_min + (ybin*y_step), zbin * z_step);
+                auto x = xbin*x_step;
+                auto y = y_min + (ybin*y_step);
+                auto z = zbin * z_step;
+
+                auto Dispacement = sSpaceCharge->GetPosOffsets(x, y, z);
 
                 // Loop over all coordinates
                 for(unsigned coord = 0; coord < 3; coord++)
@@ -127,7 +131,7 @@ void GetDistortion::beginRun(art::Run& run)
                     if (coord == 0) {
                         Dispacement[0] *= -1.;
                     }
-                    std::cout << "pos: " << xbin*x_step << "/" << y_min + (ybin * y_step) << "/" << zbin * z_step  << " dis: " << Dispacement[0] << "/" << Dispacement[1] << "/" << Dispacement[2] << std::endl;
+                    std::cout << "pos: " << x << "/" << y << "/" << z << " dis: " << Dispacement[0] << "/" << Dispacement[1] << "/" << Dispacement[2] << std::endl;
                     // Fill interpolated grid points into histograms
                     RecoDisplacement[coord].SetBinContent(xbin+1,ybin+1,zbin+1, Dispacement[coord]);
                 } // end coordinate loop
