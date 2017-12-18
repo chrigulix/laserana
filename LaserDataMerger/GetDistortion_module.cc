@@ -65,8 +65,8 @@ private:
     geo::GeometryCore const *sGeometry;
 
 
-    std::vector MinimumCoord = {0, -116.25, 0};
-    std::vector MaximumCoord = {256.04, 166.25, 1036.8};
+    std::vector<double> MinimumCoord = {0, -116.25, 0};
+    std::vector<double> MaximumCoord = {256.04, 166.25, 1036.8};
 
     std::vector<unsigned int> Resolution = {26,26,101};
 
@@ -92,7 +92,7 @@ void GetDistortion::beginJob()
 void GetDistortion::beginRun(art::Run& run)
 {
 
-    std::vector Unit = {0, 0, 0};
+    std::vector<double> Unit = {0, 0, 0};
     Unit[0] = (MaximumCoord[0] - MinimumCoord[0]) / (Resolution[0] - 1);
     Unit[1] = (MaximumCoord[1] - MinimumCoord[1]) / (Resolution[1] - 1);
     Unit[2] = (MaximumCoord[2] - MinimumCoord[2]) / (Resolution[2] - 1);
