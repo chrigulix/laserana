@@ -66,7 +66,7 @@ private:
 
 
     std::vector<double> MinimumCoord = {0, -116.25, 0};
-    std::vector<double> MaximumCoord = {256.04, 166.25, 1036.8};
+    std::vector<double> MaximumCoord = {256.04, 116.25, 1036.8};
 
     std::vector<unsigned int> Resolution = {26,26,101};
 
