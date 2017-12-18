@@ -7,6 +7,7 @@ gettracks:
       GetTracks: true
       GetLaser: true
       GetMC: false
+      GetPerfectTracks: true
 }
 
 GetTracks: @local::gettracks

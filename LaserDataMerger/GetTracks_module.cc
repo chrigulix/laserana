@@ -65,7 +65,7 @@ public:
 
 private:
 
-    bool DEBUG = true;
+    bool DEBUG = false;
 
     // All this goes into the root tree
     TTree* fTrackTree;
@@ -102,9 +102,9 @@ private:
 
     bool fGetTracks;
     bool fGetLaser;
-    bool fGetMC = true;
+    bool fGetMC = false;
     bool fGetTrue = false;
-    bool fPerfectTrack = true;
+    bool fPerfectTrack;
 
 }; // class GetTracks
 
@@ -169,6 +169,7 @@ void GetTracks::reconfigure(fhicl::ParameterSet const& parameterSet)
     fGetTracks = parameterSet.get<bool>("GetTracks", true);
     fGetLaser = parameterSet.get<bool>("GetLaser", true);
     fGetMC = parameterSet.get<bool>("GetMC", false);
+    fPerfectTrack = parameterSet.get<bool>("GetPerfectTracks", true);
 }
 
 //-----------------------------------------------------------------------
@@ -270,6 +271,9 @@ void GetTracks::produce(art::Event& event)
             fLaserTree->Fill();
 
             if (fPerfectTrack) {
+                // Here we produce perfect reconstruction. Meaning we use the laser inforamtion
+                // to introduce track points which we then distort. This is for simulation and
+                // verification.
                 Double_t stepsize = 0.3; ///< Stepsize of track production in mm
 
                 double start_z;
