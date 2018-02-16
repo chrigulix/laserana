@@ -73,22 +73,10 @@ private:
     unsigned int wire;
     unsigned int plane;
 
-    // wire holders
-    std::vector<float> calwire;
-    std::vector<float> roi;
-
-    // holders for the hit information per wire of interest
-    std::vector<unsigned int> start_ticks;
-    std::vector<unsigned int> end_ticks;
-    std::vector<unsigned int> peak_times;
-    std::vector<float> peak_amps;
-    unsigned int hit_channel;
-
-
     art::InputTag fRawLabel;
-    art::InputTag fHitLabel;
-    art::InputTag fCalLabel;
-    std::vector<unsigned int> fChannels;
+    std::vector<std::pair<unsigned int, unsigned int>> fUWires;
+    std::vector<std::pair<unsigned int, unsigned int>> fVWires;
+    std::vector<std::pair<unsigned int, unsigned int>> fYWires;
 
 
 }; // class GetRaw
@@ -133,7 +121,9 @@ void GetRaw::endJob()
 void GetRaw::reconfigure(fhicl::ParameterSet const& parameterSet)
 {
     fRawLabel = parameterSet.get<art::InputTag>("RawLabel", "daq");
-    fChannels = parameterSet.get<std::vector<unsigned int> >("Channels");
+    fYWires = parameterSet.get<std::vector<std::pair<unsigned int, unsigned int>> >("YWires");
+    //fUWires = parameterSet.get<std::vector<std::pair<unsigned int, unsigned int>> >("UWires");
+    //fVWires = parameterSet.get<std::vector<std::pair<unsigned int, unsigned int>> >("VWires");
 }
 
 //-----------------------------------------------------------------------
@@ -144,29 +134,36 @@ void GetRaw::produce(art::Event& event)
 
     event.getByLabel(fRawLabel, Raw);
 
-
+    raw::RawDigit aaa;
     //auto track = tr.fXYZ;
     for (auto const &Digit : *Raw) {
-        auto test = raw::RawDigit();
 
         Channel = Digit.Channel();
+        auto WireID = fGeometry->ChannelToWire(Channel);
+        auto this_wire = WireID.front().Wire;
+        auto this_plane = WireID.front().Plane;
 
-        if(std::find(fChannels.begin(), fChannels.end(), Channel) != fChannels.end()) {
+        // for the moment we only access y-plane
+        if (this_plane != 2) continue;
 
-            auto WireID = fGeometry->ChannelToWire(Channel);
+        // loop over all specified pairs of ranges
+        for (uint range_idx = 0; range_idx < fYWires.size(); range_idx++) {
 
-            plane = WireID.front().Plane;
-            wire = WireID.front().Wire;
+            auto range = fYWires[range_idx];
+            if ((range.first <= this_wire) and (this_wire <= range.second)) {
 
-            std::cout << "Writing Channel: " << Channel
-                      << " Plane/Wire: " <<  plane  << '/' << wire
-                      << std::endl;
-            event_id = (unsigned int) event.id().event();
-            RawDigit = Digit.ADCs();
-            fRawTree->Fill();
+                plane = this_plane;
+                wire = this_wire;
+
+                std::cout << "Writing Channel: " << Channel
+                          << " Plane/Wire: " <<  plane  << '/' << wire
+                          << std::endl;
+                event_id = (unsigned int) event.id().event();
+                RawDigit = Digit.ADCs();
+                fRawTree->Fill();
+            }
+            RawDigit.clear();
         }
-        RawDigit.clear();
-
     }
  }
     DEFINE_ART_MODULE(GetRaw)
