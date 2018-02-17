@@ -22,6 +22,8 @@
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Core/ModuleMacros.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+
 
 // uBooNE includes
 #include "lardata/Utilities/AssociationUtil.h"
@@ -65,6 +67,7 @@ private:
     TTree* fHitTree;
     TTree* fCalTree;
 
+    bool fGetAll;
 
     // raw digit holders
     std::vector<short> RawDigit;
@@ -122,6 +125,7 @@ void GetRaw::reconfigure(fhicl::ParameterSet const& parameterSet)
 {
     fRawLabel = parameterSet.get<art::InputTag>("RawLabel", "daq");
     fYWires = parameterSet.get<std::vector<std::pair<unsigned int, unsigned int>> >("YWires");
+    fGetAll = parameterSet.get<bool>("GetAll", true);
     //fUWires = parameterSet.get<std::vector<std::pair<unsigned int, unsigned int>> >("UWires");
     //fVWires = parameterSet.get<std::vector<std::pair<unsigned int, unsigned int>> >("VWires");
 }
@@ -131,6 +135,7 @@ void GetRaw::reconfigure(fhicl::ParameterSet const& parameterSet)
 void GetRaw::produce(art::Event& event)
 {
     art::Handle<std::vector<raw::RawDigit> > Raw;
+    const lariov::ChannelStatusProvider &ChannelFilter = art::ServiceHandle<lariov::ChannelStatusService>()->GetProvider();
 
     event.getByLabel(fRawLabel, Raw);
 
@@ -142,27 +147,46 @@ void GetRaw::produce(art::Event& event)
         auto WireID = fGeometry->ChannelToWire(Channel);
         auto this_wire = WireID.front().Wire;
         auto this_plane = WireID.front().Plane;
+        if (fGetAll) {
+            if (this_plane != 2) continue; // only interested in collection plane
 
-        // for the moment we only access y-plane
-        if (this_plane != 2) continue;
-
-        // loop over all specified pairs of ranges
-        for (uint range_idx = 0; range_idx < fYWires.size(); range_idx++) {
-
-            auto range = fYWires[range_idx];
-            if ((range.first <= this_wire) and (this_wire <= range.second)) {
-
-                plane = this_plane;
-                wire = this_wire;
-
-                std::cout << "Writing Channel: " << Channel
-                          << " Plane/Wire: " <<  plane  << '/' << wire
-                          << std::endl;
-                event_id = (unsigned int) event.id().event();
-                RawDigit = Digit.ADCs();
-                fRawTree->Fill();
+            if (ChannelFilter.Status(Channel) < 1 || !ChannelFilter.IsPresent(Channel)) {
+                continue;// jump to next iterator in RawDigit loop
             }
+            plane = this_plane;
+            wire = this_wire;
+            event_id = (unsigned int) event.id().event();
+
+            // Cut out interesting region
+            for (uint sp = 4000; sp < 6001; sp++){
+                RawDigit.push_back(Digit.ADC(sp));
+            }
+
+            fRawTree->Fill();
             RawDigit.clear();
+        }
+        else {
+            // for the moment we only access y-plane
+            if (this_plane != 2) continue;
+
+            // loop over all specified pairs of ranges
+            for (uint range_idx = 0; range_idx < fYWires.size(); range_idx++) {
+
+                auto range = fYWires[range_idx];
+                if ((range.first <= this_wire) and (this_wire <= range.second)) {
+
+                    plane = this_plane;
+                    wire = this_wire;
+
+                    std::cout << "Writing Channel: " << Channel
+                              << " Plane/Wire: " << plane << '/' << wire
+                              << std::endl;
+                    event_id = (unsigned int) event.id().event();
+                    RawDigit = Digit.ADCs();
+                    fRawTree->Fill();
+                }
+                RawDigit.clear();
+            }
         }
     }
  }
