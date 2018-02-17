@@ -32,7 +32,7 @@ physics:
     GetRaw:
     {
         module_type:          "GetRaw"
-        Channels: [8190, 4401, 1882]
+        YWires: [[3386, 3454]]
     }
   }
 
