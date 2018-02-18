@@ -32,6 +32,8 @@ physics:
     GetRaw:
     {
         module_type:          "GetRaw"
+        get_all: true
+        GetPlane: 0
         YWires: [[3386, 3454]]
     }
   }

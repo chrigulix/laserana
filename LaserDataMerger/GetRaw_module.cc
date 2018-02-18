@@ -68,6 +68,7 @@ private:
     TTree* fCalTree;
 
     bool fGetAll;
+    unsigned int fGetPlane;
 
     // raw digit holders
     std::vector<short> RawDigit;
@@ -126,6 +127,7 @@ void GetRaw::reconfigure(fhicl::ParameterSet const& parameterSet)
     fRawLabel = parameterSet.get<art::InputTag>("RawLabel", "daq");
     fYWires = parameterSet.get<std::vector<std::pair<unsigned int, unsigned int>> >("YWires");
     fGetAll = parameterSet.get<bool>("GetAll", true);
+    fGetPlane = parameterSet.get<unsigned int>("GetPlane", 2);
     //fUWires = parameterSet.get<std::vector<std::pair<unsigned int, unsigned int>> >("UWires");
     //fVWires = parameterSet.get<std::vector<std::pair<unsigned int, unsigned int>> >("VWires");
 }
@@ -148,7 +150,7 @@ void GetRaw::produce(art::Event& event)
         auto this_wire = WireID.front().Wire;
         auto this_plane = WireID.front().Plane;
         if (fGetAll) {
-            if (this_plane != 2) continue; // only interested in collection plane
+            if (this_plane != fGetPlane) continue; // only interested in collection plane
 
             if (ChannelFilter.Status(Channel) < 1 || !ChannelFilter.IsPresent(Channel)) {
                 continue;// jump to next iterator in RawDigit loop
