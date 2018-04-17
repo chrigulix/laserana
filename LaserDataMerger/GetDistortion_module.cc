@@ -59,7 +59,7 @@ public:
 
 private:
 
-    bool DEBUG = true;
+    bool DEBUG = false;
 
     spacecharge::SpaceCharge const* sSpaceCharge;
     geo::GeometryCore const *sGeometry;
@@ -117,6 +117,20 @@ void GetDistortion::beginRun(art::Run& run)
                                     Resolution[1], MinimumCoord[1] - Unit[1] * 0.5, MaximumCoord[1] + Unit[1] * 0.5,
                                     Resolution[2], MinimumCoord[2] - Unit[2] * 0.5, MaximumCoord[2] + Unit[2] * 0.5));
 
+    std::vector<TH3F> EFieldDisplacement;
+    EFieldDisplacement.push_back(TH3F("EField_Displacement_X", "EField Displacement X",
+                                    Resolution[0], MinimumCoord[0] - Unit[0] * 0.5, MaximumCoord[0] + Unit[0] * 0.5,
+                                    Resolution[1], MinimumCoord[1] - Unit[1] * 0.5, MaximumCoord[1] + Unit[1] * 0.5,
+                                    Resolution[2], MinimumCoord[2] - Unit[2] * 0.5, MaximumCoord[2] + Unit[2] * 0.5));
+    EFieldDisplacement.push_back(TH3F("EField_Displacement_Y", "EField Displacement Y",
+                                    Resolution[0], MinimumCoord[0] - Unit[0] * 0.5, MaximumCoord[0] + Unit[0] * 0.5,
+                                    Resolution[1], MinimumCoord[1] - Unit[1] * 0.5, MaximumCoord[1] + Unit[1] * 0.5,
+                                    Resolution[2], MinimumCoord[2] - Unit[2] * 0.5, MaximumCoord[2] + Unit[2] * 0.5));
+    EFieldDisplacement.push_back(TH3F("EField_Displacement_Z", "EField Displacement Z",
+                                    Resolution[0], MinimumCoord[0] - Unit[0] * 0.5, MaximumCoord[0] + Unit[0] * 0.5,
+                                    Resolution[1], MinimumCoord[1] - Unit[1] * 0.5, MaximumCoord[1] + Unit[1] * 0.5,
+                                    Resolution[2], MinimumCoord[2] - Unit[2] * 0.5, MaximumCoord[2] + Unit[2] * 0.5));
+
     // Loop over all xbins
     for(unsigned xbin = 0; xbin < Resolution[0]; xbin++)
     {
@@ -131,6 +145,7 @@ void GetDistortion::beginRun(art::Run& run)
                 auto z = zbin * z_step;
 
                 auto Dispacement = sSpaceCharge->GetPosOffsets(x, y, z);
+                auto EField = sSpaceCharge->GetEfieldOffsets(x, y, z);
 
                 // Loop over all coordinates
                 for(unsigned coord = 0; coord < 3; coord++)
@@ -140,9 +155,11 @@ void GetDistortion::beginRun(art::Run& run)
                     if (coord == 0) {
                         Dispacement[0] *= -1.;
                     }
-                    std::cout << "pos: " << x << "/" << y << "/" << z << " dis: " << Dispacement[0] << "/" << Dispacement[1] << "/" << Dispacement[2] << std::endl;
+                    if (DEBUG) std::cout << "pos: " << x << "/" << y << "/" << z
+                                         << " dis: " << Dispacement[0] << "/" << Dispacement[1] << "/" << Dispacement[2] << std::endl;
                     // Fill interpolated grid points into histograms
                     RecoDisplacement[coord].SetBinContent(xbin+1,ybin+1,zbin+1, Dispacement[coord]);
+                    EFieldDisplacement[coord].SetBinContent(xbin+1,ybin+1,zbin+1, EField[coord]);
                 } // end coordinate loop
             } // end zbin loop
         } // end ybin loop
@@ -155,6 +172,7 @@ void GetDistortion::beginRun(art::Run& run)
     {
         // Write every TH3 map into file
         RecoDisplacement[coord].Write();
+        EFieldDisplacement[coord].Write();
     }
 
     // Close output file and clean up

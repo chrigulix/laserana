@@ -25,6 +25,7 @@ services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: false
 
 services.SpaceCharge.EnableSimSpatialSCE: true
 services.SpaceCharge.EnableSimEfieldSCE: true
+# services.SpaceCharge.InputFilename: "SpaceCharge/SCEoffsets_MicroBooNE_E273.root"
 
 source:
 {
